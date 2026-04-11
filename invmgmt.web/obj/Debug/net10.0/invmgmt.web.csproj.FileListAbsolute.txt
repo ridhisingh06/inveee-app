@@ -1,0 +1,10 @@
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.csproj.AssemblyReference.cache
+D:\inveee\invmgmt.web\obj\Debug\net10.0\rpswa.dswa.cache.json
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.GeneratedMSBuildEditorConfig.editorconfig
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.AssemblyInfoInputs.cache
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.AssemblyInfo.cs
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.csproj.CoreCompileInputs.cache
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.MvcApplicationPartsAssemblyInfo.cs
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.MvcApplicationPartsAssemblyInfo.cache
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.RazorAssemblyInfo.cache
+D:\inveee\invmgmt.web\obj\Debug\net10.0\invmgmt.web.RazorAssemblyInfo.cs
