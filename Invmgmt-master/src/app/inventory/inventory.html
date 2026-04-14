@@ -1,0 +1,79 @@
+<app-navbar></app-navbar>
+
+<div class="container">
+
+  <h2>Inventory Management</h2>
+
+  <!-- ================= ADD ITEM (ADMIN ONLY UI) ================= -->
+  <div class="form" *ngIf="role === 'Admin'">
+
+    <input type="text"
+           placeholder="Item Name"
+           [(ngModel)]="itemName">
+
+    <select [(ngModel)]="selectedCategoryId">
+      <option value="">Select Category</option>
+      <option *ngFor="let c of categories" [value]="c.id">
+        {{ c.name }}
+      </option>
+    </select>
+
+    <input type="number"
+           placeholder="Total Quantity"
+           [(ngModel)]="quantity">
+
+    <button (click)="addItem()">
+      Add Item
+    </button>
+
+  </div>
+
+  <!-- ================= SEARCH ================= -->
+  <div class="search">
+    <input type="text"
+           placeholder="Search items..."
+           [(ngModel)]="searchText">
+  </div>
+
+  <!-- ================= TABLE ================= -->
+  <table>
+
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Available Qty</th>
+        <th>Total Qty</th>
+        <th *ngIf="role === 'Admin'">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let item of filteredItems; let i = index">
+
+        <td>{{ i + 1 }}</td>
+        <td>{{ item.name }}</td>
+        <td>{{ item.category }}</td>
+        <td>{{ item.availableQuantity }}</td>
+        <td>{{ item.totalQuantity }}</td>
+
+        <!-- ADMIN ACTIONS -->
+        <td *ngIf="role === 'Admin'">
+
+          <button (click)="editItem(item)">
+            Edit
+          </button>
+
+          <button (click)="deleteItem(item.id)">
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+    </tbody>
+
+  </table>
+
+</div>

@@ -1,0 +1,36 @@
+<nav class="navbar">
+
+  <!-- 🔹 Logo -->
+  <div class="logo">Stationary Store</div>
+
+  <!-- 🔹 Links -->
+  <div class="nav-links">
+
+    <!-- COMMON -->
+    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    
+      <!-- USER -->
+      <ng-container *ngIf="role === 'User'">
+        <a routerLink="/request" routerLinkActive="active">New Request</a>
+        <a routerLink="/my-requests" routerLinkActive="active">My Requests</a>
+      </ng-container>
+
+      <!-- ADMIN -->
+      <ng-container *ngIf="role === 'Admin'">
+        <a routerLink="/users" routerLinkActive="active">Users</a>
+        <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+        <a routerLink="/requests" routerLinkActive="active">Requests</a>
+      </ng-container>
+
+      <!-- ISSUER -->
+      <ng-container *ngIf="role === 'Issuer'">
+        <a routerLink="/approved" routerLinkActive="active">Approved</a>
+        <a routerLink="/issue" routerLinkActive="active">Issue</a>
+        <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      </ng-container>
+
+      <!-- LOGOUT -->
+      <button (click)="logout()">Logout</button>
+
+  </div>
+</nav>

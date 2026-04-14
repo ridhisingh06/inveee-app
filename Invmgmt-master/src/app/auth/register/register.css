@@ -1,0 +1,92 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(120deg, #e0f2fe, #f5f6fa);
+}
+
+/*  Title */
+.brand-title {
+  font-size: 38px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 40px;
+  background: linear-gradient(45deg, #feda75, #d62976, #962fbf);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/*  Card */
+.container {
+  width: 380px;
+  margin: 25px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* 🔥 Inputs */
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+  input:focus, select:focus {
+    border-color: #38bdf8;
+    outline: none;
+  }
+
+/* 🔥 Button */
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+  background: #2ecc71;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+  button:hover {
+    background: #27ae60;
+  }
+
+  button:disabled {
+    background: gray;
+    cursor: not-allowed;
+  }
+
+/*  Messages */
+.success {
+  color: green;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/*  Login link */
+.login-link {
+  text-align: center;
+  margin-top: 10px;
+}
+
+  .login-link a {
+    color: #38bdf8;
+    text-decoration: none;
+  }

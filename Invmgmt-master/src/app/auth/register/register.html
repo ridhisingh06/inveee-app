@@ -1,0 +1,40 @@
+<div class="brand-title">Stationary Store Portal</div>
+
+<div class="container">
+  <h2>Create Account</h2>
+
+  <input [(ngModel)]="username" placeholder="Username">
+
+  <input [(ngModel)]="email" placeholder="Email">
+
+  <input [(ngModel)]="password" type="password" placeholder="Password">
+
+  <input [(ngModel)]="designation" placeholder="Designation">
+
+  <!-- Department -->
+  <input type="number"
+         [(ngModel)]="departmentId"
+         placeholder="Department ID">
+
+  <!-- Role -->
+  <select [(ngModel)]="roleId">
+    <option value="">Select Role</option>
+    <option [value]="1">User</option>
+    <option [value]="2">Issuer</option>
+  </select>
+
+  <!-- Button -->
+  <button (click)="register()" [disabled]="loading">
+    {{ loading ? 'Registering...' : 'Register' }}
+  </button>
+
+  <!-- Messages -->
+  <p class="success" *ngIf="successMsg">{{successMsg}}</p>
+  <p class="error" *ngIf="errorMsg">{{errorMsg}}</p>
+
+  <!-- 🔥 Login Link -->
+  <p class="login-link">
+    Already have an account?
+    <a routerLink="/login">Login</a>
+  </p>
+</div>
