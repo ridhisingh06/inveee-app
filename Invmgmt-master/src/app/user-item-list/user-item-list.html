@@ -1,0 +1,26 @@
+<div class="page">
+  <div class="header">
+    <div class="title">
+      <h2>Item List</h2>
+      <p>Select a category and add items to your cart.</p>
+    </div>
+
+    <div class="controls">
+      <label class="label" for="category">Category</label>
+      <select id="category" class="select" [(ngModel)]="selectedCategory">
+        <option *ngFor="let c of categories" [ngValue]="c">{{ c }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card" *ngFor="let item of items">
+      <div class="card-body">
+        <div class="name">{{ item.name }}</div>
+        <div class="desc" *ngIf="item.description">{{ item.description }}</div>
+      </div>
+      <button class="btn" type="button" (click)="addToCart(item)">Request Item</button>
+    </div>
+  </div>
+</div>
+

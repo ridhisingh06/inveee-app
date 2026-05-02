@@ -86,6 +86,11 @@ export class InventoryComponent implements OnInit, DoCheck {
   // =========================
   addItem() {
 
+    if (this.role !== 'Admin') {
+      alert("Only Admins can add inventory items");
+      return;
+    }
+
     if (!this.itemName || !this.selectedCategoryId || this.quantity <= 0) {
       alert("Fill all fields properly");
       return;
@@ -105,7 +110,12 @@ export class InventoryComponent implements OnInit, DoCheck {
           this.resetForm();
         },
         error: (err) => {
-          console.error('Error adding item', err);
+          if (err.status === 401) {
+            alert('Access denied. Admin role required.');
+          } else {
+            console.error('Error adding item', err);
+            alert('Failed to add item. Please check the server connection.');
+          }
         }
       });
   }

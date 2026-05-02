@@ -1,0 +1,405 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\inveee\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\app.routes.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\app.routes.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\auth\\register\\register.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\auth\\register\\register.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\main.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\main.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\navbar\\navbar.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\navbar\\navbar.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\my-requests\\my-requests.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\request-item\\request-item.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\auth\\Guard\\guard.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\auth\\Guard\\guard.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\invmgmt.web\\Controllers\\AdminController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:invmgmt.web\\Controllers\\AdminController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\invmgmt.web\\Controllers\\HomeController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:invmgmt.web\\Controllers\\HomeController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\invmgmt.web\\Controllers\\InventoryController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:invmgmt.web\\Controllers\\InventoryController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\navbar\\navbar.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\navbar\\navbar.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\admin-pending\\admin-pending.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\invmgmt.web\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:invmgmt.web\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\inventory\\inventory.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\inventory\\inventory.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\admin-pending\\admin-pending.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.service.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\admin-pending\\admin-pending.service.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\request-item\\request-item.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\request-item\\request-item.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\my-requests\\my-requests.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\my-requests\\my-requests.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\app.component.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\app.component.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\app.component.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\app.component.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\inveee\\Invmgmt-master\\src\\app\\app.component.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Invmgmt-master\\src\\app\\app.component.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 258,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "main.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\main.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\main.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\main.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\main.ts",
+              "ViewState": "AgIAAAgAAAAAAAAAAADwvwkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T04:17:04.009Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "app.routes.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\app.routes.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\app.routes.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\app.routes.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\app.routes.ts",
+              "ViewState": "AgIAABwAAAAAAAAAAAAQwC8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T03:27:11.862Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "register.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\auth\\register\\register.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\auth\\register\\register.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\auth\\register\\register.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\auth\\register\\register.ts",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAFsAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T04:02:42.586Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "my-requests.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\my-requests\\my-requests.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\my-requests\\my-requests.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T03:42:24.698Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "navbar.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\navbar\\navbar.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\navbar\\navbar.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\navbar\\navbar.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\navbar\\navbar.ts",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAkAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T04:11:33.06Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "request-item.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\request-item\\request-item.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\request-item\\request-item.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T03:32:25.616Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "guard.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\auth\\Guard\\guard.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\auth\\Guard\\guard.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\auth\\Guard\\guard.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\auth\\Guard\\guard.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T03:58:29.637Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\inveee\\invmgmt.web\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "invmgmt.web\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\inveee\\invmgmt.web\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "invmgmt.web\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T03:51:08.173Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "InventoryController.cs",
+              "DocumentMoniker": "D:\\inveee\\invmgmt.web\\Controllers\\InventoryController.cs",
+              "RelativeDocumentMoniker": "invmgmt.web\\Controllers\\InventoryController.cs",
+              "ToolTip": "D:\\inveee\\invmgmt.web\\Controllers\\InventoryController.cs",
+              "RelativeToolTip": "invmgmt.web\\Controllers\\InventoryController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T03:50:52.323Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "D:\\inveee\\invmgmt.web\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "invmgmt.web\\Controllers\\AdminController.cs",
+              "ToolTip": "D:\\inveee\\invmgmt.web\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "invmgmt.web\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T02:47:53.32Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "request-item.css",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.css",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\request-item\\request-item.css",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.css",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\request-item\\request-item.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-04-15T03:32:31.349Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "my-requests.html",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.html",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\my-requests\\my-requests.html",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.html",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\my-requests\\my-requests.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-04-15T03:42:27.994Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "my-requests.css",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.css",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\my-requests\\my-requests.css",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\my-requests\\my-requests.css",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\my-requests\\my-requests.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-04-15T03:42:31.507Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "request-item.html",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.html",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\request-item\\request-item.html",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\request-item\\request-item.html",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\request-item\\request-item.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-04-15T03:32:28.632Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "app.component.css",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\app.component.css",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\app.component.css",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\app.component.css",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\app.component.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-04-15T03:45:51.324Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "app.component.html",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\app.component.html",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\app.component.html",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\app.component.html",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\app.component.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-04-15T03:45:47.89Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "app.component.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\app.component.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\app.component.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\app.component.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\app.component.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T03:45:43.903Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "navbar.html",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\navbar\\navbar.html",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\navbar\\navbar.html",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\navbar\\navbar.html",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\navbar\\navbar.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-04-15T03:17:44.526Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "admin-pending.html",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.html",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\admin-pending\\admin-pending.html",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.html",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\admin-pending\\admin-pending.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-04-15T03:04:48.049Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "admin-pending.service.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.service.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\admin-pending\\admin-pending.service.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.service.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\admin-pending\\admin-pending.service.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T02:48:50.174Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "admin-pending.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\admin-pending\\admin-pending.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\admin-pending\\admin-pending.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\admin-pending\\admin-pending.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T02:46:53.399Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "inventory.ts",
+              "DocumentMoniker": "D:\\inveee\\Invmgmt-master\\src\\app\\inventory\\inventory.ts",
+              "RelativeDocumentMoniker": "Invmgmt-master\\src\\app\\inventory\\inventory.ts",
+              "ToolTip": "D:\\inveee\\Invmgmt-master\\src\\app\\inventory\\inventory.ts",
+              "RelativeToolTip": "Invmgmt-master\\src\\app\\inventory\\inventory.ts",
+              "ViewState": "AgIAAIcAAAAAAAAAAAAswKQAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-04-15T02:30:06.769Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\inveee\\invmgmt.web\\Program.cs",
+              "RelativeDocumentMoniker": "invmgmt.web\\Program.cs",
+              "ToolTip": "D:\\inveee\\invmgmt.web\\Program.cs",
+              "RelativeToolTip": "invmgmt.web\\Program.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAAACkAAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T02:28:18.977Z"
+            }
+          ]
+        },
+        {
+          "DockedHeight": 142,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

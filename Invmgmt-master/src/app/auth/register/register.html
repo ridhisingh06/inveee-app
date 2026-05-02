@@ -12,15 +12,19 @@
   <input [(ngModel)]="designation" placeholder="Designation">
 
   <!-- Department -->
-  <input type="number"
-         [(ngModel)]="departmentId"
-         placeholder="Department ID">
+  <select [(ngModel)]="departmentId">
+    <option [ngValue]="null">Select Department</option>
+    <option [ngValue]="1">IT</option>
+    <option [ngValue]="7">HR</option>
+    <option [ngValue]="8">Finance</option>
+    <option [ngValue]="9">Admin</option>
+  </select>
 
   <!-- Role -->
   <select [(ngModel)]="roleId">
-    <option value="">Select Role</option>
-    <option [value]="1">User</option>
-    <option [value]="2">Issuer</option>
+    <option [ngValue]="null">Select Role</option>
+    <option [ngValue]="1">User</option>
+    <option [ngValue]="2">Issuer</option>
   </select>
 
   <!-- Button -->
@@ -32,7 +36,7 @@
   <p class="success" *ngIf="successMsg">{{successMsg}}</p>
   <p class="error" *ngIf="errorMsg">{{errorMsg}}</p>
 
-  <!-- 🔥 Login Link -->
+  <!--  Login Link -->
   <p class="login-link">
     Already have an account?
     <a routerLink="/login">Login</a>

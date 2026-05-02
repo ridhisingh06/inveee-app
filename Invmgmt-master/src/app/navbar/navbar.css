@@ -19,11 +19,61 @@
   letter-spacing: 1px;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sidebar-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.burger {
+  width: 18px;
+  height: 2px;
+  background: white;
+  display: inline-block;
+  position: relative;
+}
+
+.burger::before,
+.burger::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 2px;
+  background: white;
+}
+
+.burger::before {
+  top: -6px;
+}
+
+.burger::after {
+  top: 6px;
+}
+
 /* LINKS */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 18px;
+  flex-wrap: wrap;
 }
 
   /* LINK STYLE */
@@ -46,7 +96,7 @@
 }
 
 /* LOGOUT BUTTON */
-button {
+.logout-btn {
   background: #ef4444;
   border: none;
   padding: 6px 12px;
@@ -56,6 +106,41 @@ button {
   transition: 0.3s;
 }
 
-  button:hover {
+.logout-btn:hover {
     background: #dc2626;
   }
+
+/* CART */
+.cart-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.cart-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #f97316;
+  color: #111827;
+  font-weight: 900;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #0f172a;
+}

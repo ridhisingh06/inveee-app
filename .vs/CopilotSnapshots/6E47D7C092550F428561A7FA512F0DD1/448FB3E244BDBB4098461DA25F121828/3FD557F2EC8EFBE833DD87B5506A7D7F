@@ -1,0 +1,68 @@
+﻿import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NavbarComponent } from '../navbar/navbar';
+import { AdminPendingService, PendingUser } from './admin-pending.service';
+
+@Component({
+  selector: 'app-admin-pending',
+  standalone: true,
+  imports: [CommonModule, NavbarComponent],
+  templateUrl: './admin-pending.html',
+  styleUrls: ['./admin-pending.css']
+})
+export class AdminPendingComponent implements OnInit {
+  pendingRequests: PendingUser[] = [];
+  loading = false;
+  errorMsg = '';
+  successMsg = '';
+
+  constructor(private adminPendingService: AdminPendingService) {}
+
+  ngOnInit() {
+    this.loadPendingRequests();
+  }
+
+  loadPendingRequests() {
+    this.loading = true;
+    this.errorMsg = '';
+
+    this.adminPendingService.getPendingUsers()
+      .subscribe({
+        next: (res) => {
+          this.pendingRequests = res;
+          this.loading = false;
+        },
+        error: () => {
+          this.errorMsg = 'Unable to load pending registration requests.';
+          this.loading = false;
+        }
+      });
+  }
+
+  approve(id: number, roleId: number, departmentId: number) {
+    const payload = { roleId, departmentId };
+    this.adminPendingService.approveUser(id, payload)
+      .subscribe({
+        next: (res) => {
+          this.successMsg = res.message;
+          this.loadPendingRequests();
+        },
+        error: (err) => {
+          this.errorMsg = err?.error?.message || 'Unable to approve the selected request.';
+        }
+      });
+  }
+
+  reject(id: number) {
+    this.adminPendingService.rejectUser(id)
+      .subscribe({
+        next: (res) => {
+          this.successMsg = res.message;
+          this.loadPendingRequests();
+        },
+        error: (err) => {
+          this.errorMsg = err?.error?.message || 'Unable to reject the selected request.';
+        }
+      });
+  }
+}

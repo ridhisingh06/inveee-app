@@ -1,0 +1,49 @@
+<app-navbar></app-navbar>
+
+<section class="pending-page">
+  <div class="pending-header">
+    <div>
+      <p class="eyebrow">Admin Console</p>
+      <h1>Pending Requests</h1>
+      <p class="subcopy">
+        Review new user registrations and decide who can access the system.
+      </p>
+    </div>
+
+    <button class="refresh-btn" (click)="loadPendingRequests()">Refresh</button>
+  </div>
+
+  <p class="status-message" *ngIf="loading">Loading pending requests...</p>
+  <p class="success-message" *ngIf="successMsg">{{ successMsg }}</p>
+  <p class="error-message" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+  <div class="empty-state" *ngIf="!loading && !errorMsg && pendingRequests.length === 0">
+    No pending registration requests right now.
+  </div>
+
+  <div class="table-shell" *ngIf="pendingRequests.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of pendingRequests; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ request.username }}</td>
+          <td>{{ request.email }}</td>
+          <td>{{ request.role || '-' }}</td>
+          <td class="action-cell">
+            <button class="approve-btn" (click)="approve(request.id, request.roleId, request.departmentId)">Approve</button>
+            <button class="reject-btn" (click)="reject(request.id)">Reject</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

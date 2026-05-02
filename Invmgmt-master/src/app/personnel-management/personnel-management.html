@@ -1,0 +1,62 @@
+<app-navbar></app-navbar>
+
+<div class="pm-shell">
+  <div class="pm-header">
+    <div class="pm-title-wrap">
+      <div class="pm-title">Personnel Details Management</div>
+      <div class="pm-subtitle">Code file maintenance and reports</div>
+    </div>
+
+    <a class="back-btn" routerLink="/admin-dashboard">
+      ← Back to Main Menu
+    </a>
+  </div>
+
+  <div class="pm-selected" *ngIf="selectedLabel() as label">
+    <div class="pm-selected-badge">Selected</div>
+    <div class="pm-selected-text">{{ label }}</div>
+  </div>
+
+  <div class="pm-grid">
+    <section class="pm-section">
+      <div class="section-head">
+        <div class="section-title">Code File Management</div>
+        <div class="section-note">Entries, modification, and allocations</div>
+      </div>
+
+      <div class="cards">
+        <a
+          class="card"
+          *ngFor="let item of codeFileItems"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+        >
+          <div class="card-title">{{ item.label }}</div>
+          <div class="card-desc" *ngIf="item.description">{{ item.description }}</div>
+          <div class="card-arrow" aria-hidden="true">→</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="pm-section">
+      <div class="section-head">
+        <div class="section-title">Reports</div>
+        <div class="section-note">Quick lists for verification and printing</div>
+      </div>
+
+      <div class="cards">
+        <a
+          class="card"
+          *ngFor="let item of reportItems"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+        >
+          <div class="card-title">{{ item.label }}</div>
+          <div class="card-desc" *ngIf="item.description">{{ item.description }}</div>
+          <div class="card-arrow" aria-hidden="true">→</div>
+        </a>
+      </div>
+    </section>
+  </div>
+</div>
+

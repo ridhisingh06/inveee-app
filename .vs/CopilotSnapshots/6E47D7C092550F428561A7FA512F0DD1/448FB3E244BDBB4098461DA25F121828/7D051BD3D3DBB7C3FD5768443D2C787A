@@ -1,0 +1,123 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using invmgmt.web.Data;
+using invmgmt.web.DTOs;
+using invmgmt.web.Models;
+
+[Route("api/admin")]
+[ApiController]
+[Authorize(Roles = "Admin")]
+public class AdminController : ControllerBase
+{
+    private readonly AppDbContext _context;
+
+    public AdminController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet("pending-users")]
+    public async Task<IActionResult> GetPendingUsers()
+    {
+        var pendingUsers = await _context.RegistrationRequests
+            .Where(x => x.Status == RegistrationStatus.Pending)
+            .Include(x => x.Role)
+            .Select(x => new PendingRegistrationDto
+            {
+                Id = x.Id,
+                Username = x.Username,
+                Email = x.Email,
+                Role = x.Role != null ? x.Role.Name : string.Empty,
+                Designation = x.Designation,
+                Department = x.Department != null ? x.Department.Name : string.Empty,
+                Status = x.Status.ToString(),
+                CreatedAt = x.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(pendingUsers);
+    }
+
+    [HttpPut("approve/{id}")]
+    public async Task<IActionResult> Approve(int id)
+    {
+        var request = await _context.RegistrationRequests.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (request == null)
+        {
+            return NotFound(new { message = "Pending request not found" });     
+        }
+
+        if (request.Status != RegistrationStatus.Pending)
+        {
+            return BadRequest(new { message = "This request has already been processed" });
+        }
+
+        var existingUser = await _context.Users.FirstOrDefaultAsync(x => x.Email == request.Email);
+
+        if (existingUser == null)
+        {
+            existingUser = new User
+            {
+                Username = request.Username,
+                Email = request.Email,
+                PasswordHash = request.PasswordHash,
+                DepartmentId = request.DepartmentId,
+                Designation = request.Designation,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Users.Add(existingUser);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            existingUser.IsActive = true;
+        }
+
+        var userRole = await _context.UserRoles
+            .FirstOrDefaultAsync(x => x.UserId == existingUser.Id);
+
+        if (userRole == null)
+        {
+            _context.UserRoles.Add(new UserRole
+            {
+                UserId = existingUser.Id,
+                RoleId = request.RoleId
+            });
+        }
+        else
+        {
+            userRole.RoleId = request.RoleId;
+        }
+
+        request.Status = RegistrationStatus.Approved;
+        request.IsActive = true;
+        request.ApprovedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "User approved successfully" });
+    }
+
+    [HttpPut("reject/{id}")]
+    public async Task<IActionResult> Reject(int id)
+    {
+        var request = await _context.RegistrationRequests.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (request == null)
+        {
+            return NotFound(new { message = "Pending request not found" });
+        }
+
+        request.Status = RegistrationStatus.Rejected;
+        request.IsActive = false;
+        request.ApprovedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "User rejected successfully" });
+    }
+}

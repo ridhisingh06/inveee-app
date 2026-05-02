@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Invmgmt-master",
+    "\\Invmgmt-master\\src",
+    "\\Invmgmt-master\\src\\app",
+    "\\Invmgmt-master\\src\\app\\auth",
+    "\\Invmgmt-master\\src\\app\\auth\\Guard",
+    "\\Invmgmt-master\\src\\app\\auth\\register",
+    "\\Invmgmt-master\\src\\app\\inventory",
+    "\\Invmgmt-master\\src\\app\\my-requests",
+    "\\Invmgmt-master\\src\\app\\request-item"
+  ],
+  "SelectedNode": "\\Invmgmt-master\\src\\app\\auth\\register\\register.ts",
+  "PreviewInSolutionExplorer": false
+}

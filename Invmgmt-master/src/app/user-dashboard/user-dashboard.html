@@ -1,0 +1,23 @@
+<app-navbar></app-navbar>
+
+<div class="layout">
+  <aside class="sidebar" [class.closed]="!sidebarOpen">
+    <div class="side-head">
+      <div class="side-title">User</div>
+      <button class="side-toggle" type="button" (click)="toggleSidebar()">
+        {{ sidebarOpen ? 'Hide' : 'Show' }}
+      </button>
+    </div>
+
+    <nav class="side-nav">
+      <a routerLink="/user-dashboard/request-items" routerLinkActive="active">Request Items</a>
+      <a routerLink="/user-dashboard/check-status" routerLinkActive="active">Check Status</a>
+      <a routerLink="/user-dashboard/item-list" routerLinkActive="active">Item List</a>
+      <a routerLink="/user-dashboard/cart" routerLinkActive="active">Cart</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

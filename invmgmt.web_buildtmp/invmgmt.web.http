@@ -1,0 +1,6 @@
+@invmgmt.web_HostAddress = http://localhost:5147
+
+GET {{invmgmt.web_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

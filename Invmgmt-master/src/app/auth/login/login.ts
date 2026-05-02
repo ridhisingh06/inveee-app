@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';     
-import { environment } from '../../../environments/environment';
 import { RouterModule } from '@angular/router';
+import { AuthApiService } from '../services/auth-api.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [FormsModule, CommonModule, RouterModule],
-  templateUrl: './login.html'
+  templateUrl: './login.html',
+  styleUrls: ['./login.css']
 })
 export class LoginComponent {
 
@@ -19,18 +19,28 @@ export class LoginComponent {
 
   errorMsg = '';
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private authApi: AuthApiService, private router: Router) { }
 
   login() {
+    if (!this.email || !this.password) {
+      this.errorMsg = 'Email and password are required';
+      return;
+    }
 
     const payload = {
       email: this.email,
       password: this.password
     };
 
-    this.http.post(`${environment.apiUrl}/auth/login`, payload)
+    this.authApi.login(payload)
       .subscribe({
         next: (res: any) => {
+          this.errorMsg = '';
+
+          if (!res?.token) {
+            this.errorMsg = 'Login failed. Please try again.';
+            return;
+          }
 
           // 🔐 token save
           localStorage.setItem('token', res.token);
@@ -47,8 +57,23 @@ export class LoginComponent {
           // 🚀 redirect
           this.router.navigate(['/dashboard']);
         },
-        error: () => {
-          this.errorMsg = "Invalid credentials";
+        error: (err) => {
+          if (err?.status === 0) {
+            this.errorMsg = 'Cannot reach server. Please check your connection.';
+            return;
+          }
+
+          if (err?.status === 401) {
+            this.errorMsg = 'Invalid credentials';
+            return;
+          }
+
+          if (err?.status === 500) {
+            this.errorMsg = 'Server error. Please try again later.';
+            return;
+          }
+
+          this.errorMsg = err?.error?.message || err?.error || 'Login failed';
         }
       });
   }

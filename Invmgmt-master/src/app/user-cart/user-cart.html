@@ -1,0 +1,29 @@
+<div class="page">
+  <div class="header">
+    <h2>Your Cart</h2>
+    <p class="sub">Review items before submitting the request.</p>
+  </div>
+
+  <div *ngIf="lines.length === 0" class="empty">
+    <div class="empty-title">Cart is empty</div>
+    <div class="empty-sub">Add items from Item List.</div>
+  </div>
+
+  <div *ngIf="lines.length > 0" class="list">
+    <div class="row" *ngFor="let line of lines">
+      <div class="info">
+        <div class="name">{{ line.item.name }}</div>
+        <div class="meta">
+          <span class="pill">{{ line.item.category }}</span>
+          <span class="qty">Qty: {{ line.qty }}</span>
+        </div>
+      </div>
+      <button class="danger" type="button" (click)="delete(line.item.id)">Delete</button>
+    </div>
+
+    <div class="footer">
+      <button class="primary" type="button" (click)="requestAll()">Request All Items</button>
+    </div>
+  </div>
+</div>
+

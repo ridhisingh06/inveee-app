@@ -1,15 +1,49 @@
-<div class="container">
-  <h2>Login</h2>
+<section class="login-shell">
+  <div class="login-panel">
+    <div class="login-copy">
+      <p class="eyebrow">Inventory Management</p>
+      <h1>Sign in to continue your workflow.</h1>
+      
 
-  <input [(ngModel)]="email" placeholder="Email">
+      
+    </div>
 
-  <input [(ngModel)]="password" type="password" placeholder="Password">
+    <form class="login-card" (ngSubmit)="login()">
+      <div class="card-header">
+        <h2>Welcome back</h2>
+        <p>Use your registered email and password to enter the dashboard.</p>
+      </div>
 
-  <button (click)="login()">Login</button>
+      <label class="field">
+        <span>Email</span>
+        <input
+          [(ngModel)]="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          placeholder="Enter your email"
+        >
+      </label>
 
-  <p class="error" *ngIf="errorMsg">{{errorMsg}}</p>
-  <p>
-    If not registered?
-    <a routerLink="/register">Register here</a>
-  </p>
-</div>
+      <label class="field">
+        <span>Password</span>
+        <input
+          [(ngModel)]="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+        >
+      </label>
+
+      <p class="error" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+      <button type="submit">Login</button>
+
+      <p class="register-link">
+        New here?
+        <a routerLink="/register">Create an account</a>
+      </p>
+    </form>
+  </div>
+</section>

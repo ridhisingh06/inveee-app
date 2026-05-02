@@ -1,36 +1,56 @@
 <nav class="navbar">
 
-  <!-- 🔹 Logo -->
-  <div class="logo">Stationary Store</div>
+  <!-- Logo -->
+  <div class="brand">
+    <button
+      *ngIf="role === 'Admin' && showSidebarToggle"
+      class="sidebar-toggle"
+      type="button"
+      (click)="toggleSidebar()"
+      aria-label="Toggle admin sidebar"
+    >
+      <span class="burger" aria-hidden="true"></span>
+    </button>
+    <div class="logo">Stationary Store</div>
+  </div>
 
-  <!-- 🔹 Links -->
+  <!-- Links (same for all roles) -->
   <div class="nav-links">
 
-    <!-- COMMON -->
     <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    
-      <!-- USER -->
-      <ng-container *ngIf="role === 'User'">
-        <a routerLink="/request" routerLinkActive="active">New Request</a>
-        <a routerLink="/my-requests" routerLinkActive="active">My Requests</a>
-      </ng-container>
+    <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
 
-      <!-- ADMIN -->
-      <ng-container *ngIf="role === 'Admin'">
-        <a routerLink="/users" routerLinkActive="active">Users</a>
-        <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
-        <a routerLink="/requests" routerLinkActive="active">Requests</a>
-      </ng-container>
+    <!-- User links -->
+    <a *ngIf="role === 'User'" routerLink="/user-dashboard/request-items" routerLinkActive="active">Request Items</a>
+    <a *ngIf="role === 'User'" routerLink="/user-dashboard/check-status" routerLinkActive="active">Check Status</a>
 
-      <!-- ISSUER -->
-      <ng-container *ngIf="role === 'Issuer'">
-        <a routerLink="/approved" routerLinkActive="active">Approved</a>
-        <a routerLink="/issue" routerLinkActive="active">Issue</a>
-        <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
-      </ng-container>
+    <!-- Admin links -->
+    <a *ngIf="role === 'Admin'" routerLink="/pending-requests" routerLinkActive="active">Pending Requests</a>
+    <a *ngIf="role === 'Admin'" routerLink="/personnel-management" routerLinkActive="active">Personnel Management</a>
 
-      <!-- LOGOUT -->
-      <button (click)="logout()">Logout</button>
+    <!-- Issuer links -->
+    <a *ngIf="role === 'Issuer'" routerLink="/approved" routerLinkActive="active">Approved</a>
+    <a *ngIf="role === 'Issuer'" routerLink="/issue" routerLinkActive="active">Issue</a>
+
+    <button
+      *ngIf="role === 'User'"
+      class="cart-btn"
+      type="button"
+      (click)="openCart()"
+      aria-label="Open cart"
+    >
+      <span class="cart-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20">
+          <path
+            d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM6.2 6l.9 5h10.3l1.6-5H6.2zM4 4h2l.4 2h13.5c.7 0 1.2.7 1 1.4l-2.2 6.6c-.2.6-.8 1-1.4 1H7.2l-.2 1H19v2H6c-.7 0-1.2-.6-1.1-1.3L6 14 4.8 6H4V4z"
+            fill="currentColor"
+          />
+        </svg>
+      </span>
+      <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+    </button>
+
+    <button class="logout-btn" (click)="logout()">Logout</button>
 
   </div>
 </nav>

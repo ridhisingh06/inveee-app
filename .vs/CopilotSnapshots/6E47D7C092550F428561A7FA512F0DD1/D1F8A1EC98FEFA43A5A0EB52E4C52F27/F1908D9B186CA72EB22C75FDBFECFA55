@@ -1,0 +1,40 @@
+﻿import { Routes } from '@angular/router';
+import { LoginComponent } from './auth/login/login';
+import { RegisterComponent } from './auth/register/register';
+import { authGuard } from './auth/Guard/guard';
+import { DashboardComponent} from './dashboard/dashboard';
+import { InventoryComponent } from './inventory/inventory';
+import { AdminPendingComponent } from './admin-pending/admin-pending';
+import { RequestItemComponent } from './request-item/request-item';
+
+export const routes: Routes = [
+  // register page
+  { path: 'register', component: RegisterComponent },
+
+  // default route
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+
+  // login page
+  { path: 'login', component: LoginComponent },
+
+  // dashboard (protected)
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [authGuard],
+    data: { roles: ['Admin', 'User', 'Issuer'] }
+  },
+  {
+    path: 'inventory',
+    component: InventoryComponent,
+    canActivate: [authGuard],
+    data: { roles: ['Admin', 'User', 'Issuer'] }
+  },
+  {
+    path: 'pending-requests',
+    component: AdminPendingComponent,
+    canActivate: [authGuard],
+    data: { roles: ['Admin'] }
+  },
+  { path: 'request-item', component: RequestItemComponent }
+];

@@ -1,0 +1,23 @@
+﻿import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { AppComponent } from './app.component';
+import { routes } from './app.routes';
+import { RequestItemComponent } from './request-item/request-item.component';
+import { MyRequestsComponent } from './my-requests/my-requests.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    RequestItemComponent,
+    MyRequestsComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(routes),
+    FormsModule
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}

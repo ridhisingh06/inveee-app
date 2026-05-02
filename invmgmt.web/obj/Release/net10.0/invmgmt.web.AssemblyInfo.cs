@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("invmgmt.web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2a39842d219743aa0750027eba7c171ddb4dde21")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88bb93798df66cf3659c0cf6aaf50d06f96daae3")]
 [assembly: System.Reflection.AssemblyProductAttribute("invmgmt.web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("invmgmt.web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

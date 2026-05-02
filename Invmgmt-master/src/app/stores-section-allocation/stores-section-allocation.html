@@ -1,0 +1,95 @@
+<app-navbar></app-navbar>
+
+<div class="ssa-shell">
+  <header class="gov-head">
+    <div class="dept">Department of Personnel and Training</div>
+    <div class="page-title">Stores SECTION Allocation</div>
+  </header>
+
+  <div class="card">
+    <div class="card-top">
+      <div class="mode">
+        <label class="radio">
+          <input type="radio" name="mode" [checked]="mode === 'modify'" (change)="setMode('modify')" />
+          <span>Modify</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="mode" [checked]="mode === 'delete'" (change)="setMode('delete')" />
+          <span>Delete</span>
+        </label>
+      </div>
+
+      <div class="status" *ngIf="isLoading || isSaving">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>{{ isSaving ? 'Submitting...' : 'Loading...' }}</span>
+      </div>
+    </div>
+
+    <div class="alert" *ngIf="message" [class.success]="message.type === 'success'" [class.error]="message.type === 'error'">
+      {{ message.text }}
+    </div>
+
+    <div class="form-grid">
+      <div class="fields">
+        <div class="row">
+          <label>Section Code</label>
+          <select [(ngModel)]="selectedSectionCode" (change)="onSectionChange()" [disabled]="isLoading || isSaving">
+            <option value="" disabled>Select Section Code</option>
+            <option *ngFor="let s of sections" [value]="s.code">{{ s.code }}</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label>Section Name</label>
+          <input type="text" [(ngModel)]="sectionName" [readonly]="isReadOnly" [disabled]="isLoading || isSaving" />
+        </div>
+
+        <div class="row">
+          <label>Incharge Employee Code</label>
+          <input
+            type="text"
+            [ngModel]="inchargeEmployeeCode"
+            (ngModelChange)="onInchargeCodeInput($event)"
+            [readonly]="isReadOnly"
+            [disabled]="isLoading || isSaving"
+            placeholder="Enter employee code"
+          />
+        </div>
+
+        <div class="row">
+          <label>Incharge Name</label>
+          <input type="text" [ngModel]="inchargeName" readonly />
+        </div>
+
+        <div class="row">
+          <label>Total Staff</label>
+          <input type="number" [(ngModel)]="totalStaff" [readonly]="isReadOnly" [disabled]="isLoading || isSaving" />
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="button" (click)="submit()" [disabled]="isLoading || isSaving">
+            Submit
+          </button>
+          <button type="button" (click)="clearForm()" [disabled]="isLoading || isSaving">
+            Clear
+          </button>
+          <button class="ghost" type="button" (click)="showHelp()" [disabled]="isLoading || isSaving">
+            Help
+          </button>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="img-box" aria-label="Optional image placeholder">
+          <div class="img-title">Image</div>
+          <div class="img-hint">Optional placeholder</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <a class="back" routerLink="/admin-dashboard">Back to Home</a>
+    </div>
+  </div>
+</div>
+

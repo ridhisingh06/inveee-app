@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
 import { RouterModule } from '@angular/router';
+import { AuthApiService } from '../services/auth-api.service';
 
 @Component({
   selector: 'app-register',
@@ -24,9 +23,9 @@ export class RegisterComponent {
 
   successMsg = '';
   errorMsg = '';
-  loading = false; // 🔥 new
+  loading = false; //  new
 
-  constructor(private http: HttpClient) { }
+  constructor(private authApi: AuthApiService) { }
 
   register() {
 
@@ -40,7 +39,7 @@ export class RegisterComponent {
     const payload = {
       username: this.username,
       email: this.email,
-      passwordHash: this.password,
+      password: this.password,
       designation: this.designation,
       departmentId: this.departmentId,
       roleId: this.roleId
@@ -48,16 +47,35 @@ export class RegisterComponent {
 
     this.loading = true;
 
-    this.http.post(`${environment.apiUrl}/registration/register`, payload)
+    this.authApi.register({
+      username: payload.username,
+      email: payload.email,
+      password: payload.password,
+      designation: payload.designation,
+      departmentId: payload.departmentId,
+      roleId: payload.roleId
+    })
       .subscribe({
-        next: () => {
-          this.successMsg = '✅ Registered! Wait for admin approval.';
+        next: (res) => {
+          this.successMsg = res.message || 'Your request is pending. Please wait for admin approval.';
           this.errorMsg = '';
           this.resetForm();
           this.loading = false;
         },
         error: (err) => {
-          this.errorMsg = err.error || '❌ Registration failed';
+          let msg = ' Registration failed';
+          if (err?.error?.errors) {
+            // ASP.NET Core Model Validation errors (e.g. invalid DepartmentId or null fields)
+            const firstErrorKey = Object.keys(err.error.errors)[0];
+            msg = err.error.errors[firstErrorKey][0];
+          } else if (err?.error?.message) {
+            // Our custom AuthController errors
+            msg = err.error.message;
+          } else if (typeof err?.error === 'string') {
+            msg = err.error;
+          }
+          
+          this.errorMsg = msg;
           this.successMsg = '';
           this.loading = false;
         }

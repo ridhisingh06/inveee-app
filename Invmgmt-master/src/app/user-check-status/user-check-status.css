@@ -1,0 +1,25 @@
+.page {
+  padding: 18px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.sub {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.hint {
+  margin-top: 12px;
+  background: #fff;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  padding: 14px;
+  color: #374151;
+  font-size: 14px;
+}
+
