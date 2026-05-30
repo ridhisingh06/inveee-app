@@ -37,6 +37,25 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    // ── Production guard ────────────────────────────────────────────────────
+    // Connection string must come from appsettings.Production.json (gitignored)
+    // or the ConnectionStrings__DefaultConnection environment variable.
+    // It must never be empty or point to localhost in production.
+    if (string.IsNullOrWhiteSpace(connString))
+        throw new InvalidOperationException(
+            "[STARTUP] DefaultConnection is empty. " +
+            "Set the ConnectionStrings__DefaultConnection environment variable " +
+            "or populate appsettings.Production.json (gitignored).");
+
+    // Log which host is being used so misconfiguration is obvious at boot
+    var host = connString
+        .Split(';', StringSplitOptions.RemoveEmptyEntries)
+        .FirstOrDefault(p => p.TrimStart().StartsWith("Host=", StringComparison.OrdinalIgnoreCase))
+        ?.Split('=', 2).LastOrDefault() ?? "unknown";
+
+    Console.WriteLine($"[STARTUP] ✓ Database host: {host}");
+
     options.UseNpgsql(connString, npgsqlOptions =>
     {
         // Connection resilience settings

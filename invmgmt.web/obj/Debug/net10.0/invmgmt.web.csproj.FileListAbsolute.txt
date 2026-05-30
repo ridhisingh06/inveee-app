@@ -730,3 +730,4 @@ D:\INVEEER\invmgmt.web\obj\Debug\net10.0\refint\invmgmt.web.dll
 D:\INVEEER\invmgmt.web\obj\Debug\net10.0\invmgmt.web.pdb
 D:\INVEEER\invmgmt.web\obj\Debug\net10.0\invmgmt.web.genruntimeconfig.cache
 D:\INVEEER\invmgmt.web\obj\Debug\net10.0\ref\invmgmt.web.dll
+D:\inveeeR\invmgmt.web\bin\Debug\net10.0\appsettings.Production.json

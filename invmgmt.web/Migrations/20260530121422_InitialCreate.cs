@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace invmgmt.web.Migrations
 {
     /// <inheritdoc />
@@ -58,6 +60,36 @@ namespace invmgmt.web.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Personnel",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ICNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    BirthDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    ResidentialAddress = table.Column<string>(type: "text", nullable: true),
+                    ResidentialPhone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    OfficePhone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Designation = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    JobDescription = table.Column<string>(type: "text", nullable: true),
+                    Department = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    IsStoresIncharge = table.Column<bool>(type: "boolean", nullable: false),
+                    Building = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    ReportingOfficer = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    IdCardNumber = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: true),
+                    IdCardExpiryDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    PhotoPath = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Personnel", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -79,7 +111,8 @@ namespace invmgmt.web.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,7 +126,7 @@ namespace invmgmt.web.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "User",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -104,13 +137,15 @@ namespace invmgmt.web.Migrations
                     DepartmentId = table.Column<int>(type: "integer", nullable: true),
                     Designation = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsApproved = table.Column<bool>(type: "boolean", nullable: false),
+                    Role = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_User", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_User_Departments_DepartmentId",
+                        name: "FK_Users_Departments_DepartmentId",
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
                         principalColumn: "Id");
@@ -166,6 +201,31 @@ namespace invmgmt.web.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Bills",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    BillNo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    BillDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    VendorName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    GrandTotal = table.Column<decimal>(type: "numeric", nullable: false),
+                    CreatedByUserId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bills", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bills_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RegistrationRequests",
                 columns: table => new
                 {
@@ -173,8 +233,9 @@ namespace invmgmt.web.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
-                    PasswordHash = table.Column<int>(type: "integer", nullable: false),
-                    DepartmentId = table.Column<int>(type: "integer", nullable: true),
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    DepartmentId = table.Column<int>(type: "integer", nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
                     Designation = table.Column<string>(type: "text", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
@@ -190,11 +251,18 @@ namespace invmgmt.web.Migrations
                         name: "FK_RegistrationRequests_Departments_DepartmentId",
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RegistrationRequests_User_ApprovedUserId",
+                        name: "FK_RegistrationRequests_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RegistrationRequests_Users_ApprovedUserId",
                         column: x => x.ApprovedUserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id");
                 });
 
@@ -205,7 +273,7 @@ namespace invmgmt.web.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    CategoryId = table.Column<int>(type: "integer", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -217,12 +285,11 @@ namespace invmgmt.web.Migrations
                         name: "FK_Requests_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Requests_User_UserId",
+                        name: "FK_Requests_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -246,11 +313,41 @@ namespace invmgmt.web.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRoles_User_UserId",
+                        name: "FK_UserRoles_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BillItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    BillId = table.Column<int>(type: "integer", nullable: false),
+                    ItemId = table.Column<int>(type: "integer", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BillItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BillItems_Bills_BillId",
+                        column: x => x.BillId,
+                        principalTable: "Bills",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BillItems_Items_ItemId",
+                        column: x => x.ItemId,
+                        principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -276,9 +373,9 @@ namespace invmgmt.web.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ApprovalLogs_User_UserId",
+                        name: "FK_ApprovalLogs_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -304,9 +401,9 @@ namespace invmgmt.web.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_IssueLogs_User_UserId",
+                        name: "FK_IssueLogs_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -332,9 +429,9 @@ namespace invmgmt.web.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ReceivedLogs_User_UserId",
+                        name: "FK_ReceivedLogs_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -349,7 +446,8 @@ namespace invmgmt.web.Migrations
                     ItemId = table.Column<int>(type: "integer", nullable: false),
                     QuantityRequested = table.Column<int>(type: "integer", nullable: false),
                     QuantityApproved = table.Column<int>(type: "integer", nullable: false),
-                    QuantityIssued = table.Column<int>(type: "integer", nullable: false)
+                    QuantityIssued = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -368,6 +466,27 @@ namespace invmgmt.web.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Departments",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Admin" },
+                    { 2, "IT" },
+                    { 3, "HR" },
+                    { 4, "Finance" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "User" },
+                    { 2, "Issuer" },
+                    { 3, "Admin" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ApprovalLogs_RequestId",
                 table: "ApprovalLogs",
@@ -379,9 +498,36 @@ namespace invmgmt.web.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BillItems_BillId",
+                table: "BillItems",
+                column: "BillId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BillItems_ItemId",
+                table: "BillItems",
+                column: "ItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bills_BillNo",
+                table: "Bills",
+                column: "BillNo",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bills_CreatedAt",
+                table: "Bills",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bills_CreatedByUserId",
+                table: "Bills",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InventoryStocks_ItemId",
                 table: "InventoryStocks",
-                column: "ItemId");
+                column: "ItemId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_IssueLogs_RequestId",
@@ -397,6 +543,12 @@ namespace invmgmt.web.Migrations
                 name: "IX_Items_CategoryId",
                 table: "Items",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Personnel_Email",
+                table: "Personnel",
+                column: "Email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReceivedLogs_RequestId",
@@ -419,6 +571,21 @@ namespace invmgmt.web.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RegistrationRequests_RoleId",
+                table: "RegistrationRequests",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RegistrationRequests_Status",
+                table: "RegistrationRequests",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RegistrationRequests_Status_CreatedAt",
+                table: "RegistrationRequests",
+                columns: new[] { "Status", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RequestItems_ItemId",
                 table: "RequestItems",
                 column: "ItemId");
@@ -429,14 +596,24 @@ namespace invmgmt.web.Migrations
                 column: "RequestId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RequestItems_Status",
+                table: "RequestItems",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Requests_CategoryId",
                 table: "Requests",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Requests_UserId",
+                name: "IX_Requests_Status_CreatedAt",
                 table: "Requests",
-                column: "UserId");
+                columns: new[] { "Status", "CreatedAt" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Requests_UserId_Status",
+                table: "Requests",
+                columns: new[] { "UserId", "Status" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleItemLimits_ItemId",
@@ -449,11 +626,6 @@ namespace invmgmt.web.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_User_DepartmentId",
-                table: "User",
-                column: "DepartmentId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleId",
                 table: "UserRoles",
                 column: "RoleId");
@@ -462,6 +634,16 @@ namespace invmgmt.web.Migrations
                 name: "IX_UserRoles_UserId",
                 table: "UserRoles",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_DepartmentId",
+                table: "Users",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_IsApproved_CreatedAt",
+                table: "Users",
+                columns: new[] { "IsApproved", "CreatedAt" });
         }
 
         /// <inheritdoc />
@@ -474,10 +656,16 @@ namespace invmgmt.web.Migrations
                 name: "AuditLogs");
 
             migrationBuilder.DropTable(
+                name: "BillItems");
+
+            migrationBuilder.DropTable(
                 name: "InventoryStocks");
 
             migrationBuilder.DropTable(
                 name: "IssueLogs");
+
+            migrationBuilder.DropTable(
+                name: "Personnel");
 
             migrationBuilder.DropTable(
                 name: "ReceivedLogs");
@@ -495,6 +683,9 @@ namespace invmgmt.web.Migrations
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
+                name: "Bills");
+
+            migrationBuilder.DropTable(
                 name: "Requests");
 
             migrationBuilder.DropTable(
@@ -504,7 +695,7 @@ namespace invmgmt.web.Migrations
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "User");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Categories");

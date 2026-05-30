@@ -12,8 +12,8 @@ using invmgmt.web.Data;
 namespace invmgmt.web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260519182533_AddIsApprovedAndRequestStatus")]
-    partial class AddIsApprovedAndRequestStatus
+    [Migration("20260530121422_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,6 +98,86 @@ namespace invmgmt.web.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AuditLogs");
+                });
+
+            modelBuilder.Entity("invmgmt.web.Models.Bill", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("BillDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("BillNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("GrandTotal")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("VendorName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillNo")
+                        .IsUnique();
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.ToTable("Bills");
+                });
+
+            modelBuilder.Entity("invmgmt.web.Models.BillItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("BillId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("BillItems");
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Category", b =>
@@ -224,6 +304,9 @@ namespace invmgmt.web.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -240,6 +323,89 @@ namespace invmgmt.web.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("invmgmt.web.Models.Personnel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly?>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Building")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Department")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Designation")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("ICNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateOnly?>("IdCardExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("IdCardNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<bool>("IsStoresIncharge")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("JobDescription")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("OfficePhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("PhotoPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ReportingOfficer")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ResidentialAddress")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ResidentialPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Personnel");
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.ReceivedLog", b =>
@@ -329,6 +495,8 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("Status");
 
+                    b.HasIndex("Status", "CreatedAt");
+
                     b.ToTable("RegistrationRequests");
                 });
 
@@ -359,6 +527,8 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("Status", "CreatedAt");
+
                     b.HasIndex("UserId", "Status");
 
                     b.ToTable("Requests");
@@ -387,11 +557,16 @@ namespace invmgmt.web.Migrations
                     b.Property<int>("RequestId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
 
                     b.HasIndex("RequestId");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("RequestItems");
                 });
@@ -488,6 +663,10 @@ namespace invmgmt.web.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
@@ -495,6 +674,8 @@ namespace invmgmt.web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("IsApproved", "CreatedAt");
 
                     b.ToTable("Users");
                 });
@@ -539,6 +720,36 @@ namespace invmgmt.web.Migrations
                     b.Navigation("Request");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("invmgmt.web.Models.Bill", b =>
+                {
+                    b.HasOne("invmgmt.web.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+                });
+
+            modelBuilder.Entity("invmgmt.web.Models.BillItem", b =>
+                {
+                    b.HasOne("invmgmt.web.Models.Bill", "Bill")
+                        .WithMany("Items")
+                        .HasForeignKey("BillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("invmgmt.web.Models.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Bill");
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.InventoryStock", b =>
@@ -707,6 +918,11 @@ namespace invmgmt.web.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("invmgmt.web.Models.Bill", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Category", b =>

@@ -1,9 +1,20 @@
 # Environment secrets (use .env.example as template)
 .env
 
+# -----------------------------------------------
+# ASP.NET Core environment-specific appsettings
+# These may contain real DB credentials / secrets
+# NEVER commit these files — use appsettings.json
+# as a template and add credentials only here.
+# -----------------------------------------------
+invmgmt.web/appsettings.Production.json
+invmgmt.web/appsettings.Staging.json
+
 # Build artifacts
 node_modules/
 .vs/
+bin/
+obj/
 
 # Docker volumes (local dev)
 pgdata/
