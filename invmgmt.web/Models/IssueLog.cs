@@ -1,4 +1,4 @@
-﻿using invmgmt.web.Models;
+using invmgmt.web.Models;
 namespace invmgmt.web.Models
 {
     public class IssueLog
@@ -9,6 +9,7 @@ namespace invmgmt.web.Models
         public Request Request { get; set; }
 
         public int IssuedBy { get; set; }
+        public int UserId { get; set; }
         public User User { get; set; }
 
         public DateTime IssuedDate { get; set; } = DateTime.Now;

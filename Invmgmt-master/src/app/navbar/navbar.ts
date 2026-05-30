@@ -1,8 +1,17 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../auth/services/service';
 import { CartService } from '../services/cart.service';
+import { SidebarService } from '../services/sidebar.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-navbar',
@@ -14,36 +23,42 @@ import { CartService } from '../services/cart.service';
 export class NavbarComponent implements OnInit {
   role: string = '';
   cartCount = 0;
+  get showSidebarToggle(): boolean {
+    const adminRoutes = [
+      'admin-dashboard',
+      'pending-requests',
+      'pending-approvals',
+      'personnel-management',
+      'stores-section-allocation',
+      'incharge-allocation'
+    ];
+    return this.role === 'ADMIN' && adminRoutes.some(r => this.router.url.includes(r));
+  }
 
-  @Input() showSidebarToggle = false;
+  @Input() sidebarCollapsed = false;
   @Output() sidebarToggle = new EventEmitter<void>();
 
   constructor(
     private auth: AuthService,
     private cart: CartService,
-    private router: Router
+    private router: Router,
+    private sidebar: SidebarService,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit() {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    this.role = this.auth.getRole() ?? '';
+    this.auth.role$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((r) => {
+      this.role = r ?? '';
+    });
 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      this.role =
-        payload['role'] ||
-        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
-        '';
-    } catch {
-      this.role = '';
-    }
-
-    this.cart.lines$.subscribe(() => {
+    this.cart.lines$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.cartCount = this.cart.getItemCountSnapshot();
     });
   }
 
   toggleSidebar() {
+    this.sidebar.toggleSidebar();
     this.sidebarToggle.emit();
   }
 
@@ -56,3 +71,4 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/user-dashboard', 'cart']);
   }
 }
+

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace invmgmt.web.Models
 {
@@ -18,6 +18,8 @@ namespace invmgmt.web.Models
         public bool IsActive { get; set; } = true;
 
         public InventoryStock? InventoryStock { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<RequestItem>? RequestItems { get; set; }
         public ICollection<RoleItemLimit>? RoleItemLimits { get; set; }

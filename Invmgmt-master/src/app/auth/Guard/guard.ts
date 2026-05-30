@@ -14,13 +14,22 @@ export const authGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
+  // ⏳ Expiration check
+  if (auth.isTokenExpired()) {
+    alert("Session expired. Please login again.");
+    auth.logout();
+    router.navigate(['/login']);
+    return false;
+  }
+
   const role = auth.getRole();
 
   // 🎭 Role check
   const allowedRoles = route.data?.['roles'];
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
-    router.navigate(['/dashboard']);
+  if (allowedRoles && (!role || !allowedRoles.includes(role))) {
+    alert("Access Denied");
+    router.navigate(['/login']);
     return false;
   }
 

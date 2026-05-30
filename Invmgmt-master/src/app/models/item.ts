@@ -1,7 +1,7 @@
-export type ItemCategory = 'Stationary' | 'IT Items' | 'Housekeeping';
+export type ItemCategory = string;
 
 export interface Item {
-  id: string;
+  id: string | number;
   name: string;
   category: ItemCategory;
   description?: string;

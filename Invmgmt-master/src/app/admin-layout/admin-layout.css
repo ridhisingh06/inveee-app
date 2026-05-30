@@ -1,0 +1,32 @@
+.admin-shell {
+  display: block;
+  min-height: calc(100vh - 70px);
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 50%, #fffaed 100%);
+}
+
+.admin-shell.sidebar-collapsed .main-content {
+  margin-left: 80px;
+}
+
+.main-content {
+  display: block;
+  margin-left: 260px;
+  padding: 2rem;
+  min-height: calc(100vh - 70px);
+  transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
+}

@@ -4,19 +4,23 @@ import { RegisterComponent } from './auth/register/register';
 import { authGuard } from './auth/Guard/guard';
 import { InventoryComponent } from './inventory/inventory';
 import { AdminPendingComponent } from './admin-pending/admin-pending';
-import { RequestItemComponent } from './request-item/request-item';
-import { MyRequestsComponent } from './my-requests/my-requests';
-import { DashboardRedirectComponent } from './dashboard-redirect/dashboard-redirect';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard';
 import { UserDashboardComponent } from './user-dashboard/user-dashboard';
 import { IssuerDashboardComponent } from './issuer-dashboard/issuer-dashboard';
 import { IssuerApprovedComponent } from './issuer-approved/issuer-approved';
 import { IssuerIssueComponent } from './issuer-issue/issuer-issue';
 import { PersonnelManagementComponent } from './personnel-management/personnel-management';
+import { PersonnelDetailsNewEntryComponent } from './personnel-details-new-entry/personnel-details-new-entry';
 import { StoresSectionAllocationComponent } from './stores-section-allocation/stores-section-allocation';
 import { UserItemListComponent } from './user-item-list/user-item-list';
 import { UserCartComponent } from './user-cart/user-cart';
 import { UserCheckStatusComponent } from './user-check-status/user-check-status';
+import { CategoryManagementComponent } from './category-management/category-management';
+import { PendingApprovalsComponent } from './pending-approvals/pending-approvals';
+import { AdminLayoutComponent } from './admin-layout/admin-layout';
+import { DeliveryChallanBillEntryComponent } from './delivery-challan-bill-entry/delivery-challan-bill-entry';
+import { MonthlyRegisterComponent } from './monthly-register/monthly-register';
+import { SectionWiseQueryComponent } from './section-wise-query/section-wise-query';
 
 export const routes: Routes = [
   // register page
@@ -28,98 +32,109 @@ export const routes: Routes = [
   // login page
   { path: 'login', component: LoginComponent },
 
-  // dashboard redirect (protected)
+  // default dashboard catch-all (redirect to login or specific dashboard)
+  { path: 'dashboard', redirectTo: 'login', pathMatch: 'full' },
+
+  // ADMIN SECTION (With Sidebar Layout)
   {
-    path: 'dashboard',
-    component: DashboardRedirectComponent,
+    path: '',
+    component: AdminLayoutComponent,
     canActivate: [authGuard],
-    data: { roles: ['Admin', 'User', 'Issuer'] }
+    data: { roles: ['ADMIN'] },
+    children: [
+      {
+        path: 'admin-dashboard',
+        component: AdminDashboardComponent
+      },
+      {
+        path: 'pending-requests',
+        component: AdminPendingComponent
+      },
+      {
+        path: 'personnel-management',
+        component: PersonnelManagementComponent
+      },
+      {
+        path: 'personnel-management/personnel-details-new-entry',
+        component: PersonnelDetailsNewEntryComponent
+      },
+      {
+        path: 'personnel-management/personnel-details-new-entry/:id',
+        component: PersonnelDetailsNewEntryComponent
+      },
+      {
+        path: 'personnel-management/:slug',
+        component: PersonnelManagementComponent
+      },
+      {
+        path: 'stores-section-allocation',
+        component: StoresSectionAllocationComponent
+      },
+      {
+        path: 'incharge-allocation',
+        component: StoresSectionAllocationComponent
+      },
+      {
+        path: 'category-management',
+        component: CategoryManagementComponent
+      },
+      {
+        path: 'pending-approvals',
+        component: PendingApprovalsComponent
+      },
+      {
+        path: 'delivery-challan-bill-entry',
+        component: DeliveryChallanBillEntryComponent
+      },
+      {
+        path: 'monthly-register',
+        component: MonthlyRegisterComponent
+      },
+      {
+        path: 'section-wise-query',
+        component: SectionWiseQueryComponent
+      }
+    ]
   },
 
-  // role dashboards (protected)
-  {
-    path: 'admin-dashboard',
-    component: AdminDashboardComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Admin'] }
-  },
+  // USER SECTION
   {
     path: 'user-dashboard',
     component: UserDashboardComponent,
     canActivate: [authGuard],
-    data: { roles: ['User'] },
+    data: { roles: ['USER'] },
     children: [
       { path: '', redirectTo: 'item-list', pathMatch: 'full' },
-      { path: 'request-items', component: UserItemListComponent },
       { path: 'item-list', component: UserItemListComponent },
-      { path: 'check-status', component: UserCheckStatusComponent },
-      { path: 'cart', component: UserCartComponent }
+      { path: 'my-requests', component: UserCheckStatusComponent },
+      { path: 'cart', component: UserCartComponent },
+      // Legacy redirect for old links
+      { path: 'request-items', redirectTo: 'item-list', pathMatch: 'full' },
+      { path: 'check-status', redirectTo: 'my-requests', pathMatch: 'full' }
     ]
   },
   {
     path: 'issuer-dashboard',
     component: IssuerDashboardComponent,
     canActivate: [authGuard],
-    data: { roles: ['Issuer'] }
+    data: { roles: ['ISSUER'] }
   },
   {
     path: 'inventory',
     component: InventoryComponent,
     canActivate: [authGuard],
-    data: { roles: ['Admin', 'User', 'Issuer'] }
-  },
-  {
-    path: 'pending-requests',
-    component: AdminPendingComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Admin'] }
-  },
-  {
-    path: 'request-item',
-    component: RequestItemComponent,
-    canActivate: [authGuard],
-    data: { roles: ['User'] }
-  },
-  {
-    path: 'my-requests',
-    component: MyRequestsComponent,
-    canActivate: [authGuard],
-    data: { roles: ['User'] }
+    data: { roles: ['ADMIN', 'USER', 'ISSUER'] }
   },
   {
     path: 'approved',
     component: IssuerApprovedComponent,
     canActivate: [authGuard],
-    data: { roles: ['Issuer'] }
+    data: { roles: ['ISSUER'] }
   },
   {
     path: 'issue',
     component: IssuerIssueComponent,
     canActivate: [authGuard],
-    data: { roles: ['Issuer'] }
-  },
-  {
-    path: 'personnel-management',
-    component: PersonnelManagementComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Admin'] }
-  },
-  {
-    path: 'personnel-management/:slug',
-    component: PersonnelManagementComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Admin'] }
-  },
-  {
-    path: 'stores-section-allocation',
-    component: StoresSectionAllocationComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Admin'] }
-  },
-  {
-    path: 'incharge-allocation',
-    component: StoresSectionAllocationComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Admin'] }
+    data: { roles: ['ISSUER'] }
   }
 ];

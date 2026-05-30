@@ -1,0 +1,102 @@
+<div class="approvals-page">
+  <header class="page-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>Approve or reject items sent by issuer</p>
+    </div>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        [ngModel]="searchText"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="Search by user/email/item..."
+        [disabled]="loading"
+      />
+      <button class="refresh-btn" (click)="fetchRequests(currentPage)" [disabled]="loading">Refresh</button>
+    </div>
+  </header>
+
+  <div class="alert success-alert" *ngIf="successMsg">
+    <span class="alert-icon">OK</span>
+    <span>{{ successMsg }}</span>
+  </div>
+
+  <div class="alert error-alert" *ngIf="errorMsg">
+    <span class="alert-icon">!</span>
+    <span>{{ errorMsg }}</span>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading items pending admin approval...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
+    <p>No items waiting for admin approval.</p>
+  </div>
+
+  <div class="table-shell" *ngIf="!loading && requests.length > 0">
+    <table class="requests-table">
+      <thead>
+        <tr>
+          <th>User Name</th>
+          <th>Items</th>
+          <th class="qty-col">Total Qty</th>
+          <th class="date-col">Updated Date</th>
+          <th class="status-col">Status</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let req of requests">
+          <td>
+            <div class="user-cell">
+              <div class="user-name">{{ req.username }}</div>
+              <div class="user-email" *ngIf="req.email">{{ req.email }}</div>
+            </div>
+          </td>
+
+          <td>
+            <ul class="items-list" *ngIf="req.items.length">
+              <li *ngFor="let item of req.items">
+                <span class="item-name">{{ item.itemName }}</span>
+                <span class="item-qty">x {{ item.quantityIssued }}</span>
+                <span class="item-actions">
+                  <ng-container *ngIf="(statusMap[item.id] || item.status) === 'Approved'">
+                    <button class="approve-btn small-btn" disabled>Approved</button>
+                  </ng-container>
+                  <ng-container *ngIf="(statusMap[item.id] || item.status) === 'Rejected'">
+                    <button class="reject-btn small-btn" disabled>Rejected</button>
+                  </ng-container>
+                  <ng-container *ngIf="(statusMap[item.id] || item.status) !== 'Approved' && (statusMap[item.id] || item.status) !== 'Rejected'">
+                    <button class="approve-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="approve(req.id, item.id)">
+                      <ng-container *ngIf="processingMap[item.id] === 'approving'">Approving...</ng-container>
+                      <ng-container *ngIf="processingMap[item.id] !== 'approving'">Approve</ng-container>
+                    </button>
+                    <button class="reject-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="reject(req.id, item.id)">
+                      <ng-container *ngIf="processingMap[item.id] === 'rejecting'">Rejecting...</ng-container>
+                      <ng-container *ngIf="processingMap[item.id] !== 'rejecting'">Reject</ng-container>
+                    </button>
+                  </ng-container>
+                </span>
+              </li>
+            </ul>
+          </td>
+
+          <td class="qty-col">{{ getTotalQty(req) }}</td>
+          <td class="date-col">{{ req.updatedAt | date:'mediumDate' }}</td>
+          <td class="status-col"><span class="badge issued">{{ getStatusLabel(req.status) }}</span></td>
+          <td class="actions-col">Per item</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination-footer" *ngIf="totalPages > 1">
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">Prev</button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ total }} requests)</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+  </div>
+</div>

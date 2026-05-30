@@ -1,30 +1,86 @@
-version: '3.8'
-
 services:
   frontend:
-    build: ./invmgmt-master
+    build: ./Invmgmt-master
     ports:
       - "4200:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:80/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   backend:
     build: ./invmgmt.web
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ASPNETCORE_HTTP_PORTS=5000
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=mydb;Username=postgres;Password=postgres
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=InvMgmtDb;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-ridhi@608}
+      - Serilog__WriteTo__2__Name=Seq
+      - Serilog__WriteTo__2__Args__serverUrl=http://seq:5341
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@gmail.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin@123}
+      - Jwt__Key=${JWT_KEY:-THIS_IS_MY_SECRET_KEY_12345_ABCDEF_2026}
+      - Jwt__Issuer=invmgmt
+      - Jwt__Audience=invmgmt_user
+    volumes:
+      - ./invmgmt.web/Logs:/app/Logs
+      - uploads:/app/wwwroot/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      seq:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5000/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
 
   db:
     image: postgres:15
     restart: always
     environment:
       POSTGRES_DB: InvMgmtDb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ridhi@608
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ridhi@608}
     ports:
-      - "5432:5432"
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d InvMgmtDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  seq:
+    image: datalust/seq:latest
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
+    ports:
+      - "8082:80"
+      - "5342:5341"
+    volumes:
+      - seqdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:80 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  pgdata:
+  seqdata:
+  uploads:

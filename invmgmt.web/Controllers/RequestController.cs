@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using invmgmt.web.Data;
-using invmgmt.web.Models;
-using invmgmt.web.Models.Enums;
 using invmgmt.web.DTOs;
+using invmgmt.web.Services;
 using invmgmt.web.Utils;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace invmgmt.web.Controllers
 {
@@ -13,264 +12,221 @@ namespace invmgmt.web.Controllers
     [ApiController]
     public class RequestController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IRequestService _requestService;
+        private readonly ILogger<RequestController> _logger;
 
-        public RequestController(AppDbContext context)
+        public RequestController(IRequestService requestService, ILogger<RequestController> logger)
         {
-            _context = context;
+            _requestService = requestService;
+            _logger = logger;
         }
 
         // CREATE REQUEST (from cart)
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "USER")]
         [HttpPost]
         public async Task<IActionResult> CreateRequest([FromBody] CreateRequestFromCartDto dto)
         {
-            if (dto == null || dto.Items == null || dto.Items.Count == 0)
+            try
             {
-                return BadRequest(new { message = "Cart is empty" });
-            }
-
-            if (dto.Items.Any(i => i.ItemId <= 0 || i.Quantity <= 0))
-            {
-                return BadRequest(new { message = "Invalid item or quantity" });
-            }
-
-            var userId = User.GetUserId();
-            var itemIds = dto.Items.Select(i => i.ItemId).Distinct().ToList();
-
-            // Rule: user cannot request same item again while an active request exists for that item
-            // in Pending/Approved/Issued.
-            var activeStatuses = new[] { RequestStatus.Pending, RequestStatus.Approved, RequestStatus.Issued };
-            var inProcess = await _context.RequestItems
-                .Where(ri =>
-                    itemIds.Contains(ri.ItemId) &&
-                    activeStatuses.Contains(ri.Request.Status) &&
-                    ri.Request.UserId == userId)
-                .Include(ri => ri.Item)
-                .ToListAsync();
-
-            if (inProcess.Count > 0)
-            {
-                return BadRequest(new
+                var userId = User.GetUserId();
+                var result = await _requestService.CreateRequestAsync(userId, dto);
+                if (!result.Success)
                 {
-                    message = "Item already requested and in process",
-                    items = inProcess.Select(x => new { x.ItemId, name = x.Item.Name }).Distinct()
-                });
+                    return BadRequest(new { message = result.Message });
+                }
+
+                return CreatedAtAction(nameof(GetById), new { id = result.RequestId }, new { id = result.RequestId, message = result.Message });
             }
-
-            // Validate item ids exist
-            var existingItems = await _context.Items
-                .Where(i => itemIds.Contains(i.Id))
-                .Select(i => new { i.Id, i.CategoryId })
-                .ToListAsync();
-
-            var missing = itemIds.Except(existingItems.Select(i => i.Id)).ToList();
-            if (missing.Count > 0)
+            catch (Exception ex)
             {
-                return BadRequest(new { message = "One or more items not found", itemIds = missing });
+                _logger.LogError(ex, "Unexpected error in CreateRequest");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
             }
-
-            await using var tx = await _context.Database.BeginTransactionAsync();
-
-            var request = new Request
-            {
-                UserId = userId,
-                CategoryId = dto.CategoryId,
-                Status = RequestStatus.Pending,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Requests.Add(request);
-            await _context.SaveChangesAsync();
-
-            foreach (var line in dto.Items)
-            {
-                _context.RequestItems.Add(new RequestItem
-                {
-                    RequestId = request.Id,
-                    ItemId = line.ItemId,
-                    QuantityRequested = line.Quantity,
-                    QuantityApproved = 0,
-                    QuantityIssued = 0
-                });
-            }
-
-            await _context.SaveChangesAsync();
-            await tx.CommitAsync();
-
-            return CreatedAtAction(nameof(GetById), new { id = request.Id }, new { id = request.Id });
         }
 
         // GET MY REQUESTS
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "USER")]
         [HttpGet("my")]
-        public async Task<IActionResult> GetMy()
+        public async Task<IActionResult> GetMy([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var userId = User.GetUserId();
-
-            var data = await _context.Requests
-                .Where(r => r.UserId == userId)
-                .OrderByDescending(r => r.CreatedAt)
-                .Select(r => new RequestSummaryDto
-                {
-                    Id = r.Id,
-                    Status = r.Status,
-                    CreatedAt = r.CreatedAt,
-                    UpdatedAt = r.UpdatedAt
-                })
-                .ToListAsync();
-
-            return Ok(data);
+            try
+            {
+                var userId = User.GetUserId();
+                var data = await _requestService.GetUserRequestsAsync(userId, pageNumber, pageSize);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in GetMy");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
         // GET REQUEST DETAILS (User/Admin/Issuer)
-        [Authorize(Roles = "User,Admin,Issuer")]
+        [Authorize(Roles = "USER,ADMIN,ISSUER")]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var request = await _context.Requests
-                .Include(r => r.RequestItems)
-                    .ThenInclude(ri => ri.Item)
-                .FirstOrDefaultAsync(r => r.Id == id);
-
-            if (request == null)
-            {
-                return NotFound(new { message = "Request not found" });
-            }
-
-            if (User.IsInRole("User"))
+            try
             {
                 var userId = User.GetUserId();
-                if (request.UserId != userId)
+                var role = User.IsInRole("ADMIN") ? "ADMIN" : User.IsInRole("ISSUER") ? "ISSUER" : "USER";
+                
+                var dto = await _requestService.GetRequestByIdAsync(id, userId, role);
+
+                if (dto == null)
                 {
-                    return Forbid();
+                    return NotFound(new { message = "Request not found or access denied" });
                 }
+
+                return Ok(dto);
             }
-
-            var dto = new RequestDetailDto
+            catch (Exception ex)
             {
-                Id = request.Id,
-                UserId = request.UserId,
-                Status = request.Status,
-                CreatedAt = request.CreatedAt,
-                UpdatedAt = request.UpdatedAt,
-                Items = request.RequestItems.Select(ri => new RequestItemDetailDto
-                {
-                    Id = ri.Id,
-                    ItemId = ri.ItemId,
-                    ItemName = ri.Item.Name,
-                    QuantityRequested = ri.QuantityRequested,
-                    QuantityApproved = ri.QuantityApproved,
-                    QuantityIssued = ri.QuantityIssued
-                }).ToList()
-            };
-
-            return Ok(dto);
+                _logger.LogError(ex, "Unexpected error in GetById");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
         // CONFIRM RECEIVED
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "USER")]
         [HttpPost("{id:int}/confirm-received")]
         public async Task<IActionResult> ConfirmReceived(int id)
         {
-            var userId = User.GetUserId();
-            var request = await _context.Requests.FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
-
-            if (request == null)
+            try
             {
-                return NotFound(new { message = "Request not found" });
-            }
+                var userId = User.GetUserId();
+                var result = await _requestService.ConfirmReceivedAsync(id, userId);
 
-            if (request.Status != RequestStatus.Issued)
+                if (!result.Success)
+                {
+                    if (result.Message == "Request not found") return NotFound(new { message = result.Message });
+                    return BadRequest(new { message = result.Message });
+                }
+
+                return Ok(new { message = result.Message });
+            }
+            catch (Exception ex)
             {
-                return BadRequest(new { message = "Only issued requests can be marked as received" });
+                _logger.LogError(ex, "Unexpected error in ConfirmReceived");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
             }
-
-            request.Status = RequestStatus.Received;
-            request.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Request marked as received" });
         }
 
         //  GET PENDING (ADMIN)
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         [HttpGet("pending")]
-        public async Task<IActionResult> GetPending()
+        public async Task<IActionResult> GetPending([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var data = await _context.Requests
-                .Where(r => r.Status == RequestStatus.Pending)
-                .Include(r => r.User)
-                .Include(r => r.RequestItems)
-                    .ThenInclude(ri => ri.Item)
-                .ToListAsync();
-
-            return Ok(data);
+            try
+            {
+                var data = await _requestService.GetPendingRequestsAsync(pageNumber, pageSize);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in GetPending");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
         //  APPROVE REQUEST (ADMIN)
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         [HttpPost("approve/{id}")]
         public async Task<IActionResult> Approve(int id)
         {
-            var request = await _context.Requests
-                .Include(r => r.RequestItems)
-                .FirstOrDefaultAsync(r => r.Id == id);
-
-            if (request == null)
-                return NotFound("Request not found");
-
-            foreach (var item in request.RequestItems)
+            try
             {
-                item.QuantityApproved = item.QuantityRequested;
+                var result = await _requestService.ApproveRequestAsync(id);
+                if (!result.Success) return BadRequest(new { message = result.Message });
+                return Ok(new { message = result.Message });
             }
-
-            request.Status = RequestStatus.Approved;
-            request.UpdatedAt = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Request Approved");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in Approve");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
         //  REJECT REQUEST (ADMIN)
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         [HttpPost("reject/{id}")]
         public async Task<IActionResult> Reject(int id)
         {
-            var request = await _context.Requests.FindAsync(id);
-
-            if (request == null)
-                return NotFound("Request not found");
-
-            request.Status = RequestStatus.Rejected;
-            request.UpdatedAt = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Request Rejected");
+            try
+            {
+                var result = await _requestService.RejectRequestAsync(id);
+                if (!result.Success) return BadRequest(new { message = result.Message });
+                return Ok(new { message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in Reject");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
-
         //  RECEIVE ITEMS
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "USER")]
         [HttpPost("receive/{id}")]
         public async Task<IActionResult> Receive(int id)
         {
-            var request = await _context.Requests.FindAsync(id);
+            try
+            {
+                var userId = User.GetUserId();
+                var result = await _requestService.ConfirmReceivedAsync(id, userId);
 
-            if (request == null)
-                return NotFound();
+                if (!result.Success)
+                {
+                    if (result.Message == "Request not found") return NotFound(new { message = result.Message });
+                    return BadRequest(new { message = result.Message });
+                }
 
-            if (request.Status != RequestStatus.Issued)
-                return BadRequest("Items not issued yet");
+                return Ok(new { message = "Items Received Successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in Receive");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
+        }
+        
+        [Authorize(Roles = "USER")]
+        [HttpGet("can-request")]
+        public async Task<IActionResult> CanRequest()
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var result = await _requestService.CheckCanRequestAsync(userId);
+                return Ok(new { canRequest = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in CanRequest");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
+        }
 
-            request.Status = RequestStatus.Received;
-            request.UpdatedAt = DateTime.Now;
+        // CANCEL / DELETE REQUEST (USER - only Requested or Pending)
+        [Authorize(Roles = "USER")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteRequest(int id)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var result = await _requestService.DeleteRequestAsync(id, userId);
+                if (!result.Success)
+                    return BadRequest(new { message = result.Message });
 
-            await _context.SaveChangesAsync();
-
-            return Ok("Items Received Successfully");
+                return Ok(new { message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in DeleteRequest");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
     }
 }

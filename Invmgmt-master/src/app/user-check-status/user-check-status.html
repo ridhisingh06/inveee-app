@@ -1,11 +1,74 @@
-<div class="page">
-  <h2>Check Status</h2>
-  <p class="sub">
-    Hook this page to your backend to show submitted requests and statuses.
-  </p>
+<div class="status-page">
+  <header class="status-header">
+    <div>
+      <h1>Request Tracker</h1>
+      <p>Live status of all your stationery and asset requests</p>
+    </div>
+    <button class="refresh-btn" (click)="loadRequests()" [disabled]="loading">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      Refresh
+    </button>
+  </header>
 
-  <div class="hint">
-    If you already have a page for this, you can route to it from the sidebar.
+  <div class="mini-stats" *ngIf="!loading && requests.length > 0">
+    <div class="mini-stat amber">
+      <span class="ms-value">{{ pendingCount }}</span>
+      <span class="ms-label">Pending</span>
+    </div>
+    <div class="mini-stat green">
+      <span class="ms-value">{{ issuedCount }}</span>
+      <span class="ms-label">Admin Review</span>
+    </div>
+    <div class="mini-stat blue">
+      <span class="ms-value">{{ approvedCount }}</span>
+      <span class="ms-label">Approved</span>
+    </div>
+    <div class="mini-stat total">
+      <span class="ms-value">{{ requests.length }}</span>
+      <span class="ms-label">Total</span>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Fetching your requests...</p>
+  </div>
+
+  <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
+    <div class="empty-icon">--</div>
+    <h3>No requests yet</h3>
+    <p>Head to the Item List to add items and submit your first request.</p>
+  </div>
+
+  <div class="timeline" *ngIf="!loading && requests.length > 0">
+    <div class="timeline-item fade-in" *ngFor="let req of requests">
+      <div class="timeline-dot" [ngClass]="getStatusClass(req.status)">
+        {{ getStatusIcon(req.status) }}
+      </div>
+      <div class="timeline-card" [ngClass]="getStatusClass(req.status)">
+        <div class="tc-top">
+          <span class="tc-id">REQ-{{ req.id }}</span>
+          <span class="tc-badge" [ngClass]="getStatusClass(req.status)">{{ getStatusLabel(req.status) }}</span>
+        </div>
+        <div class="tc-meta">
+          <span>Submitted {{ req.createdAt | date:'mediumDate' }}</span>
+          <span *ngIf="req.updatedAt && req.updatedAt !== req.createdAt">
+            Updated {{ req.updatedAt | date:'mediumDate' }}
+          </span>
+        </div>
+        <ul class="request-items" *ngIf="req.items?.length">
+          <li *ngFor="let item of req.items">
+            <span>{{ item.itemName }}</span>
+            <span>x {{ item.quantityRequested }}</span>
+            <span class="tc-badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
-

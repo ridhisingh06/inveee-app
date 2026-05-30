@@ -1,7 +1,12 @@
-﻿using invmgmt.web.Models.Enums;
+using invmgmt.web.Models.Enums;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 
 namespace invmgmt.web.Models
 {
+    [Index(nameof(UserId), nameof(Status))]
+    [Index(nameof(Status), nameof(CreatedAt))]
     public class Request
     {
         public int Id { get; set; }
@@ -19,13 +24,9 @@ namespace invmgmt.web.Models
 
         public DateTime? UpdatedAt { get; set; }
 
-
-
-
         public ICollection<RequestItem> RequestItems { get; set; }
         public ICollection<ApprovalLog> ApprovalLogs { get; set; }
         public ICollection<IssueLog> IssueLogs { get; set; }
         public ICollection<ReceivedLog> ReceivedLogs { get; set; }
-    
-}
+    }
 }

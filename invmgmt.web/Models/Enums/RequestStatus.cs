@@ -1,13 +1,17 @@
-﻿namespace invmgmt.web.Models.Enums
+namespace invmgmt.web.Models.Enums
 {
     public enum RequestStatus
     {
-        Pending = 0,
-        Approved = 1,
-        Rejected = 2,
-        Issued = 3,
-        Received = 4
+        PendingWithIssuer = 0,
+        Pending = 1,
+        Approved = 2,
+        Rejected = 3,
+        PendingAdminApproval = 4,
+        Received = 5,
+        NotIssued = 6,
+
+        // Legacy aliases kept so older migrations, records, and routes remain compatible.
+        Requested = PendingWithIssuer,
+        Issued = PendingAdminApproval
     }
 }
-
-//ITems ke liye request status define kiya hai, jisme pending, approved, rejected, issued aur received status hote hain. Ye status request ke lifecycle ko track karne me madad karta hai.

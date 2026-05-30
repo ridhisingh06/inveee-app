@@ -30,6 +30,7 @@ public sealed class RequestItemDetailDto
     public int QuantityRequested { get; set; }
     public int QuantityApproved { get; set; }
     public int QuantityIssued { get; set; }
+    public RequestItemStatus Status { get; set; }
 }
 
 public sealed class RequestDetailDto
@@ -41,4 +42,3 @@ public sealed class RequestDetailDto
     public DateTime? UpdatedAt { get; set; }
     public List<RequestItemDetailDto> Items { get; set; } = new();
 }
-

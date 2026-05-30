@@ -1,0 +1,128 @@
+2026-05-23 02:21:18.255 +05:30 [INF] [DB Init] Attempting to connect to database (attempt 1/5)...
+2026-05-23 02:21:19.862 +05:30 [INF] Executed DbCommand (37ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-23 02:21:19.973 +05:30 [INF] [DB Init] Found 1 pending migrations. Applying them now...
+2026-05-23 02:21:19.992 +05:30 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-23 02:21:20.609 +05:30 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-23 02:21:20.728 +05:30 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-23 02:21:20.759 +05:30 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-23 02:21:20.763 +05:30 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-23 02:21:20.773 +05:30 [INF] Applying migration '20260522193559_SyncModel'.
+2026-05-23 02:21:20.805 +05:30 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260522193559_SyncModel', '10.0.5');
+2026-05-23 02:21:20.812 +05:30 [INF] [DB Init] ✓ Database migrated successfully.
+2026-05-23 02:21:21.264 +05:30 [INF] Executed DbCommand (30ms) [Parameters=[@adminEmail='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @adminEmail
+LIMIT 1
+2026-05-23 02:21:21.385 +05:30 [INF] [DB Init] Admin user already exists: admin@gmail.com
+2026-05-23 02:21:21.475 +05:30 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-23 02:21:21.498 +05:30 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-23 02:21:21.520 +05:30 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-23 02:21:21.821 +05:30 [INF] Now listening on: http://localhost:5181
+2026-05-23 02:21:21.821 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-23 02:21:21.821 +05:30 [INF] Hosting environment: Development
+2026-05-23 02:21:21.821 +05:30 [INF] Content root path: D:\inveee\invmgmt.web
+2026-05-23 02:21:55.368 +05:30 [INF] Login attempt for admin@gmail.com
+2026-05-23 02:21:55.373 +05:30 [INF] Login attempt for email: a***@gmail.com
+2026-05-23 02:21:55.493 +05:30 [INF] Executed DbCommand (3ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-23 02:21:55.496 +05:30 [ERR] ✗ Unexpected error during login attempt: a***@gmail.com, Exception=Invalid salt version
+BCrypt.Net.SaltParseException: Invalid salt version
+   at BCrypt.Net.BCrypt.HashPassword(String inputKey, String salt, Boolean enhancedEntropy, HashType hashType)
+   at BCrypt.Net.BCrypt.Verify(String text, String hash, Boolean enhancedEntropy, HashType hashType)
+   at invmgmt.web.Utils.PasswordUtils.VerifyPassword(String password, String hash) in D:\inveee\invmgmt.web\Utils\PasswordUtils.cs:line 51
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in D:\inveee\invmgmt.web\Services\AuthService.cs:line 78
+2026-05-23 02:21:55.508 +05:30 [WRN] Login failed for admin@gmail.com: An unexpected error occurred during login.
+2026-05-23 02:21:55.529 +05:30 [INF] HTTP POST /api/auth/login responded 401 in 264.3138 ms
+2026-05-23 02:22:45.736 +05:30 [INF] [DB Init] Attempting to connect to database (attempt 1/5)...
+2026-05-23 02:22:47.304 +05:30 [INF] Executed DbCommand (30ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-23 02:22:47.393 +05:30 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-23 02:22:47.624 +05:30 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-23 02:22:47.713 +05:30 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-23 02:22:47.744 +05:30 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-23 02:22:47.746 +05:30 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-23 02:22:47.754 +05:30 [INF] No migrations were applied. The database is already up to date.
+2026-05-23 02:22:47.760 +05:30 [INF] [DB Init] ✓ Database migrated successfully.
+2026-05-23 02:22:48.076 +05:30 [INF] Executed DbCommand (13ms) [Parameters=[@adminEmail='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @adminEmail
+LIMIT 1
+2026-05-23 02:22:48.139 +05:30 [INF] [DB Init] Admin user already exists: admin@gmail.com
+2026-05-23 02:22:48.197 +05:30 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-23 02:22:48.210 +05:30 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-23 02:22:48.230 +05:30 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-23 02:22:48.422 +05:30 [INF] Now listening on: http://localhost:5181
+2026-05-23 02:22:48.423 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-23 02:22:48.423 +05:30 [INF] Hosting environment: Development
+2026-05-23 02:22:48.423 +05:30 [INF] Content root path: D:\inveee\invmgmt.web
+2026-05-23 02:25:15.883 +05:30 [INF] Login attempt for admin@gmail.com
+2026-05-23 02:25:15.889 +05:30 [INF] Login attempt for email: a***@gmail.com
+2026-05-23 02:25:16.050 +05:30 [INF] Executed DbCommand (3ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-23 02:25:16.067 +05:30 [ERR] ✗ Unexpected error during login attempt: a***@gmail.com, Exception=Invalid salt version
+BCrypt.Net.SaltParseException: Invalid salt version
+   at BCrypt.Net.BCrypt.HashPassword(String inputKey, String salt, Boolean enhancedEntropy, HashType hashType)
+   at BCrypt.Net.BCrypt.Verify(String text, String hash, Boolean enhancedEntropy, HashType hashType)
+   at invmgmt.web.Utils.PasswordUtils.VerifyPassword(String password, String hash) in D:\inveee\invmgmt.web\Utils\PasswordUtils.cs:line 51
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in D:\inveee\invmgmt.web\Services\AuthService.cs:line 78
+2026-05-23 02:25:16.119 +05:30 [WRN] Login failed for admin@gmail.com: An unexpected error occurred during login.
+2026-05-23 02:25:16.194 +05:30 [INF] HTTP POST /api/auth/login responded 401 in 463.2781 ms

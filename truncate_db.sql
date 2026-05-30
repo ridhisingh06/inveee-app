@@ -1,0 +1,1 @@
+TRUNCATE TABLE "Departments", "Roles", "Users", "RegistrationRequests", "Categories", "Items", "InventoryStocks", "RoleItemLimits", "Requests", "RequestItems", "ApprovalLogs", "IssueLogs", "ReceivedLogs", "AuditLogs", "UserRoles" RESTART IDENTITY CASCADE;

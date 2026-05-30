@@ -28,6 +28,38 @@ namespace invmgmt.web.Utils
 
             return CryptographicOperations.FixedTimeEquals(aBytes, bBytes);
         }
+
+        /// <summary>
+        /// Hash password using BCrypt
+        /// </summary>
+        public static string HashPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null or empty", nameof(password));
+
+            return BCrypt.Net.BCrypt.HashPassword(password);
+        }
+
+        /// <summary>
+        /// Verify password using BCrypt
+        /// </summary>
+        public static bool VerifyPassword(string password, string hash)
+        {
+            if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(hash)) 
+                return false;
+                
+            if (!LooksLikeBcryptHash(hash))
+                return false;
+
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, hash);
+            }
+            catch (BCrypt.Net.SaltParseException)
+            {
+                return false;
+            }
+        }
     }
 }
 

@@ -1,0 +1,1331 @@
+2026-05-24 19:38:28.748 +00:00 [INF] Application is shutting down...
+2026-05-24 19:38:33.621 +00:00 [INF] [DB Init] Attempting to connect to database (attempt 1/5)...
+2026-05-24 19:38:34.805 +00:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 19:38:34.886 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 19:38:35.161 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-24 19:38:35.249 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-24 19:38:35.280 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-24 19:38:35.288 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 19:38:35.309 +00:00 [INF] No migrations were applied. The database is already up to date.
+2026-05-24 19:38:35.325 +00:00 [INF] [DB Init] ✓ Database migrated successfully.
+2026-05-24 19:38:35.737 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-24 19:38:35.957 +00:00 [INF] Executed DbCommand (9ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?', @p2='?' (DbType = Int32), @p3='?', @p4='?' (DbType = Int32), @p5='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Roles" ("Id", "Name")
+VALUES (@p0, @p1);
+INSERT INTO "Roles" ("Id", "Name")
+VALUES (@p2, @p3);
+INSERT INTO "Roles" ("Id", "Name")
+VALUES (@p4, @p5);
+2026-05-24 19:38:35.977 +00:00 [INF] [DB Init] Roles seeded.
+2026-05-24 19:38:36.000 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-24 19:38:36.035 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?', @p2='?' (DbType = Int32), @p3='?', @p4='?' (DbType = Int32), @p5='?', @p6='?' (DbType = Int32), @p7='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Departments" ("Id", "Name")
+VALUES (@p0, @p1);
+INSERT INTO "Departments" ("Id", "Name")
+VALUES (@p2, @p3);
+INSERT INTO "Departments" ("Id", "Name")
+VALUES (@p4, @p5);
+INSERT INTO "Departments" ("Id", "Name")
+VALUES (@p6, @p7);
+2026-05-24 19:38:36.037 +00:00 [INF] [DB Init] Departments seeded.
+2026-05-24 19:38:36.066 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-24 19:38:36.114 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[@p0='?', @p1='?', @p2='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Categories" ("Name")
+VALUES (@p0)
+RETURNING "Id";
+INSERT INTO "Categories" ("Name")
+VALUES (@p1)
+RETURNING "Id";
+INSERT INTO "Categories" ("Name")
+VALUES (@p2)
+RETURNING "Id";
+2026-05-24 19:38:36.143 +00:00 [INF] [DB Init] Categories seeded.
+2026-05-24 19:38:36.252 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@adminEmail='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @adminEmail
+LIMIT 1
+2026-05-24 19:38:36.611 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?', @p3='?', @p4='?' (DbType = Boolean), @p5='?' (DbType = Boolean), @p6='?', @p7='?', @p8='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedAt", "DepartmentId", "Designation", "Email", "IsActive", "IsApproved", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+RETURNING "Id";
+2026-05-24 19:38:36.617 +00:00 [INF] [DB Init] Admin user created: admin@gmail.com
+2026-05-24 19:38:36.754 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-24 19:38:36.777 +00:00 [WRN] No XML encryptor configured. Key {b0a480b0-6d91-4fca-9a8a-086f1ad2a031} may be persisted to storage in unencrypted form.
+2026-05-24 19:38:36.873 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-24 19:38:36.875 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-24 19:38:36.877 +00:00 [INF] Hosting environment: Development
+2026-05-24 19:38:36.877 +00:00 [INF] Content root path: /app
+2026-05-24 19:57:32.174 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-24 19:57:32.201 +00:00 [INF] [DEBUG] Login attempt for email: admin@gmail.com
+2026-05-24 19:57:32.572 +00:00 [INF] Executed DbCommand (32ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 19:57:32.607 +00:00 [INF] [DEBUG] User found: Email=admin@gmail.com, Role=ADMIN, IsApproved=true
+2026-05-24 19:57:32.766 +00:00 [WRN] [DEBUG] Login failed: Invalid password for user. UserId=2, Email=admin@gmail.com
+2026-05-24 19:57:32.770 +00:00 [WRN] Login failed for admin@gmail.com: Invalid email or password
+2026-05-24 19:57:32.806 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 1111.8572 ms
+2026-05-24 19:59:02.746 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-24 19:59:02.747 +00:00 [INF] [DEBUG] Login attempt for email: admin@gmail.com
+2026-05-24 19:59:03.200 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 19:59:03.204 +00:00 [INF] [DEBUG] User found: Email=admin@gmail.com, Role=ADMIN, IsApproved=true
+2026-05-24 19:59:03.376 +00:00 [INF] [DEBUG] Password verified successfully for Email=admin@gmail.com
+2026-05-24 19:59:03.378 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=admin@gmail.com
+2026-05-24 19:59:03.467 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=2, Email=admin@gmail.com, Role=ADMIN
+2026-05-24 19:59:03.467 +00:00 [INF] Login successful for admin@gmail.com
+2026-05-24 19:59:03.474 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 791.5389 ms
+2026-05-24 19:59:04.369 +00:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-05-24 19:59:04.396 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Items" AS i
+WHERE i."IsActive"
+2026-05-24 19:59:04.445 +00:00 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(sum(i."AvailableQuantity"::bigint), 0.0)::bigint
+FROM "InventoryStocks" AS i
+2026-05-24 19:59:04.467 +00:00 [INF] HTTP GET /api/admin/summary responded 200 in 383.5064 ms
+2026-05-24 19:59:13.635 +00:00 [INF] Categories requested
+2026-05-24 19:59:13.642 +00:00 [INF] Inventory list requested
+2026-05-24 19:59:13.993 +00:00 [INF] Executed DbCommand (30ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 19:59:14.152 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 533.6016 ms
+2026-05-24 19:59:14.196 +00:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 19:59:14.199 +00:00 [INF] HTTP GET /api/inventory responded 200 in 580.4846 ms
+2026-05-24 19:59:15.311 +00:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 19:59:16.415 +00:00 [INF] Executed DbCommand (296ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 19:59:16.436 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 1251.4604 ms
+2026-05-24 20:09:21.579 +00:00 [INF] Register attempt for singhidhi60803@gmail.com
+2026-05-24 20:09:21.627 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-24 20:09:21.663 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."ApprovedAt", r."ApprovedBy", r."ApprovedUserId", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."IsActive", r."PasswordHash", r."RoleId", r."Status", r."Username"
+FROM "RegistrationRequests" AS r
+WHERE lower(r."Email") = @ToLower AND r."Status" = 0
+LIMIT 1
+2026-05-24 20:09:21.689 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[@dto_DepartmentId='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d
+    WHERE d."Id" = @dto_DepartmentId)
+2026-05-24 20:09:21.911 +00:00 [INF] Executed DbCommand (11ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?', @p3='?', @p4='?' (DbType = Boolean), @p5='?' (DbType = Boolean), @p6='?', @p7='?', @p8='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedAt", "DepartmentId", "Designation", "Email", "IsActive", "IsApproved", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+RETURNING "Id";
+2026-05-24 20:09:21.980 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = DateTime), @p4='?' (DbType = Int32), @p5='?', @p6='?', @p7='?' (DbType = Boolean), @p8='?', @p9='?' (DbType = Int32), @p10='?' (DbType = Int32), @p11='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RegistrationRequests" ("ApprovedAt", "ApprovedBy", "ApprovedUserId", "CreatedAt", "DepartmentId", "Designation", "Email", "IsActive", "PasswordHash", "RoleId", "Status", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11)
+RETURNING "Id";
+2026-05-24 20:09:21.986 +00:00 [INF] New user registered and waiting for approval singhidhi60803@gmail.com
+2026-05-24 20:09:21.988 +00:00 [INF] Register successful for singhidhi60803@gmail.com
+2026-05-24 20:09:21.989 +00:00 [INF] HTTP POST /api/auth/register responded 200 in 439.1459 ms
+2026-05-24 20:09:31.303 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-24 20:09:31.309 +00:00 [INF] [DEBUG] Login attempt for email: admin@gmail.com
+2026-05-24 20:09:31.318 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:09:31.335 +00:00 [INF] [DEBUG] User found: Email=admin@gmail.com, Role=ADMIN, IsApproved=true
+2026-05-24 20:09:31.568 +00:00 [INF] [DEBUG] Password verified successfully for Email=admin@gmail.com
+2026-05-24 20:09:31.569 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=admin@gmail.com
+2026-05-24 20:09:31.580 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=2, Email=admin@gmail.com, Role=ADMIN
+2026-05-24 20:09:31.585 +00:00 [INF] Login successful for admin@gmail.com
+2026-05-24 20:09:31.596 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 294.5593 ms
+2026-05-24 20:09:31.687 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-05-24 20:09:31.692 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Items" AS i
+WHERE i."IsActive"
+2026-05-24 20:09:31.697 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(sum(i."AvailableQuantity"::bigint), 0.0)::bigint
+FROM "InventoryStocks" AS i
+2026-05-24 20:09:31.699 +00:00 [INF] HTTP GET /api/admin/summary responded 200 in 19.6491 ms
+2026-05-24 20:09:53.283 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 20:09:53.301 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 20:09:53.318 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 72.4226 ms
+2026-05-24 20:09:56.210 +00:00 [INF] Inventory list requested
+2026-05-24 20:09:56.217 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:09:56.219 +00:00 [INF] Categories requested
+2026-05-24 20:09:56.231 +00:00 [INF] HTTP GET /api/inventory responded 200 in 28.9099 ms
+2026-05-24 20:09:56.268 +00:00 [INF] Executed DbCommand (16ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 20:09:56.283 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 64.1681 ms
+2026-05-24 20:09:57.800 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 20:09:57.804 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 20:09:57.829 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 34.8281 ms
+2026-05-24 20:10:09.461 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 20:10:09.492 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 20:10:09.507 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 49.6690 ms
+2026-05-24 20:10:15.248 +00:00 [INF] Categories requested
+2026-05-24 20:10:15.248 +00:00 [INF] Inventory list requested
+2026-05-24 20:10:15.250 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 20:10:15.256 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 8.6586 ms
+2026-05-24 20:10:15.293 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:10:15.295 +00:00 [INF] HTTP GET /api/inventory responded 200 in 48.7104 ms
+2026-05-24 20:10:16.811 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 20:10:16.817 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 20:10:16.820 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 13.4219 ms
+2026-05-24 20:10:22.626 +00:00 [INF] Admin approve requested: RegistrationRequestId=1
+2026-05-24 20:10:22.655 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."ApprovedAt", r."ApprovedBy", r."ApprovedUserId", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."IsActive", r."PasswordHash", r."RoleId", r."Status", r."Username", r0."Id", r0."Name"
+FROM "RegistrationRequests" AS r
+INNER JOIN "Roles" AS r0 ON r."RoleId" = r0."Id"
+WHERE r."Id" = @id
+LIMIT 1
+2026-05-24 20:10:22.678 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@request_RoleId='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r
+    WHERE r."Id" = @request_RoleId)
+2026-05-24 20:10:22.689 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@request_DepartmentId='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d
+    WHERE d."Id" = @request_DepartmentId)
+2026-05-24 20:10:22.698 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@request_Email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @request_Email
+LIMIT 1
+2026-05-24 20:10:22.702 +00:00 [INF] Activating existing user: UserId=3, Email=singhidhi60803@gmail.com, RegistrationRequestId=1, CurrentIsActive=true
+2026-05-24 20:10:22.720 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[@p9='?' (DbType = Int32), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?', @p3='?', @p4='?' (DbType = Boolean), @p5='?' (DbType = Boolean), @p6='?', @p7='?', @p8='?'], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "CreatedAt" = @p0, "DepartmentId" = @p1, "Designation" = @p2, "Email" = @p3, "IsActive" = @p4, "IsApproved" = @p5, "PasswordHash" = @p6, "Role" = @p7, "Username" = @p8
+WHERE "Id" = @p9;
+2026-05-24 20:10:22.721 +00:00 [INF] User activated successfully: UserId=3, Email=singhidhi60803@gmail.com, RegistrationRequestId=1
+2026-05-24 20:10:22.736 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[@existingUser_Id='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."RoleId", u."UserId"
+FROM "UserRoles" AS u
+WHERE u."UserId" = @existingUser_Id
+LIMIT 1
+2026-05-24 20:10:22.737 +00:00 [INF] Creating UserRole: UserId=3, RoleId=1, RegistrationRequestId=1
+2026-05-24 20:10:23.491 +00:00 [INF] Executed DbCommand (13ms) [Parameters=[@p3='?' (DbType = Int32), @p0='?' (DbType = DateTime), @p1='?' (DbType = Boolean), @p2='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "RegistrationRequests" SET "ApprovedAt" = @p0, "IsActive" = @p1, "Status" = @p2
+WHERE "Id" = @p3;
+INSERT INTO "UserRoles" ("RoleId", "UserId")
+VALUES (@p4, @p5)
+RETURNING "Id";
+2026-05-24 20:10:23.543 +00:00 [INF] ✓ User approval completed successfully: RegistrationRequestId=1, UserId=3, Email=singhidhi60803@gmail.com, Role=User, IsActive=true
+2026-05-24 20:10:23.549 +00:00 [INF] HTTP PUT /api/admin/approve/1 responded 200 in 948.9034 ms
+2026-05-24 20:10:24.069 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 20:10:24.072 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 20:10:24.074 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 8.6944 ms
+2026-05-24 20:10:25.025 +00:00 [INF] Admin approve requested: RegistrationRequestId=1
+2026-05-24 20:10:25.036 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."ApprovedAt", r."ApprovedBy", r."ApprovedUserId", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."IsActive", r."PasswordHash", r."RoleId", r."Status", r."Username", r0."Id", r0."Name"
+FROM "RegistrationRequests" AS r
+INNER JOIN "Roles" AS r0 ON r."RoleId" = r0."Id"
+WHERE r."Id" = @id
+LIMIT 1
+2026-05-24 20:10:25.041 +00:00 [INF] Approval already completed for RegistrationRequestId=1, Email=singhidhi60803@gmail.com
+2026-05-24 20:10:25.051 +00:00 [INF] HTTP PUT /api/admin/approve/1 responded 200 in 26.8823 ms
+2026-05-24 20:10:25.575 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 20:10:25.580 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 20:10:25.581 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 9.8341 ms
+2026-05-24 20:10:31.650 +00:00 [INF] Login attempt for singhidhi60803@gmail.com
+2026-05-24 20:10:31.661 +00:00 [INF] [DEBUG] Login attempt for email: singhidhi60803@gmail.com
+2026-05-24 20:10:31.683 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:10:31.692 +00:00 [INF] [DEBUG] User found: Email=singhidhi60803@gmail.com, Role=USER, IsApproved=true
+2026-05-24 20:10:31.975 +00:00 [INF] [DEBUG] Password verified successfully for Email=singhidhi60803@gmail.com
+2026-05-24 20:10:31.977 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=singhidhi60803@gmail.com
+2026-05-24 20:10:31.980 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=3, Email=singhidhi60803@gmail.com, Role=USER
+2026-05-24 20:10:31.980 +00:00 [INF] Login successful for singhidhi60803@gmail.com
+2026-05-24 20:10:31.982 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 333.4282 ms
+2026-05-24 20:10:32.038 +00:00 [INF] Inventory list requested
+2026-05-24 20:10:32.042 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:10:32.045 +00:00 [INF] HTTP GET /api/inventory responded 200 in 8.3520 ms
+2026-05-24 20:10:35.957 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@userId='?' (DbType = Int32), @p2='?' (DbType = Int32), @p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."CategoryId", r."CreatedAt", r."Status", r."UpdatedAt", r."UserId"
+FROM "Requests" AS r
+WHERE r."UserId" = @userId
+ORDER BY r."CreatedAt" DESC
+LIMIT @p2 OFFSET @p
+2026-05-24 20:10:35.963 +00:00 [INF] HTTP GET /api/request/my responded 200 in 389.4709 ms
+2026-05-24 20:10:41.176 +00:00 [INF] Inventory list requested
+2026-05-24 20:10:41.179 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:10:41.188 +00:00 [INF] HTTP GET /api/inventory responded 200 in 12.8974 ms
+2026-05-24 20:10:49.059 +00:00 [INF] Executed DbCommand (134ms) [Parameters=[@userId='?' (DbType = Int32), @activeStatuses='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Requests" AS r
+    WHERE r."UserId" = @userId AND r."Status" = ANY (@activeStatuses))
+2026-05-24 20:10:49.064 +00:00 [INF] HTTP GET /api/request/can-request responded 200 in 455.8583 ms
+2026-05-24 20:10:53.157 +00:00 [INF] Inventory list requested
+2026-05-24 20:10:53.160 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:10:53.164 +00:00 [INF] HTTP GET /api/inventory responded 200 in 9.4689 ms
+2026-05-24 20:10:56.957 +00:00 [INF] Categories requested
+2026-05-24 20:10:56.957 +00:00 [INF] Inventory list requested
+2026-05-24 20:10:56.961 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 20:10:56.968 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:10:56.990 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 33.3129 ms
+2026-05-24 20:10:56.992 +00:00 [INF] HTTP GET /api/inventory responded 200 in 35.0439 ms
+2026-05-24 20:11:05.068 +00:00 [INF] Inventory list requested
+2026-05-24 20:11:05.076 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:11:05.092 +00:00 [INF] HTTP GET /api/inventory responded 200 in 32.9994 ms
+2026-05-24 20:11:07.138 +00:00 [INF] Inventory list requested
+2026-05-24 20:11:07.294 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:11:07.334 +00:00 [INF] HTTP GET /api/inventory responded 200 in 247.5879 ms
+2026-05-24 20:11:15.924 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-24 20:11:15.926 +00:00 [INF] [DEBUG] Login attempt for email: admin@gmail.com
+2026-05-24 20:11:15.940 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:11:15.943 +00:00 [INF] [DEBUG] User found: Email=admin@gmail.com, Role=ADMIN, IsApproved=true
+2026-05-24 20:11:16.234 +00:00 [INF] [DEBUG] Password verified successfully for Email=admin@gmail.com
+2026-05-24 20:11:16.237 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=admin@gmail.com
+2026-05-24 20:11:16.241 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=2, Email=admin@gmail.com, Role=ADMIN
+2026-05-24 20:11:16.243 +00:00 [INF] Login successful for admin@gmail.com
+2026-05-24 20:11:16.244 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 331.6389 ms
+2026-05-24 20:11:16.296 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-05-24 20:11:16.299 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Items" AS i
+WHERE i."IsActive"
+2026-05-24 20:11:16.301 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(sum(i."AvailableQuantity"::bigint), 0.0)::bigint
+FROM "InventoryStocks" AS i
+2026-05-24 20:11:16.303 +00:00 [INF] HTTP GET /api/admin/summary responded 200 in 10.3831 ms
+2026-05-24 20:11:18.139 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 20:11:18.162 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 20:11:18.166 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 29.6103 ms
+2026-05-24 20:11:20.458 +00:00 [INF] Inventory list requested
+2026-05-24 20:11:20.459 +00:00 [INF] Categories requested
+2026-05-24 20:11:20.472 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:11:20.494 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 20:11:20.505 +00:00 [INF] HTTP GET /api/inventory responded 200 in 50.0970 ms
+2026-05-24 20:11:20.514 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 57.5962 ms
+2026-05-24 20:11:38.466 +00:00 [INF] Add item requested: Pen (CategoryId=1, Qty=100)
+2026-05-24 20:11:38.492 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = DateTime), @p2='?', @p3='?' (DbType = Boolean), @p4='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Items" ("CategoryId", "CreatedAt", "Description", "IsActive", "Name")
+VALUES (@p0, @p1, @p2, @p3, @p4)
+RETURNING "Id";
+2026-05-24 20:11:38.510 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "InventoryStocks" ("AvailableQuantity", "ItemId", "TotalQuantity", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3)
+RETURNING "Id";
+2026-05-24 20:11:38.515 +00:00 [INF] Item added: ItemId=1
+2026-05-24 20:11:38.515 +00:00 [INF] HTTP POST /api/inventory responded 200 in 66.9466 ms
+2026-05-24 20:11:38.522 +00:00 [INF] Inventory list requested
+2026-05-24 20:11:38.524 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:11:38.526 +00:00 [INF] HTTP GET /api/inventory responded 200 in 4.6099 ms
+2026-05-24 20:12:05.236 +00:00 [INF] Add item requested: Mouse  (CategoryId=2, Qty=50)
+2026-05-24 20:12:05.252 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = DateTime), @p2='?', @p3='?' (DbType = Boolean), @p4='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Items" ("CategoryId", "CreatedAt", "Description", "IsActive", "Name")
+VALUES (@p0, @p1, @p2, @p3, @p4)
+RETURNING "Id";
+2026-05-24 20:12:05.257 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "InventoryStocks" ("AvailableQuantity", "ItemId", "TotalQuantity", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3)
+RETURNING "Id";
+2026-05-24 20:12:05.258 +00:00 [INF] Item added: ItemId=2
+2026-05-24 20:12:05.260 +00:00 [INF] HTTP POST /api/inventory responded 200 in 26.7156 ms
+2026-05-24 20:12:05.267 +00:00 [INF] Inventory list requested
+2026-05-24 20:12:05.269 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:12:05.271 +00:00 [INF] HTTP GET /api/inventory responded 200 in 4.3222 ms
+2026-05-24 20:12:26.537 +00:00 [INF] Add item requested: Tissue (CategoryId=3, Qty=100)
+2026-05-24 20:12:26.545 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = DateTime), @p2='?', @p3='?' (DbType = Boolean), @p4='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Items" ("CategoryId", "CreatedAt", "Description", "IsActive", "Name")
+VALUES (@p0, @p1, @p2, @p3, @p4)
+RETURNING "Id";
+2026-05-24 20:12:26.549 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "InventoryStocks" ("AvailableQuantity", "ItemId", "TotalQuantity", "UpdatedAt")
+VALUES (@p0, @p1, @p2, @p3)
+RETURNING "Id";
+2026-05-24 20:12:26.550 +00:00 [INF] Item added: ItemId=3
+2026-05-24 20:12:26.551 +00:00 [INF] HTTP POST /api/inventory responded 200 in 15.7725 ms
+2026-05-24 20:12:26.557 +00:00 [INF] Inventory list requested
+2026-05-24 20:12:26.562 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:12:26.563 +00:00 [INF] HTTP GET /api/inventory responded 200 in 7.2207 ms
+2026-05-24 20:12:36.052 +00:00 [INF] Login attempt for singhidhi60803@gmail.com
+2026-05-24 20:12:36.058 +00:00 [INF] [DEBUG] Login attempt for email: singhidhi60803@gmail.com
+2026-05-24 20:12:36.070 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:12:36.083 +00:00 [INF] [DEBUG] User found: Email=singhidhi60803@gmail.com, Role=USER, IsApproved=true
+2026-05-24 20:12:36.319 +00:00 [INF] [DEBUG] Password verified successfully for Email=singhidhi60803@gmail.com
+2026-05-24 20:12:36.320 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=singhidhi60803@gmail.com
+2026-05-24 20:12:36.321 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=3, Email=singhidhi60803@gmail.com, Role=USER
+2026-05-24 20:12:36.321 +00:00 [INF] Login successful for singhidhi60803@gmail.com
+2026-05-24 20:12:36.322 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 271.7924 ms
+2026-05-24 20:12:36.403 +00:00 [INF] Inventory list requested
+2026-05-24 20:12:36.406 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:12:36.414 +00:00 [INF] HTTP GET /api/inventory responded 200 in 13.7612 ms
+2026-05-24 20:12:38.549 +00:00 [INF] Inventory list requested
+2026-05-24 20:12:38.589 +00:00 [INF] Categories requested
+2026-05-24 20:12:38.590 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:12:38.617 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 20:12:38.620 +00:00 [INF] HTTP GET /api/inventory responded 200 in 83.1214 ms
+2026-05-24 20:12:38.627 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 49.2937 ms
+2026-05-24 20:12:41.077 +00:00 [INF] Categories requested
+2026-05-24 20:12:41.083 +00:00 [INF] Inventory list requested
+2026-05-24 20:12:41.094 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 20:12:41.105 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 31.6503 ms
+2026-05-24 20:12:41.106 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:12:41.117 +00:00 [INF] HTTP GET /api/inventory responded 200 in 43.1650 ms
+2026-05-24 20:12:48.367 +00:00 [INF] Inventory list requested
+2026-05-24 20:12:48.382 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:12:48.390 +00:00 [INF] HTTP GET /api/inventory responded 200 in 26.0412 ms
+2026-05-24 20:13:06.301 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@userId='?' (DbType = Int32), @p2='?' (DbType = Int32), @p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."CategoryId", r."CreatedAt", r."Status", r."UpdatedAt", r."UserId"
+FROM "Requests" AS r
+WHERE r."UserId" = @userId
+ORDER BY r."CreatedAt" DESC
+LIMIT @p2 OFFSET @p
+2026-05-24 20:13:06.303 +00:00 [INF] HTTP GET /api/request/my responded 200 in 14.0442 ms
+2026-05-24 20:13:07.617 +00:00 [INF] Inventory list requested
+2026-05-24 20:13:07.668 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:13:07.683 +00:00 [INF] HTTP GET /api/inventory responded 200 in 79.0417 ms
+2026-05-24 20:13:11.658 +00:00 [INF] Inventory list requested
+2026-05-24 20:13:11.663 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:13:11.666 +00:00 [INF] HTTP GET /api/inventory responded 200 in 10.3135 ms
+2026-05-24 20:13:33.968 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@userId='?' (DbType = Int32), @activeStatuses='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Requests" AS r
+    WHERE r."UserId" = @userId AND r."Status" = ANY (@activeStatuses))
+2026-05-24 20:13:33.970 +00:00 [INF] HTTP GET /api/request/can-request responded 200 in 4.6986 ms
+2026-05-24 20:47:34.924 +00:00 [INF] Application is shutting down...
+2026-05-24 20:47:39.129 +00:00 [INF] [DB Init] Attempting to connect to database (attempt 1/5)...
+2026-05-24 20:47:40.495 +00:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 20:47:40.589 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 20:47:40.902 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-24 20:47:40.968 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-24 20:47:40.992 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-24 20:47:40.996 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 20:47:41.002 +00:00 [INF] No migrations were applied. The database is already up to date.
+2026-05-24 20:47:41.010 +00:00 [INF] [DB Init] ✓ Database migrated successfully.
+2026-05-24 20:47:41.288 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-24 20:47:41.316 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-24 20:47:41.329 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-24 20:47:41.476 +00:00 [INF] Executed DbCommand (21ms) [Parameters=[@adminEmail='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @adminEmail
+LIMIT 1
+2026-05-24 20:47:41.623 +00:00 [INF] [DB Init] Admin user already exists: admin@gmail.com
+2026-05-24 20:47:41.946 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-24 20:47:41.975 +00:00 [WRN] No XML encryptor configured. Key {5feab0b8-ef71-4453-9112-6e8ed2a6aeeb} may be persisted to storage in unencrypted form.
+2026-05-24 20:47:42.112 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-24 20:47:42.115 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-24 20:47:42.117 +00:00 [INF] Hosting environment: Development
+2026-05-24 20:47:42.158 +00:00 [INF] Content root path: /app
+2026-05-24 20:48:38.061 +00:00 [INF] Application is shutting down...
+2026-05-24 20:49:15.908 +00:00 [INF] [DB Init] Attempting to connect to database (attempt 1/5)...
+2026-05-24 20:49:17.475 +00:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 20:49:17.535 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 20:49:17.738 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-24 20:49:17.814 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-24 20:49:17.832 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-24 20:49:17.840 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-24 20:49:17.845 +00:00 [INF] No migrations were applied. The database is already up to date.
+2026-05-24 20:49:17.849 +00:00 [INF] [DB Init] ✓ Database migrated successfully.
+2026-05-24 20:49:18.205 +00:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-24 20:49:18.232 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-24 20:49:18.246 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-24 20:49:18.361 +00:00 [INF] Executed DbCommand (14ms) [Parameters=[@adminEmail='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @adminEmail
+LIMIT 1
+2026-05-24 20:49:18.433 +00:00 [INF] [DB Init] Admin user already exists: admin@gmail.com
+2026-05-24 20:49:18.556 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-24 20:49:18.664 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-24 20:49:18.665 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-24 20:49:18.666 +00:00 [INF] Hosting environment: Development
+2026-05-24 20:49:18.666 +00:00 [INF] Content root path: /app
+2026-05-24 20:52:56.685 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-24 20:52:56.692 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@gmail.com
+2026-05-24 20:52:56.781 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:52:56.784 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@gmail.com
+2026-05-24 20:52:56.785 +00:00 [WRN] Login failed for ridhi@gmail.com: Invalid email or password
+2026-05-24 20:52:56.803 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 286.7570 ms
+2026-05-24 20:53:48.092 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-24 20:53:48.093 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@gmail.com
+2026-05-24 20:53:48.283 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:53:48.295 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@gmail.com
+2026-05-24 20:53:48.296 +00:00 [WRN] Login failed for ridhi@gmail.com: Invalid email or password
+2026-05-24 20:53:48.303 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 251.0745 ms
+2026-05-24 20:53:49.804 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-24 20:53:49.806 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@gmail.com
+2026-05-24 20:53:49.809 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:53:49.810 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@gmail.com
+2026-05-24 20:53:49.811 +00:00 [WRN] Login failed for ridhi@gmail.com: Invalid email or password
+2026-05-24 20:53:49.813 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 20.7706 ms
+2026-05-24 20:53:51.367 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-24 20:53:51.369 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@gmail.com
+2026-05-24 20:53:51.374 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:53:51.375 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@gmail.com
+2026-05-24 20:53:51.376 +00:00 [WRN] Login failed for ridhi@gmail.com: Invalid email or password
+2026-05-24 20:53:51.378 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 12.5098 ms
+2026-05-24 20:53:52.505 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-24 20:53:52.506 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@gmail.com
+2026-05-24 20:53:52.510 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:53:52.511 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@gmail.com
+2026-05-24 20:53:52.511 +00:00 [WRN] Login failed for ridhi@gmail.com: Invalid email or password
+2026-05-24 20:53:52.513 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 9.0334 ms
+2026-05-24 20:54:24.621 +00:00 [INF] Login attempt for ridhi@test.com
+2026-05-24 20:54:24.624 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@test.com
+2026-05-24 20:54:24.679 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:54:24.682 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@test.com
+2026-05-24 20:54:24.691 +00:00 [WRN] Login failed for ridhi@test.com: Invalid email or password
+2026-05-24 20:54:24.695 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 74.7097 ms
+2026-05-24 20:54:55.794 +00:00 [INF] Login attempt for ridhi@test.com
+2026-05-24 20:54:55.796 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@test.com
+2026-05-24 20:54:55.805 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:54:55.813 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@test.com
+2026-05-24 20:54:55.814 +00:00 [WRN] Login failed for ridhi@test.com: Invalid email or password
+2026-05-24 20:54:55.824 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 31.1200 ms
+2026-05-24 20:57:44.386 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-24 20:57:44.392 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@gmail.com
+2026-05-24 20:57:44.419 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:57:44.423 +00:00 [WRN] [DEBUG] Login failed: User not found for email: ridhi@gmail.com
+2026-05-24 20:57:44.424 +00:00 [WRN] Login failed for ridhi@gmail.com: Invalid email or password
+2026-05-24 20:57:44.428 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 48.7501 ms
+2026-05-24 20:58:29.702 +00:00 [INF] Inventory list requested
+2026-05-24 20:58:29.848 +00:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:58:29.865 +00:00 [INF] HTTP GET /api/inventory responded 200 in 240.1636 ms
+2026-05-24 20:58:36.068 +00:00 [INF] Login attempt for singhidhi60803@gmail.com
+2026-05-24 20:58:36.071 +00:00 [INF] [DEBUG] Login attempt for email: singhidhi60803@gmail.com
+2026-05-24 20:58:36.076 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:58:36.098 +00:00 [INF] [DEBUG] User found: Email=singhidhi60803@gmail.com, Role=USER, IsApproved=true
+2026-05-24 20:58:36.474 +00:00 [INF] [DEBUG] Password verified successfully for Email=singhidhi60803@gmail.com
+2026-05-24 20:58:36.475 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=singhidhi60803@gmail.com
+2026-05-24 20:58:36.486 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=3, Email=singhidhi60803@gmail.com, Role=USER
+2026-05-24 20:58:36.487 +00:00 [INF] Login successful for singhidhi60803@gmail.com
+2026-05-24 20:58:36.491 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 425.7222 ms
+2026-05-24 20:58:36.545 +00:00 [INF] Inventory list requested
+2026-05-24 20:58:36.552 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:58:36.560 +00:00 [INF] HTTP GET /api/inventory responded 200 in 22.0386 ms
+2026-05-24 20:58:39.008 +00:00 [INF] Inventory list requested
+2026-05-24 20:58:39.011 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 20:58:39.017 +00:00 [INF] HTTP GET /api/inventory responded 200 in 16.6970 ms
+2026-05-24 20:59:21.062 +00:00 [INF] Login attempt for singhridhi60803@gmail.com
+2026-05-24 20:59:21.076 +00:00 [INF] [DEBUG] Login attempt for email: singhridhi60803@gmail.com
+2026-05-24 20:59:21.144 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 20:59:21.149 +00:00 [WRN] [DEBUG] Login failed: User not found for email: singhridhi60803@gmail.com
+2026-05-24 20:59:21.150 +00:00 [WRN] Login failed for singhridhi60803@gmail.com: Invalid email or password
+2026-05-24 20:59:21.155 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 191.0177 ms
+2026-05-24 21:00:17.511 +00:00 [INF] Register attempt for ridhi@gmail.com
+2026-05-24 21:00:17.556 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-24 21:00:17.601 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."ApprovedAt", r."ApprovedBy", r."ApprovedUserId", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."IsActive", r."PasswordHash", r."RoleId", r."Status", r."Username"
+FROM "RegistrationRequests" AS r
+WHERE lower(r."Email") = @ToLower AND r."Status" = 0
+LIMIT 1
+2026-05-24 21:00:17.619 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@dto_DepartmentId='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d
+    WHERE d."Id" = @dto_DepartmentId)
+2026-05-24 21:00:17.884 +00:00 [INF] Executed DbCommand (16ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?', @p3='?', @p4='?' (DbType = Boolean), @p5='?' (DbType = Boolean), @p6='?', @p7='?', @p8='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedAt", "DepartmentId", "Designation", "Email", "IsActive", "IsApproved", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+RETURNING "Id";
+2026-05-24 21:00:17.950 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?' (DbType = Int32), @p3='?' (DbType = DateTime), @p4='?' (DbType = Int32), @p5='?', @p6='?', @p7='?' (DbType = Boolean), @p8='?', @p9='?' (DbType = Int32), @p10='?' (DbType = Int32), @p11='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RegistrationRequests" ("ApprovedAt", "ApprovedBy", "ApprovedUserId", "CreatedAt", "DepartmentId", "Designation", "Email", "IsActive", "PasswordHash", "RoleId", "Status", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11)
+RETURNING "Id";
+2026-05-24 21:00:17.955 +00:00 [INF] New user registered and waiting for approval ridhi@gmail.com
+2026-05-24 21:00:17.957 +00:00 [INF] Register successful for ridhi@gmail.com
+2026-05-24 21:00:17.958 +00:00 [INF] HTTP POST /api/auth/register responded 200 in 476.1435 ms
+2026-05-24 21:00:27.420 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-24 21:00:27.422 +00:00 [INF] [DEBUG] Login attempt for email: admin@gmail.com
+2026-05-24 21:00:27.432 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 21:00:27.441 +00:00 [INF] [DEBUG] User found: Email=admin@gmail.com, Role=ADMIN, IsApproved=true
+2026-05-24 21:00:27.688 +00:00 [INF] [DEBUG] Password verified successfully for Email=admin@gmail.com
+2026-05-24 21:00:27.690 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=admin@gmail.com
+2026-05-24 21:00:27.693 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=2, Email=admin@gmail.com, Role=ADMIN
+2026-05-24 21:00:27.694 +00:00 [INF] Login successful for admin@gmail.com
+2026-05-24 21:00:27.695 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 282.5163 ms
+2026-05-24 21:00:27.850 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-05-24 21:00:27.877 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Items" AS i
+WHERE i."IsActive"
+2026-05-24 21:00:27.939 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(sum(i."AvailableQuantity"::bigint), 0.0)::bigint
+FROM "InventoryStocks" AS i
+2026-05-24 21:00:27.954 +00:00 [INF] HTTP GET /api/admin/summary responded 200 in 170.3262 ms
+2026-05-24 21:00:30.176 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 21:00:30.277 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 21:00:30.300 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 193.9670 ms
+2026-05-24 21:00:35.388 +00:00 [INF] Admin approve requested: RegistrationRequestId=2
+2026-05-24 21:00:35.409 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."ApprovedAt", r."ApprovedBy", r."ApprovedUserId", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."IsActive", r."PasswordHash", r."RoleId", r."Status", r."Username", r0."Id", r0."Name"
+FROM "RegistrationRequests" AS r
+INNER JOIN "Roles" AS r0 ON r."RoleId" = r0."Id"
+WHERE r."Id" = @id
+LIMIT 1
+2026-05-24 21:00:35.433 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@request_RoleId='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r
+    WHERE r."Id" = @request_RoleId)
+2026-05-24 21:00:35.443 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@request_DepartmentId='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d
+    WHERE d."Id" = @request_DepartmentId)
+2026-05-24 21:00:35.453 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@request_Email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @request_Email
+LIMIT 1
+2026-05-24 21:00:35.455 +00:00 [INF] Activating existing user: UserId=4, Email=ridhi@gmail.com, RegistrationRequestId=2, CurrentIsActive=true
+2026-05-24 21:00:35.466 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@p9='?' (DbType = Int32), @p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?', @p3='?', @p4='?' (DbType = Boolean), @p5='?' (DbType = Boolean), @p6='?', @p7='?', @p8='?'], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "CreatedAt" = @p0, "DepartmentId" = @p1, "Designation" = @p2, "Email" = @p3, "IsActive" = @p4, "IsApproved" = @p5, "PasswordHash" = @p6, "Role" = @p7, "Username" = @p8
+WHERE "Id" = @p9;
+2026-05-24 21:00:35.469 +00:00 [INF] User activated successfully: UserId=4, Email=ridhi@gmail.com, RegistrationRequestId=2
+2026-05-24 21:00:35.480 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@existingUser_Id='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."RoleId", u."UserId"
+FROM "UserRoles" AS u
+WHERE u."UserId" = @existingUser_Id
+LIMIT 1
+2026-05-24 21:00:35.482 +00:00 [INF] Creating UserRole: UserId=4, RoleId=1, RegistrationRequestId=2
+2026-05-24 21:00:35.510 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@p3='?' (DbType = Int32), @p0='?' (DbType = DateTime), @p1='?' (DbType = Boolean), @p2='?' (DbType = Int32), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "RegistrationRequests" SET "ApprovedAt" = @p0, "IsActive" = @p1, "Status" = @p2
+WHERE "Id" = @p3;
+INSERT INTO "UserRoles" ("RoleId", "UserId")
+VALUES (@p4, @p5)
+RETURNING "Id";
+2026-05-24 21:00:35.517 +00:00 [INF] ✓ User approval completed successfully: RegistrationRequestId=2, UserId=4, Email=ridhi@gmail.com, Role=User, IsActive=true
+2026-05-24 21:00:35.521 +00:00 [INF] HTTP PUT /api/admin/approve/2 responded 200 in 143.9367 ms
+2026-05-24 21:00:36.040 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 21:00:36.044 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 21:00:36.045 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 7.6828 ms
+2026-05-24 21:00:37.730 +00:00 [INF] Admin approve requested: RegistrationRequestId=2
+2026-05-24 21:00:37.737 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."ApprovedAt", r."ApprovedBy", r."ApprovedUserId", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."IsActive", r."PasswordHash", r."RoleId", r."Status", r."Username", r0."Id", r0."Name"
+FROM "RegistrationRequests" AS r
+INNER JOIN "Roles" AS r0 ON r."RoleId" = r0."Id"
+WHERE r."Id" = @id
+LIMIT 1
+2026-05-24 21:00:37.738 +00:00 [INF] Approval already completed for RegistrationRequestId=2, Email=ridhi@gmail.com
+2026-05-24 21:00:37.742 +00:00 [INF] HTTP PUT /api/admin/approve/2 responded 200 in 13.6425 ms
+2026-05-24 21:00:38.267 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-24 21:00:38.271 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."RoleId", r1."Designation", d."Name" AS "Department", r1."DepartmentId", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC, r."Id" DESC
+    LIMIT @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC, r1."Id" DESC
+2026-05-24 21:00:38.272 +00:00 [INF] HTTP GET /api/admin/pending-users-cursor responded 200 in 7.9098 ms
+2026-05-24 21:00:50.684 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-24 21:00:50.691 +00:00 [INF] [DEBUG] Login attempt for email: ridhi@gmail.com
+2026-05-24 21:00:50.708 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 21:00:50.737 +00:00 [INF] [DEBUG] User found: Email=ridhi@gmail.com, Role=USER, IsApproved=true
+2026-05-24 21:00:51.025 +00:00 [INF] [DEBUG] Password verified successfully for Email=ridhi@gmail.com
+2026-05-24 21:00:51.025 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=ridhi@gmail.com
+2026-05-24 21:00:51.026 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=4, Email=ridhi@gmail.com, Role=USER
+2026-05-24 21:00:51.029 +00:00 [INF] Login successful for ridhi@gmail.com
+2026-05-24 21:00:51.030 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 347.1771 ms
+2026-05-24 21:00:51.072 +00:00 [INF] Inventory list requested
+2026-05-24 21:00:51.078 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 21:00:51.082 +00:00 [INF] HTTP GET /api/inventory responded 200 in 10.8459 ms
+2026-05-24 21:00:54.077 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@userId='?' (DbType = Int32), @p2='?' (DbType = Int32), @p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."CategoryId", r."CreatedAt", r."Status", r."UpdatedAt", r."UserId"
+FROM "Requests" AS r
+WHERE r."UserId" = @userId
+ORDER BY r."CreatedAt" DESC
+LIMIT @p2 OFFSET @p
+2026-05-24 21:00:54.103 +00:00 [INF] HTTP GET /api/request/my responded 200 in 187.6107 ms
+2026-05-24 21:01:01.675 +00:00 [INF] Executed DbCommand (81ms) [Parameters=[@userId='?' (DbType = Int32), @activeStatuses='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Requests" AS r
+    WHERE r."UserId" = @userId AND r."Status" = ANY (@activeStatuses))
+2026-05-24 21:01:01.683 +00:00 [INF] HTTP GET /api/request/can-request responded 200 in 206.1097 ms
+2026-05-24 21:01:04.771 +00:00 [INF] Inventory list requested
+2026-05-24 21:01:04.777 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 21:01:04.784 +00:00 [INF] HTTP GET /api/inventory responded 200 in 14.3800 ms
+2026-05-24 21:01:04.801 +00:00 [INF] Categories requested
+2026-05-24 21:01:04.880 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 21:01:04.940 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 145.4444 ms
+2026-05-24 21:01:06.705 +00:00 [INF] Inventory list requested
+2026-05-24 21:01:06.713 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 21:01:06.716 +00:00 [INF] HTTP GET /api/inventory responded 200 in 12.0879 ms
+2026-05-24 21:01:08.576 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@userId='?' (DbType = Int32), @p2='?' (DbType = Int32), @p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."CategoryId", r."CreatedAt", r."Status", r."UpdatedAt", r."UserId"
+FROM "Requests" AS r
+WHERE r."UserId" = @userId
+ORDER BY r."CreatedAt" DESC
+LIMIT @p2 OFFSET @p
+2026-05-24 21:01:08.582 +00:00 [INF] HTTP GET /api/request/my responded 200 in 13.3062 ms
+2026-05-24 21:01:10.597 +00:00 [INF] Categories requested
+2026-05-24 21:01:10.597 +00:00 [INF] Inventory list requested
+2026-05-24 21:01:10.602 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 21:01:10.608 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 10.8732 ms
+2026-05-24 21:01:10.632 +00:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 21:01:10.638 +00:00 [INF] HTTP GET /api/inventory responded 200 in 40.8815 ms
+2026-05-24 21:01:18.793 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-24 21:01:18.795 +00:00 [INF] [DEBUG] Login attempt for email: admin@gmail.com
+2026-05-24 21:01:18.810 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@ToLower='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE lower(u."Email") = @ToLower
+LIMIT 1
+2026-05-24 21:01:18.819 +00:00 [INF] [DEBUG] User found: Email=admin@gmail.com, Role=ADMIN, IsApproved=true
+2026-05-24 21:01:18.992 +00:00 [INF] [DEBUG] Password verified successfully for Email=admin@gmail.com
+2026-05-24 21:01:19.001 +00:00 [INF] [DEBUG] User is approved or is Admin. Generating token for Email=admin@gmail.com
+2026-05-24 21:01:19.006 +00:00 [INF] ✓ LOGIN SUCCESSFUL: UserId=2, Email=admin@gmail.com, Role=ADMIN
+2026-05-24 21:01:19.007 +00:00 [INF] Login successful for admin@gmail.com
+2026-05-24 21:01:19.008 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 216.7623 ms
+2026-05-24 21:01:19.075 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Categories" AS c
+2026-05-24 21:01:19.089 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Items" AS i
+WHERE i."IsActive"
+2026-05-24 21:01:19.093 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COALESCE(sum(i."AvailableQuantity"::bigint), 0.0)::bigint
+FROM "InventoryStocks" AS i
+2026-05-24 21:01:19.104 +00:00 [INF] HTTP GET /api/admin/summary responded 200 in 32.2410 ms
+2026-05-24 21:01:21.658 +00:00 [INF] Categories requested
+2026-05-24 21:01:21.660 +00:00 [INF] Inventory list requested
+2026-05-24 21:01:21.662 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT c."Id", c."Name"
+FROM "Categories" AS c
+2026-05-24 21:01:21.664 +00:00 [INF] HTTP GET /api/ItemCategory responded 200 in 7.1497 ms
+2026-05-24 21:01:21.666 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT i."Id" AS id, i."Name" AS name, c."Name" AS category, CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."AvailableQuantity"
+    ELSE 0
+END AS "availableQuantity", CASE
+    WHEN i0."Id" IS NOT NULL THEN i0."TotalQuantity"
+    ELSE 0
+END AS "totalQuantity", i."Description" AS description
+FROM "Items" AS i
+INNER JOIN "Categories" AS c ON i."CategoryId" = c."Id"
+LEFT JOIN "InventoryStocks" AS i0 ON i."Id" = i0."ItemId"
+2026-05-24 21:01:21.672 +00:00 [INF] HTTP GET /api/inventory responded 200 in 12.5421 ms

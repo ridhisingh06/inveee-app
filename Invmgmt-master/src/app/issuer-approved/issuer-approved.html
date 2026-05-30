@@ -1,0 +1,64 @@
+<div class="issuer-page">
+  <header class="page-header">
+    <div>
+      <h1>Approved Queue</h1>
+      <p>These requests have been authorized by Admin and are ready for dispatch</p>
+    </div>
+    <button class="refresh-btn" (click)="loadApproved()" [disabled]="loading">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      Refresh
+    </button>
+  </header>
+
+  <div class="success-msg" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="error-msg"   *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Syncing approved queue...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
+    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.3">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <p>No approved requests awaiting dispatch.</p>
+  </div>
+
+  <div class="request-list" *ngIf="!loading && requests.length > 0">
+    <div class="req-card fade-in" *ngFor="let req of requests">
+      <div class="req-card-header">
+        <div class="req-id">REQ-{{ req.id }}</div>
+        <span class="status-badge approved">Approved</span>
+      </div>
+      <div class="req-meta">
+        <div class="meta-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          {{ req.username || 'User #' + req.userId }}
+        </div>
+        <div class="meta-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          {{ req.createdAt | date:'mediumDate' }}
+        </div>
+      </div>
+      <button class="issue-btn" (click)="issueRequest(req.id)">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+        </svg>
+        Dispatch Items
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,9 @@
-﻿using System;
+using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace invmgmt.web.Models
 {
+    [Index(nameof(IsApproved), nameof(CreatedAt))]
     public class User
     {
         public int Id { get; set; }
@@ -16,6 +18,9 @@ namespace invmgmt.web.Models
         public string Designation { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
+        public bool IsApproved { get; set; } = false;
+        
+        public string Role { get; set; } = "USER";
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

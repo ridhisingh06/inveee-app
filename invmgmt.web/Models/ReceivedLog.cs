@@ -1,4 +1,4 @@
-﻿using invmgmt.web.Models;
+using invmgmt.web.Models;
 using System;
 
 namespace invmgmt.web.Models
@@ -11,6 +11,7 @@ namespace invmgmt.web.Models
         public Request Request { get; set; }
 
         public int ReceivedBy { get; set; }
+        public int UserId { get; set; }
         public User User { get; set; }
 
         public DateTime ReceivedDate { get; set; } = DateTime.Now;

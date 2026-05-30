@@ -1,0 +1,352 @@
+<!-- ===== TOAST ===== -->
+<div class="toast" [class.visible]="successMsg()" [class.toast-success]="successMsg()">
+  <span class="toast-icon">✓</span>
+  {{ successMsg() }}
+</div>
+
+<div class="toast" [class.visible]="errorMsg()" [class.toast-error]="errorMsg()">
+  <span class="toast-icon">✕</span>
+  {{ errorMsg() }}
+</div>
+
+<div class="dcbe-page">
+
+  <!-- ===== HEADER ===== -->
+  <header class="dcbe-header">
+    <div class="dcbe-title-wrap">
+      <div class="breadcrumb">
+        <span>Admin Dashboard</span>
+        <span class="sep">›</span>
+        <span>Issue & Entry</span>
+        <span class="sep">›</span>
+        <span class="active">Delivery Challan/Bill Entry</span>
+      </div>
+      <h1>Delivery Challan/Bill Entry</h1>
+      <p>Record delivery challan and bill details with item quantities and amounts.</p>
+    </div>
+    <button class="back-btn" (click)="goBack()" type="button">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back
+    </button>
+  </header>
+
+  <!-- ===== FORM ===== -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="dcbe-form">
+
+    <!-- ══════════════════════════════════════════
+         SECTION 1 – CHALLAN DETAILS
+    ══════════════════════════════════════════ -->
+    <section class="form-section">
+      <div class="section-head">
+        <div class="section-icon blue">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l9.5 5.5v9L12 22l-9.5-5.5v-9L12 2"></path>
+            <polyline points="12 12 3.5 7.5"></polyline>
+            <polyline points="12 12 12 22"></polyline>
+            <polyline points="12 12 20.5 7.5"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h2>Challan Details</h2>
+          <p>Enter challan date, number, and supplier information</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <!-- Challan Date -->
+        <div class="field-wrap">
+          <label for="challanDate" class="field-label">Challan Date <span class="req">*</span></label>
+          <input 
+            id="challanDate" 
+            type="date" 
+            formControlName="challanDate"
+            class="field-input"
+            [class.invalid]="form.get('challanDate')?.invalid && form.get('challanDate')?.touched">
+          <div class="error-msg" *ngIf="form.get('challanDate')?.invalid && form.get('challanDate')?.touched">
+            Challan date is required.
+          </div>
+        </div>
+
+        <!-- Challan No. -->
+        <div class="field-wrap">
+          <label for="challanNo" class="field-label">Challan No. <span class="req">*</span></label>
+          <input 
+            id="challanNo" 
+            type="text" 
+            formControlName="challanNo"
+            placeholder="e.g. CHAL-2024-001"
+            class="field-input"
+            [class.invalid]="form.get('challanNo')?.invalid && form.get('challanNo')?.touched">
+          <div class="error-msg" *ngIf="form.get('challanNo')?.invalid && form.get('challanNo')?.touched">
+            Challan number is required.
+          </div>
+        </div>
+
+        <!-- Purchased From -->
+        <div class="field-wrap full-width">
+          <label for="purchasedFrom" class="field-label">Purchased From <span class="req">*</span></label>
+          <select 
+            id="purchasedFrom" 
+            formControlName="purchasedFrom"
+            class="field-input field-select"
+            [class.invalid]="form.get('purchasedFrom')?.invalid && form.get('purchasedFrom')?.touched">
+            <option value="" disabled selected>Select supplier…</option>
+            <option *ngFor="let supplier of suppliers" [value]="supplier">{{ supplier }}</option>
+          </select>
+          <div class="error-msg" *ngIf="form.get('purchasedFrom')?.invalid && form.get('purchasedFrom')?.touched">
+            Please select a supplier.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 2 – ITEM SELECTION & ENTRY
+    ══════════════════════════════════════════ -->
+    <section class="form-section">
+      <div class="section-head">
+        <div class="section-icon green">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        </div>
+        <div>
+          <h2>Item Selection</h2>
+          <p>Search and add items to the challan/bill</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <!-- Item Search with autocomplete -->
+        <div class="field-wrap">
+          <label for="itemSearch" class="field-label">Search Item (press Tab to auto-suggest) <span class="req">*</span></label>
+          <div class="item-search-container">
+            <input 
+              id="itemSearch"
+              type="text" 
+              [value]="itemSearchQuery()"
+              (input)="onItemSearch($event.target.value)"
+              (focus)="showItemDropdown.set(true)"
+              (keydown.tab)="selectedItem ? addItem() : false"
+              placeholder="Search by item name..."
+              class="field-input">
+            
+            <!-- Item Dropdown -->
+            <div class="item-dropdown" *ngIf="showItemDropdown() && filteredItems.length > 0">
+              <div class="dropdown-list">
+                <div 
+                  *ngFor="let item of filteredItems" 
+                  class="dropdown-item"
+                  (click)="selectItem(item)"
+                  [class.selected]="selectedItem?.id === item.id">
+                  <span class="item-name">{{ item.name }}</span>
+                  <span class="item-price">₹{{ (item.lastPrice ?? item.price) | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field-hint" *ngIf="selectedItem">
+            Selected: <strong>{{ selectedItem.name }}</strong> @ ₹{{ selectedItem.price | number:'1.2-2' }} per unit
+          </div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="field-wrap">
+          <label for="quantity" class="field-label">Quantity <span class="req">*</span></label>
+          <input 
+            id="quantity" 
+            type="number" 
+            formControlName="quantity"
+            placeholder="Enter quantity"
+            min="1"
+            class="field-input"
+            [class.invalid]="form.get('quantity')?.invalid && form.get('quantity')?.touched">
+          <div class="error-msg" *ngIf="form.get('quantity')?.invalid && form.get('quantity')?.touched">
+            Please enter a valid quantity.
+          </div>
+        </div>
+
+        <!-- Unit Price -->
+        <div class="field-wrap">
+          <label for="unitPrice" class="field-label">Unit Price <span class="req">*</span></label>
+          <input 
+            id="unitPrice" 
+            type="number" 
+            formControlName="unitPrice"
+            placeholder="e.g. 150.00"
+            min="0.01"
+            step="0.01"
+            class="field-input"
+            [class.invalid]="form.get('unitPrice')?.invalid && form.get('unitPrice')?.touched">
+          <div class="error-msg" *ngIf="form.get('unitPrice')?.invalid && form.get('unitPrice')?.touched">
+            <ng-container *ngIf="form.get('unitPrice')?.hasError('required')">Unit price is required.</ng-container>
+            <ng-container *ngIf="form.get('unitPrice')?.hasError('min')">Unit price must be greater than 0.</ng-container>
+          </div>
+        </div>
+
+        <!-- Add Button -->
+        <div class="field-wrap">
+          <label class="field-label">&nbsp;</label>
+          <button 
+            type="button" 
+            class="add-item-btn"
+            (click)="addItem()"
+            [disabled]="!selectedItem || !form.get('quantity')?.value || !form.get('unitPrice')?.value">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Item
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 3 – ITEMS TABLE & SUMMARY
+    ══════════════════════════════════════════ -->
+    <section class="form-section">
+      <div class="section-head">
+        <div class="section-icon amber">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </div>
+        <div>
+          <h2>Bill Items</h2>
+          <p class="item-count">No. of Items in Bill: <strong>{{ numberOfItems }}</strong></p>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="table-wrapper" *ngIf="billItems.length > 0; else emptyItems">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th class="sl-col">SL No.</th>
+              <th class="item-col">Item</th>
+              <th class="qty-col">Quantity</th>
+              <th class="price-col">Unit Price</th>
+              <th class="amount-col">Amount</th>
+              <th class="action-col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of billItems; trackBy: trackBySlNo" class="bill-item-row">
+              <td class="sl-col">{{ item.slNo }}</td>
+              <td class="item-col">{{ item.itemName }}</td>
+              <td class="qty-col">{{ item.quantity }}</td>
+              <td class="price-col">₹{{ item.unitPrice | number:'1.2-2' }}</td>
+              <td class="amount-col">₹{{ item.amount | number:'1.2-2' }}</td>
+              <td class="action-col">
+                <button 
+                  type="button" 
+                  class="remove-btn"
+                  (click)="removeItem(item.slNo)"
+                  title="Remove item">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Grand Total -->
+        <div class="bill-summary">
+          <div class="summary-row total-row">
+            <span>Grand Total</span>
+            <span class="total-amount">₹{{ grandTotal | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <ng-template #emptyItems>
+        <div class="empty-bill-state">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <p>No items added yet. Search and add items above.</p>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         ACTION BUTTONS
+    ══════════════════════════════════════════ -->
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="isSubmitting() || loading() || billItems.length === 0">
+        <ng-container *ngIf="isSubmitting()">
+          <span class="spinner"></span>
+          Submitting...
+        </ng-container>
+        <ng-container *ngIf="!isSubmitting()">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          Submit
+        </ng-container>
+      </button>
+
+      <button 
+        type="button" 
+        class="reset-btn"
+        (click)="onReset()"
+        [disabled]="isSubmitting() || loading()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+          <path d="M21 3v5h-5"></path>
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+          <path d="M3 21v-5h5"></path>
+        </svg>
+        Reset
+      </button>
+
+      <button 
+        type="button" 
+        class="back-menu-btn"
+        (click)="goBack()"
+        [disabled]="isSubmitting() || loading()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Menu
+      </button>
+
+      <button
+        type="button"
+        class="print-btn"
+        (click)="printChallan()"
+        [disabled]="billItems.length === 0 || isSubmitting() || loading()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9V2h12v7"></path>
+          <path d="M6 22h12a2 2 0 0 0 2-2V11H4v9a2 2 0 0 0 2 2Z"></path>
+          <path d="M8 16h8"></path>
+          <path d="M8 12h8"></path>
+        </svg>
+        Print Challan
+      </button>
+    </div>
+  </form>
+</div>

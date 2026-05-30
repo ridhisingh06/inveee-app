@@ -1,0 +1,101 @@
+<div class="monthly-register-page">
+  <div class="page-header">
+    <h2>Monthly Register</h2>
+    <p>View request item activity by month with totals and paging.</p>
+  </div>
+
+  <section class="filters-panel">
+    <div class="filter-row">
+      <label>
+        Month
+        <select [ngModel]="month()" (ngModelChange)="month.set($event); onSearch()">
+          <option *ngFor="let option of monthOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+      </label>
+
+      <label>
+        Year
+        <input type="number" [ngModel]="year()" (ngModelChange)="year.set($event)" min="2000" max="2100" (change)="onSearch()" />
+      </label>
+
+      <label class="search-field">
+        Search
+        <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Search by user or item" />
+      </label>
+
+      <div class="actions">
+        <button type="button" (click)="onSearch()">Refresh</button>
+        <button type="button" class="secondary" (click)="onReset()">Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="summary-cards">
+    <div class="card">
+      <div class="card-title">Total Rows</div>
+      <div class="card-value">{{ totalCount() }}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Requested</div>
+      <div class="card-value">{{ totalQuantityRequested() }}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Approved</div>
+      <div class="card-value">{{ totalQuantityApproved() }}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Issued</div>
+      <div class="card-value">{{ totalQuantityIssued() }}</div>
+    </div>
+  </section>
+
+  <div class="table-container" *ngIf="!loading() && rows().length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Request</th>
+          <th>User</th>
+          <th>Item</th>
+          <th>Requested</th>
+          <th>Approved</th>
+          <th>Issued</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of rows(); index as i">
+          <td>{{ (page() - 1) * pageSize() + i + 1 }}</td>
+          <td>{{ row.requestId }}</td>
+          <td>{{ row.userName }}</td>
+          <td>{{ row.itemName }}</td>
+          <td>{{ row.quantityRequested }}</td>
+          <td>{{ row.quantityApproved }}</td>
+          <td>{{ row.quantityIssued }}</td>
+          <td>{{ row.status }}</td>
+          <td>{{ row.requestDate | date:'shortDate' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading() && rows().length === 0">
+    <p>No monthly register data found for the selected month.</p>
+  </div>
+
+  <div class="pagination-row" *ngIf="totalPages() > 1">
+    <button type="button" [disabled]="page() === 1" (click)="onPageChange(page() - 1)">Previous</button>
+    <span>Page {{ page() }} of {{ totalPages() }}</span>
+    <button type="button" [disabled]="page() === totalPages()" (click)="onPageChange(page() + 1)">Next</button>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>Loading register data…</p>
+  </div>
+
+  <div class="error-message" *ngIf="errorMsg()">
+    {{ errorMsg() }}
+  </div>
+</div>

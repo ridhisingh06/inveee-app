@@ -1,0 +1,1049 @@
+2026-05-19 17:53:05.743 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:05.743 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:05.743 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:07.063 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:07.273 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:08.495 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:14.337 +00:00 [WRN] As of ""2026-05-19T17:53:11.6343322+00:00"", the heartbeat has been running for ""00:00:01.2974146"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2026-05-19 17:53:39.291 +00:00 [INF] Executed DbCommand (21,394ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:39.374 +00:00 [INF] Executed DbCommand (21,599ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:39.374 +00:00 [INF] Executed DbCommand (21,381ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:39.161 +00:00 [INF] Executed DbCommand (21,434ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:39.462 +00:00 [INF] Executed DbCommand (22,037ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:40.575 +00:00 [INF] Executed DbCommand (23,247ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:41.599 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:41.514 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:41.516 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:41.624 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:41.648 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:41.599 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:42.138 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 35475.1027 ms
+2026-05-19 17:53:42.413 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 35194.0388 ms
+2026-05-19 17:53:42.444 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 39060.4730 ms
+2026-05-19 17:53:42.138 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 38733.2291 ms
+2026-05-19 17:53:42.413 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 36785.1158 ms
+2026-05-19 17:53:42.414 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 35393.9227 ms
+2026-05-19 17:53:43.842 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:43.847 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:43.842 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:43.847 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:43.928 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:43.938 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:44.039 +00:00 [INF] Executed DbCommand (94ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:44.074 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:44.092 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:44.107 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:44.205 +00:00 [INF] Executed DbCommand (53ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:44.270 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:44.271 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:44.270 +00:00 [INF] Executed DbCommand (84ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:44.472 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:44.412 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:44.414 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 568.4330 ms
+2026-05-19 17:53:44.415 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:44.590 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 1078.2376 ms
+2026-05-19 17:53:44.272 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:44.583 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 798.8004 ms
+2026-05-19 17:53:44.584 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 895.4080 ms
+2026-05-19 17:53:44.584 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 646.9657 ms
+2026-05-19 17:53:44.672 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 941.3179 ms
+2026-05-19 17:53:45.018 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:45.018 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:45.137 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:45.036 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:45.035 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:45.134 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:45.016 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:45.179 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:45.214 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:45.233 +00:00 [INF] Executed DbCommand (19ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:45.236 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:45.245 +00:00 [INF] Executed DbCommand (15ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:48.304 +00:00 [INF] Executed DbCommand (3,057ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:48.305 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:48.306 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:48.400 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 3383.5165 ms
+2026-05-19 17:53:48.317 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:48.343 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 3326.3672 ms
+2026-05-19 17:53:48.346 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:48.308 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:48.400 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 3365.9506 ms
+2026-05-19 17:53:48.489 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:48.492 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 3471.2994 ms
+2026-05-19 17:53:48.524 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 3643.2163 ms
+2026-05-19 17:53:48.533 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 3514.6596 ms
+2026-05-19 17:53:48.558 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:48.563 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:48.570 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.002 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.077 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.004 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.005 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.007 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.003 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.082 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.094 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.108 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.313 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 750.7835 ms
+2026-05-19 17:53:49.124 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.149 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.152 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.114 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 639.5181 ms
+2026-05-19 17:53:49.313 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.358 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.359 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 809.9314 ms
+2026-05-19 17:53:49.368 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 367.3246 ms
+2026-05-19 17:53:49.368 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.382 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 378.9648 ms
+2026-05-19 17:53:49.560 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 556.0905 ms
+2026-05-19 17:53:49.580 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.593 +00:00 [INF] Executed DbCommand (14ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.603 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.607 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.611 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.612 +00:00 [INF] Login attempt for nishu@gmail.com
+2026-05-19 17:53:49.604 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.701 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.945 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.950 +00:00 [INF] Executed DbCommand (18ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.950 +00:00 [INF] Executed DbCommand (13ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:53:49.952 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 604.2869 ms
+2026-05-19 17:53:50.140 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:50.141 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:49.956 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 394.9747 ms
+2026-05-19 17:53:50.419 +00:00 [ERR] An unexpected error occurred during login for nishu@gmail.com
+System.FormatException: The input is not a valid Base-64 string as it contains a non-base 64 character, more than two padding characters, or an illegal character among the padding characters.
+   at System.Convert.FromBase64CharPtr(Char* inputPtr, Int32 inputLength)
+   at System.Convert.FromBase64String(String s)
+   at Microsoft.AspNetCore.Identity.PasswordHasher`1.VerifyHashedPassword(TUser user, String hashedPassword, String providedPassword)
+   at invmgmt.web.Services.AuthService.LoginAsync(LoginRequest dto) in /src/Services/AuthService.cs:line 48
+   at invmgmt.web.Controllers.AuthController.Login(LoginRequest req) in /src/Controllers/AuthController.cs:line 42
+2026-05-19 17:53:50.420 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 828.4915 ms
+2026-05-19 17:53:50.421 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 827.9968 ms
+2026-05-19 17:53:50.422 +00:00 [ERR] HTTP POST /api/auth/login responded 500 in 828.2731 ms
+2026-05-19 17:55:41.738 +00:00 [INF] Register attempt for testuser@gmail.com
+2026-05-19 17:55:41.747 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:55:42.762 +00:00 [INF] Executed DbCommand (116ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "RegistrationRequests" AS r
+    WHERE r."Email" = @email AND r."Status" = 0)
+2026-05-19 17:55:42.767 +00:00 [WRN] Register failed for testuser@gmail.com: A pending registration request already exists for this email.
+2026-05-19 17:55:42.944 +00:00 [INF] HTTP POST /api/auth/register responded 400 in 2978.6322 ms
+2026-05-19 17:56:21.696 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 17:56:21.732 +00:00 [INF] Executed DbCommand (14ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 17:56:22.218 +00:00 [INF] Executed DbCommand (178ms) [Parameters=[@user_Id='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Name"
+FROM "UserRoles" AS u
+INNER JOIN "Roles" AS r ON u."RoleId" = r."Id"
+WHERE u."UserId" = @user_Id
+2026-05-19 17:56:22.229 +00:00 [INF] Login successful for ridhi@gmail.com
+2026-05-19 17:56:22.231 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 584.0612 ms
+2026-05-19 17:56:29.426 +00:00 [INF] Pending users requested (Page: 1, Limit: 50)
+2026-05-19 17:56:31.312 +00:00 [INF] Executed DbCommand (37ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-19 17:56:32.595 +00:00 [INF] Executed DbCommand (194ms) [Parameters=[@p1='?' (DbType = Int32), @p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."Designation", d."Name" AS "Department", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC
+    LIMIT @p1 OFFSET @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC
+2026-05-19 17:56:32.807 +00:00 [INF] HTTP GET /api/admin/pending-users responded 200 in 4210.0268 ms
+2026-05-19 18:01:57.309 +00:00 [INF] Pending users requested (Page: 1, Limit: 50)
+2026-05-19 18:01:57.759 +00:00 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "RegistrationRequests" AS r
+WHERE r."Status" = 0
+2026-05-19 18:01:57.776 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[@p1='?' (DbType = Int32), @p='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r1."Id", r1."Username", r1."Email", r0."Name" AS "Role", r1."Designation", d."Name" AS "Department", CASE r1."Status"
+    WHEN 0 THEN 'Pending'
+    WHEN 1 THEN 'Approved'
+    WHEN 2 THEN 'Rejected'
+    ELSE r1."Status"::text
+END AS "Status", r1."CreatedAt"
+FROM (
+    SELECT r."Id", r."CreatedAt", r."DepartmentId", r."Designation", r."Email", r."RoleId", r."Status", r."Username"
+    FROM "RegistrationRequests" AS r
+    WHERE r."Status" = 0
+    ORDER BY r."CreatedAt" DESC
+    LIMIT @p1 OFFSET @p
+) AS r1
+INNER JOIN "Roles" AS r0 ON r1."RoleId" = r0."Id"
+INNER JOIN "Departments" AS d ON r1."DepartmentId" = d."Id"
+ORDER BY r1."CreatedAt" DESC
+2026-05-19 18:01:57.786 +00:00 [INF] HTTP GET /api/admin/pending-users responded 200 in 532.1919 ms
+2026-05-19 18:29:19.766 +00:00 [INF] Application is shutting down...
+2026-05-19 18:29:25.403 +00:00 [INF] Executed DbCommand (25ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 18:29:25.739 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-19 18:29:25.841 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-19 18:29:25.855 +00:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-05-19 18:29:25.864 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-19 18:29:25.866 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 18:29:25.884 +00:00 [INF] Applying migration '20260519182533_AddIsApprovedAndRequestStatus'.
+2026-05-19 18:29:25.984 +00:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+DROP INDEX "IX_Requests_UserId";
+2026-05-19 18:29:26.003 +00:00 [INF] Executed DbCommand (17ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE "Users" ADD "IsApproved" boolean NOT NULL DEFAULT FALSE;
+2026-05-19 18:29:26.016 +00:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Requests_UserId_Status" ON "Requests" ("UserId", "Status");
+2026-05-19 18:29:26.021 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260519182533_AddIsApprovedAndRequestStatus', '10.0.5');
+2026-05-19 18:29:26.342 +00:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-19 18:29:26.389 +00:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-19 18:29:26.403 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-19 18:29:26.550 +00:00 [INF] Executed DbCommand (9ms) [Parameters=[@adminEmail='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @adminEmail
+LIMIT 1
+2026-05-19 18:29:26.755 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-19 18:29:26.798 +00:00 [WRN] No XML encryptor configured. Key {1a7a23d2-3aaa-4610-bce8-061054759155} may be persisted to storage in unencrypted form.
+2026-05-19 18:29:26.908 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-19 18:29:26.912 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-19 18:29:26.913 +00:00 [INF] Hosting environment: Development
+2026-05-19 18:29:26.914 +00:00 [INF] Content root path: /app
+2026-05-19 18:30:49.237 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:30:49.249 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:30:49.381 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:30:49.390 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:30:49.393 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:30:49.395 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:30:49.423 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 399.1536 ms
+2026-05-19 18:30:52.089 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:30:52.090 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:30:52.110 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:30:52.112 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:30:52.118 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:30:52.120 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:30:52.123 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 104.5652 ms
+2026-05-19 18:31:03.667 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:03.670 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:03.695 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:03.715 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:03.719 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:03.735 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:03.749 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 115.4920 ms
+2026-05-19 18:31:06.978 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:06.979 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:06.983 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:06.984 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:06.985 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:06.986 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:06.987 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 10.0575 ms
+2026-05-19 18:31:09.140 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:09.140 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:09.144 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:09.146 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:09.147 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:09.148 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:09.150 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 10.9402 ms
+2026-05-19 18:31:09.353 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:09.354 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:09.357 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:09.359 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:09.359 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:09.360 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:09.361 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 8.8092 ms
+2026-05-19 18:31:09.575 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:09.576 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:09.580 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:09.581 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:09.582 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:09.582 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:09.583 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 9.2016 ms
+2026-05-19 18:31:09.804 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:09.805 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:09.813 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:09.817 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:09.818 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:09.819 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:09.820 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 17.6786 ms
+2026-05-19 18:31:11.241 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:11.242 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:11.245 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:11.248 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:11.249 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:11.250 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:11.251 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 10.4683 ms
+2026-05-19 18:31:19.824 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:19.825 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:19.828 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:19.830 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:19.831 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:19.831 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:19.832 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 9.3513 ms
+2026-05-19 18:31:21.131 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:21.132 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:21.135 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:21.136 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:21.137 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:21.138 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:21.138 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 8.4269 ms
+2026-05-19 18:31:21.741 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:21.742 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:21.745 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:21.761 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:21.762 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:21.777 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:21.788 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 49.7939 ms
+2026-05-19 18:31:21.984 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:21.985 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:21.989 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:21.991 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:21.992 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:21.993 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:21.994 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 10.8981 ms
+2026-05-19 18:31:22.212 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:22.213 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:22.218 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:22.219 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:22.220 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:22.221 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:22.223 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 12.4602 ms
+2026-05-19 18:31:22.437 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:22.439 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:22.443 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:22.445 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:22.445 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:22.447 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:22.452 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 16.2239 ms
+2026-05-19 18:31:22.658 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:22.660 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:22.666 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:22.669 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:22.673 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:22.674 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:22.675 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 17.9872 ms
+2026-05-19 18:31:25.351 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:25.352 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:25.355 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:25.356 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:25.357 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:25.358 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:25.359 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 9.0459 ms
+2026-05-19 18:31:25.611 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:25.613 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:25.618 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:25.622 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:25.630 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:25.634 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:25.640 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 30.1099 ms
+2026-05-19 18:31:25.879 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:25.881 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:25.887 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:25.889 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:25.890 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:25.893 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:25.894 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 16.2597 ms
+2026-05-19 18:31:26.107 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:26.109 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:26.115 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:26.119 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:26.119 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:26.120 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:26.121 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 14.5204 ms
+2026-05-19 18:31:27.219 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:27.220 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:27.226 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:27.228 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:27.229 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:27.231 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:27.233 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 16.1791 ms
+2026-05-19 18:31:48.308 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:48.313 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:48.325 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:48.331 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:48.338 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:48.345 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:48.361 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 57.5258 ms
+2026-05-19 18:31:48.408 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:48.423 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:48.468 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:48.484 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:48.499 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:48.521 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:48.529 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 121.8516 ms
+2026-05-19 18:31:48.593 +00:00 [INF] Login attempt for ridhi@gmail.com
+2026-05-19 18:31:48.620 +00:00 [INF] Login attempt for email: r***@gmail.com
+2026-05-19 18:31:48.675 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 18:31:48.688 +00:00 [INF] User found: UserId=1, Email=r***@gmail.com, IsActive=true
+2026-05-19 18:31:48.693 +00:00 [WRN] Login blocked: User not approved. UserId=1, Email=r***@gmail.com
+2026-05-19 18:31:48.695 +00:00 [WRN] Login failed for ridhi@gmail.com: Your account is not approved yet.
+2026-05-19 18:31:48.697 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 104.3739 ms
+2026-05-19 19:57:32.114 +00:00 [INF] Application is shutting down...
+2026-05-19 19:57:42.865 +00:00 [INF] Executed DbCommand (26ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 19:57:43.462 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-19 19:57:43.552 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-19 19:57:43.568 +00:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-05-19 19:57:43.579 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-19 19:57:43.583 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 19:57:43.609 +00:00 [INF] Applying migration '20260519195006_AddRoleToUser'.
+2026-05-19 19:57:43.682 +00:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE "Users" ADD "Role" text NOT NULL DEFAULT '';
+2026-05-19 19:57:43.686 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260519195006_AddRoleToUser', '10.0.5');
+2026-05-19 19:57:44.423 +00:00 [INF] Executed DbCommand (30ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-19 19:57:44.479 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-19 19:57:44.498 +00:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-19 19:57:44.614 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS u
+    WHERE u."Role" = 'ADMIN')
+2026-05-19 19:57:45.382 +00:00 [INF] Executed DbCommand (57ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Int32), @p2='?', @p3='?', @p4='?' (DbType = Boolean), @p5='?' (DbType = Boolean), @p6='?', @p7='?', @p8='?'], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedAt", "DepartmentId", "Designation", "Email", "IsActive", "IsApproved", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
+RETURNING "Id";
+2026-05-19 19:57:45.485 +00:00 [INF] Admin user seeded successfully: admin@example.com
+2026-05-19 19:57:45.913 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-19 19:57:46.000 +00:00 [WRN] No XML encryptor configured. Key {de7aa2b4-14de-4a5d-be8d-22d040e43bcc} may be persisted to storage in unencrypted form.
+2026-05-19 19:57:46.218 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-19 19:57:46.219 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-19 19:57:46.219 +00:00 [INF] Hosting environment: Development
+2026-05-19 19:57:46.220 +00:00 [INF] Content root path: /app
+2026-05-19 20:12:13.646 +00:00 [INF] Application is shutting down...
+2026-05-19 20:12:19.875 +00:00 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 20:12:20.249 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-19 20:12:20.314 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-19 20:12:20.328 +00:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-05-19 20:12:20.339 +00:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-19 20:12:20.347 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 20:12:20.358 +00:00 [INF] No migrations were applied. The database is already up to date.
+2026-05-19 20:12:20.712 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-19 20:12:20.753 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-19 20:12:20.782 +00:00 [INF] Executed DbCommand (21ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-19 20:12:20.848 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS u
+    WHERE u."Role" = 'ADMIN')
+2026-05-19 20:12:21.028 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-19 20:12:21.072 +00:00 [WRN] No XML encryptor configured. Key {29d49ffe-4ded-48ac-ba5e-d00e3064d542} may be persisted to storage in unencrypted form.
+2026-05-19 20:12:21.222 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-19 20:12:21.226 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-19 20:12:21.228 +00:00 [INF] Hosting environment: Development
+2026-05-19 20:12:21.230 +00:00 [INF] Content root path: /app
+2026-05-19 20:14:50.261 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-19 20:14:50.273 +00:00 [INF] Login attempt for email: a***@gmail.com
+2026-05-19 20:14:50.449 +00:00 [INF] Executed DbCommand (11ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 20:14:50.454 +00:00 [WRN] Login failed: User not found for email: a***@gmail.com
+2026-05-19 20:14:50.455 +00:00 [WRN] Login failed for admin@gmail.com: Invalid credentials.
+2026-05-19 20:14:50.494 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 371.2449 ms
+2026-05-19 20:14:54.398 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-19 20:14:54.399 +00:00 [INF] Login attempt for email: a***@gmail.com
+2026-05-19 20:14:54.418 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 20:14:54.420 +00:00 [WRN] Login failed: User not found for email: a***@gmail.com
+2026-05-19 20:14:54.421 +00:00 [WRN] Login failed for admin@gmail.com: Invalid credentials.
+2026-05-19 20:14:54.438 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 110.7880 ms
+2026-05-19 20:25:35.912 +00:00 [INF] Application is shutting down...
+2026-05-19 20:25:43.243 +00:00 [INF] Executed DbCommand (17ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 20:25:43.612 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-19 20:25:43.674 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-19 20:25:43.700 +00:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-05-19 20:25:43.705 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-19 20:25:43.710 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 20:25:43.728 +00:00 [INF] No migrations were applied. The database is already up to date.
+2026-05-19 20:25:44.080 +00:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-19 20:25:44.103 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-19 20:25:44.121 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-19 20:25:44.223 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS u
+    WHERE u."Role" = 'ADMIN')
+2026-05-19 20:25:44.423 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-19 20:25:44.451 +00:00 [WRN] No XML encryptor configured. Key {dd623845-043b-4825-bb5f-c7f01de2784e} may be persisted to storage in unencrypted form.
+2026-05-19 20:25:44.550 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-19 20:25:44.553 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-19 20:25:44.554 +00:00 [INF] Hosting environment: Development
+2026-05-19 20:25:44.555 +00:00 [INF] Content root path: /app
+2026-05-19 20:26:15.575 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-19 20:26:15.580 +00:00 [INF] Login attempt for email: a***@gmail.com
+2026-05-19 20:26:15.717 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 20:26:15.724 +00:00 [WRN] Login failed: User not found for email: a***@gmail.com
+2026-05-19 20:26:15.728 +00:00 [WRN] Login failed for admin@gmail.com: Invalid credentials.
+2026-05-19 20:26:15.762 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 291.4811 ms
+2026-05-19 20:26:18.254 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-19 20:26:18.255 +00:00 [INF] Login attempt for email: a***@gmail.com
+2026-05-19 20:26:18.266 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 20:26:18.268 +00:00 [WRN] Login failed: User not found for email: a***@gmail.com
+2026-05-19 20:26:18.269 +00:00 [WRN] Login failed for admin@gmail.com: Invalid credentials.
+2026-05-19 20:26:18.273 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 75.9193 ms
+2026-05-19 20:30:45.410 +00:00 [INF] Application is shutting down...
+2026-05-19 20:30:51.237 +00:00 [INF] Executed DbCommand (19ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 20:30:51.578 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-19 20:30:51.656 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL,
+    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
+);
+2026-05-19 20:30:51.684 +00:00 [INF] Acquiring an exclusive lock for migration application. See https://aka.ms/efcore-docs-migrations-lock for more information if this takes too long.
+2026-05-19 20:30:51.696 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+LOCK TABLE "__EFMigrationsHistory" IN ACCESS EXCLUSIVE MODE
+2026-05-19 20:30:51.703 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-05-19 20:30:51.721 +00:00 [INF] No migrations were applied. The database is already up to date.
+2026-05-19 20:30:52.068 +00:00 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Roles" AS r)
+2026-05-19 20:30:52.101 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Departments" AS d)
+2026-05-19 20:30:52.120 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Categories" AS c)
+2026-05-19 20:30:52.176 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS u
+    WHERE u."Role" = 'ADMIN')
+2026-05-19 20:30:52.327 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2026-05-19 20:30:52.375 +00:00 [WRN] No XML encryptor configured. Key {5dab8099-bd11-4cb1-a225-237f52b2b1db} may be persisted to storage in unencrypted form.
+2026-05-19 20:30:52.523 +00:00 [INF] Now listening on: http://[::]:5000
+2026-05-19 20:30:52.527 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-19 20:30:52.528 +00:00 [INF] Hosting environment: Development
+2026-05-19 20:30:52.528 +00:00 [INF] Content root path: /app
+2026-05-19 20:32:08.318 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-19 20:32:08.328 +00:00 [INF] Login attempt for email: a***@gmail.com
+2026-05-19 20:32:08.688 +00:00 [INF] Executed DbCommand (27ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 20:32:08.702 +00:00 [WRN] Login failed: User not found for email: a***@gmail.com
+2026-05-19 20:32:08.704 +00:00 [WRN] Login failed for admin@gmail.com: Invalid credentials.
+2026-05-19 20:32:08.761 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 557.7340 ms
+2026-05-19 20:32:10.930 +00:00 [INF] Login attempt for admin@gmail.com
+2026-05-19 20:32:10.938 +00:00 [INF] Login attempt for email: a***@gmail.com
+2026-05-19 20:32:10.956 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@email='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."CreatedAt", u."DepartmentId", u."Designation", u."Email", u."IsActive", u."IsApproved", u."PasswordHash", u."Role", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @email
+LIMIT 1
+2026-05-19 20:32:10.957 +00:00 [WRN] Login failed: User not found for email: a***@gmail.com
+2026-05-19 20:32:10.958 +00:00 [WRN] Login failed for admin@gmail.com: Invalid credentials.
+2026-05-19 20:32:10.961 +00:00 [INF] HTTP POST /api/auth/login responded 401 in 87.7869 ms
+2026-05-19 20:36:13.166 +00:00 [WRN] As of ""2026-05-19T20:35:55.8717277+00:00"", the heartbeat has been running for ""00:00:04.8276132"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2026-05-19 20:44:04.453 +00:00 [WRN] As of ""2026-05-19T20:41:55.3572005+00:00"", the heartbeat has been running for ""00:00:10.6387444"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2026-05-19 20:45:43.402 +00:00 [WRN] As of ""2026-05-19T20:45:09.7287539+00:00"", the heartbeat has been running for ""00:00:02.1959639"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2026-05-19 20:46:25.984 +00:00 [WRN] As of ""2026-05-19T20:46:25.8216211+00:00"", the heartbeat has been running for ""00:00:01.5110868"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2026-05-19 20:52:55.437 +00:00 [WRN] As of ""2026-05-19T20:50:25.8280274+00:00"", the heartbeat has been running for ""00:00:02.1357521"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2026-05-19 20:58:46.879 +00:00 [WRN] As of ""2026-05-19T20:58:36.3743399+00:00"", the heartbeat has been running for ""00:00:08.0379840"" which is longer than ""00:00:01"". This could be caused by thread pool starvation.
+2026-05-19 21:05:49.811 +00:00 [INF] Application is shutting down...

@@ -1,4 +1,5 @@
-﻿using invmgmt.web.Models;
+using invmgmt.web.Models.Enums;
+
 namespace invmgmt.web.Models
 {
     public class RequestItem
@@ -14,5 +15,6 @@ namespace invmgmt.web.Models
         public int QuantityRequested { get; set; }
         public int QuantityApproved { get; set; }
         public int QuantityIssued { get; set; }
+        public RequestItemStatus Status { get; set; } = RequestItemStatus.PendingWithIssuer;
     }
 }

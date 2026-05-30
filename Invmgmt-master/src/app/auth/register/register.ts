@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthApiService } from '../services/auth-api.service';
 
 @Component({
@@ -25,11 +25,11 @@ export class RegisterComponent {
   errorMsg = '';
   loading = false; //  new
 
-  constructor(private authApi: AuthApiService) { }
+  constructor(private authApi: AuthApiService, private router: Router) { }
 
   register() {
 
-    if (!this.username || !this.email || !this.password ||
+    if (!this.username || !this.email || !this.password || !this.designation ||
       !this.departmentId || !this.roleId) {
       this.errorMsg = "Please fill all fields";
       this.successMsg = '';
@@ -57,10 +57,12 @@ export class RegisterComponent {
     })
       .subscribe({
         next: (res) => {
-          this.successMsg = res.message || 'Your request is pending. Please wait for admin approval.';
+          this.successMsg = res.message || 'Your registration is pending. Please wait for admin approval before signing in.';
           this.errorMsg = '';
           this.resetForm();
           this.loading = false;
+          // Navigate to login with successMsg in query params
+          this.router.navigate(['/login'], { queryParams: { successMsg: this.successMsg } });
         },
         error: (err) => {
           let msg = ' Registration failed';

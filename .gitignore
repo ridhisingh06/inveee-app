@@ -1,0 +1,10 @@
+# Environment secrets (use .env.example as template)
+.env
+
+# Build artifacts
+node_modules/
+.vs/
+
+# Docker volumes (local dev)
+pgdata/
+seqdata/

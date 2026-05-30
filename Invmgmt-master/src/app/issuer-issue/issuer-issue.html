@@ -1,0 +1,110 @@
+<div class="issue-page">
+  <header class="page-header">
+    <div>
+      <h1>Issuer Dashboard</h1>
+      <p>Review pending items and issue or mark them not issued</p>
+    </div>
+
+    <div class="header-actions">
+      <input
+        class="search-input"
+        type="text"
+        [ngModel]="searchText"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="Search by user/email/item..."
+        [disabled]="loading"
+      />
+
+      <button class="refresh-btn" (click)="loadRequests(currentPage)" [disabled]="loading">
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          [class.animate-spin]="loading"
+        >
+          <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <div class="success-msg" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading requests pending with issuer...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
+    <p>No pending issuer items right now.</p>
+  </div>
+
+  <div class="table-shell" *ngIf="!loading && requests.length > 0">
+    <table class="requests-table">
+      <thead>
+        <tr>
+          <th>User Name</th>
+          <th>Pending Items</th>
+          <th class="qty-col">Total Qty</th>
+          <th class="date-col">Request Date</th>
+          <th class="status-col">Status</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let req of requests">
+          <td>
+            <div class="user-cell">
+              <div class="user-name">{{ req.username || ('User #' + req.userId) }}</div>
+              <div class="user-email" *ngIf="req.email">{{ req.email }}</div>
+            </div>
+          </td>
+
+          <td>
+            <ul class="items-list" *ngIf="req.items?.length">
+              <li *ngFor="let item of req.items">
+                <span class="item-name">{{ item.itemName }}</span>
+                <span class="item-qty">x {{ item.quantityRequested }}</span>
+                <span class="item-actions">
+                  <ng-container *ngIf="(statusMap[item.id] || item.status) === 'PendingAdminApproval'">
+                    <button class="issue-btn small-btn" disabled>Issued</button>
+                  </ng-container>
+                  <ng-container *ngIf="(statusMap[item.id] || item.status) === 'NotIssued'">
+                    <button class="reject-btn small-btn" disabled>Not Issued</button>
+                  </ng-container>
+                  <ng-container *ngIf="(statusMap[item.id] || item.status) !== 'PendingAdminApproval' && (statusMap[item.id] || item.status) !== 'NotIssued'">
+                    <button class="issue-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="issue(req.id, item.id)">
+                      <ng-container *ngIf="processingMap[item.id] === 'issuing'">Issuing...</ng-container>
+                      <ng-container *ngIf="processingMap[item.id] !== 'issuing'">Issue</ng-container>
+                    </button>
+                    <button class="reject-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="reject(req.id, item.id)">
+                      <ng-container *ngIf="processingMap[item.id] === 'rejecting'">Saving...</ng-container>
+                      <ng-container *ngIf="processingMap[item.id] !== 'rejecting'">Not Issue</ng-container>
+                    </button>
+                  </ng-container>
+                </span>
+              </li>
+            </ul>
+          </td>
+
+          <td class="qty-col">{{ getTotalQty(req) }}</td>
+          <td class="date-col">{{ req.createdAt | date:'mediumDate' }}</td>
+          <td class="status-col"><span [class]="getStatusClass(req.status)">{{ getStatusLabel(req.status) }}</span></td>
+          <td class="actions-col">Per item</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination-footer" *ngIf="totalPages > 1">
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">Prev</button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ total }} requests)</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+  </div>
+</div>

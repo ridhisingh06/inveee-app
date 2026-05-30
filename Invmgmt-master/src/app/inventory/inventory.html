@@ -1,79 +1,180 @@
-<app-navbar></app-navbar>
+<div class="inventory-page">
+  
+  <!-- ========== HEADER ========== -->
+  <header class="inventory-header">
+    <div class="header-title">
+      <h1>Inventory Management</h1>
+      <p>Monitor and manage system assets and stock levels</p>
+    </div>
+    <div class="header-actions" *ngIf="role === 'ADMIN'">
+      <!-- Future: Export button or something -->
+    </div>
+  </header>
 
-<div class="container">
+  <!-- ========== QUICK STATS ========== -->
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-icon blue">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="label">Total Assets</span>
+        <span class="value">{{ items.length }}</span>
+      </div>
+    </div>
 
-  <h2>Inventory Management</h2>
+    <div class="stat-card categories">
+      <div class="stat-icon green">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="label">Categories</span>
+        <span class="value">{{ categories.length }}</span>
+      </div>
+    </div>
 
-  <!-- ================= ADD ITEM (ADMIN ONLY UI) ================= -->
-  <div class="form" *ngIf="role === 'Admin'">
-
-    <input type="text"
-           placeholder="Item Name"
-           [(ngModel)]="itemName">
-
-    <select [(ngModel)]="selectedCategoryId">
-      <option value="">Select Category</option>
-      <option *ngFor="let c of categories" [value]="c.id">
-        {{ c.name }}
-      </option>
-    </select>
-
-    <input type="number"
-           placeholder="Total Quantity"
-           [(ngModel)]="quantity">
-
-    <button (click)="addItem()">
-      Add Item
-    </button>
-
+    <div class="stat-card low-stock">
+      <div class="stat-icon orange">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="label">Low Stock Alerts</span>
+        <span class="value">{{ lowStockCount }}</span>
+      </div>
+    </div>
   </div>
 
-  <!-- ================= SEARCH ================= -->
-  <div class="search">
-    <input type="text"
-           placeholder="Search items..."
-           [(ngModel)]="searchText">
-  </div>
+  <!-- ========== ADD NEW ITEM (ADMIN ONLY) ========== -->
+  <section class="add-item-section" *ngIf="role === 'ADMIN'">
+    <h2 class="section-title">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Register New Asset
+    </h2>
+    <div class="inventory-form">
+      <div class="form-group">
+        <label>Item Name</label>
+        <input type="text" placeholder="Enter item name..." [(ngModel)]="itemName">
+      </div>
 
-  <!-- ================= TABLE ================= -->
-  <table>
+      <div class="form-group">
+        <label>Category</label>
+        <select [(ngModel)]="selectedCategoryId">
+          <option value="">Select Category</option>
+          <option *ngFor="let c of categories" [value]="c.id">
+            {{ c.name }}
+          </option>
+        </select>
+      </div>
 
-    <thead>
-      <tr>
-        <th>S.No</th>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Available Qty</th>
-        <th>Total Qty</th>
-        <th *ngIf="role === 'Admin'">Actions</th>
-      </tr>
-    </thead>
+      <div class="form-group">
+        <label>Initial Quantity</label>
+        <input type="number" placeholder="0" [(ngModel)]="quantity">
+      </div>
 
-    <tbody>
-      <tr *ngFor="let item of filteredItems; let i = index">
+      <button class="btn-primary" (click)="addItem()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        Add to Inventory
+      </button>
+    </div>
+  </section>
 
-        <td>{{ i + 1 }}</td>
-        <td>{{ item.name }}</td>
-        <td>{{ item.category }}</td>
-        <td>{{ item.availableQuantity }}</td>
-        <td>{{ item.totalQuantity }}</td>
+  <!-- ========== INVENTORY LIST ========== -->
+  <section class="inventory-list-section">
+    <div class="table-toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input type="text" placeholder="Search inventory..." [(ngModel)]="searchText">
+      </div>
+      <div class="filter-actions">
+        <!-- Future: Category filter chips -->
+      </div>
+    </div>
 
-        <!-- ADMIN ACTIONS -->
-        <td *ngIf="role === 'Admin'">
-
-          <button (click)="editItem(item)">
-            Edit
-          </button>
-
-          <button (click)="deleteItem(item.id)">
-            Delete
-          </button>
-
-        </td>
-
-      </tr>
-    </tbody>
-
-  </table>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Item Details</th>
+            <th>Category</th>
+            <th>Available</th>
+            <th>Total Stock</th>
+            <th>Created Date</th>
+            <th>Status</th>
+            <th *ngIf="role === 'ADMIN'">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredItems; let i = index">
+            <td>
+              <div class="item-name-cell">
+                <span class="name">{{ item.name }}</span>
+                <span class="sub">ID: #{{ item.id }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-category" 
+                    [ngClass]="{
+                      'electronics': item.category === 'Electronics',
+                      'furniture': item.category === 'Furniture',
+                      'stationery': item.category === 'Stationery',
+                      'maintenance': item.category === 'Maintenance'
+                    }">
+                {{ item.category }}
+              </span>
+            </td>
+            <td>
+              <span [class]="item.availableQuantity < 10 ? 'text-danger font-bold' : ''">
+                {{ item.availableQuantity }}
+              </span>
+            </td>
+            <td>{{ item.totalQuantity }}</td>
+            <td>{{ item.createdDate | date:'mediumDate' }}</td>
+            <td>
+              <span class="badge" 
+                    [class.badge-success]="item.availableQuantity >= 20"
+                    [class.badge-warning]="item.availableQuantity < 20 && item.availableQuantity >= 5"
+                    [class.badge-danger]="item.availableQuantity < 5">
+                {{ item.availableQuantity >= 20 ? 'In Stock' : (item.availableQuantity >= 5 ? 'Low Stock' : 'Critical') }}
+              </span>
+            </td>
+            <td *ngIf="role === 'ADMIN'">
+              <div class="actions">
+                <button class="btn-icon" title="Edit Item" (click)="editItem(item)">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="btn-icon delete" title="Delete Item" (click)="deleteItem(item.id)">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
 </div>

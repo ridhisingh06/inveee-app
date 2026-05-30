@@ -1,92 +1,66 @@
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(120deg, #e0f2fe, #f5f6fa);
+:host {
+  display: block;
+  min-height: 100vh;
 }
 
-/*  Title */
 .brand-title {
-  font-size: 38px;
-  font-weight: bold;
+  margin: 3rem 0 2rem;
   text-align: center;
-  margin-top: 40px;
-  background: linear-gradient(45deg, #feda75, #d62976, #962fbf);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--primary), #818cf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/*  Card */
 .container {
-  width: 380px;
-  margin: 25px auto;
-  padding: 25px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  width: min(540px, calc(100% - 2rem));
+  margin: 0 auto 4rem;
+  padding: 3rem;
+  border-radius: 32px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  gap: 1.5rem;
 }
 
 h2 {
-  text-align: center;
-  margin-bottom: 10px;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
 }
 
-/* 🔥 Inputs */
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: 0.3s;
+.success, .error {
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
-  input:focus, select:focus {
-    border-color: #38bdf8;
-    outline: none;
-  }
-
-/* 🔥 Button */
-button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 15px;
-  background: #2ecc71;
-  border: none;
-  color: white;
-  font-weight: bold;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-  button:hover {
-    background: #27ae60;
-  }
-
-  button:disabled {
-    background: gray;
-    cursor: not-allowed;
-  }
-
-/*  Messages */
 .success {
-  color: green;
-  text-align: center;
-  margin-top: 10px;
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  color: #166534;
 }
 
 .error {
-  color: red;
-  text-align: center;
-  margin-top: 10px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #b91c1c;
 }
 
-/*  Login link */
 .login-link {
   text-align: center;
-  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
-  .login-link a {
-    color: #38bdf8;
-    text-decoration: none;
-  }
+.login-link a {
+  font-weight: 700;
+}
+

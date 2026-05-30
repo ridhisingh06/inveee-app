@@ -1,11 +1,7 @@
-﻿using invmgmt.web.Data;
 using invmgmt.web.DTOs;
-using invmgmt.web.Models;
-using invmgmt.web.Models.Enums;
+using invmgmt.web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using invmgmt.web.Utils;
 
 namespace invmgmt.web.Controllers
 {
@@ -13,147 +9,88 @@ namespace invmgmt.web.Controllers
     [ApiController]
     public class RegistrationController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IRegistrationService _registrationService;
+        private readonly ILogger<RegistrationController> _logger;
 
-        public RegistrationController(AppDbContext context)
+        public RegistrationController(IRegistrationService registrationService, ILogger<RegistrationController> logger)
         {
-            _context = context;
+            _registrationService = registrationService;
+            _logger = logger;
         }
 
-        // =========================
-        // REGISTER
-        // =========================
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDto req)
         {
-            if (req == null ||
-                string.IsNullOrWhiteSpace(req.Email) ||
-                string.IsNullOrWhiteSpace(req.Password) ||
-                string.IsNullOrWhiteSpace(req.Username))
+            try
             {
-                return BadRequest("Username, Email and Password are required.");
+                if (req == null) 
+                    return BadRequest(new { message = "Invalid request." });
+
+                if (!ModelState.IsValid)
+                    return BadRequest(new { message = "Validation failed", errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
+
+                var result = await _registrationService.RegisterAsync(req);
+                if (!result.Success) return BadRequest(new { message = result.Message });
+
+                return Ok(new { message = result.Message });
             }
-
-            var exists = await _context.RegistrationRequests
-                .AnyAsync(u => u.Email == req.Email);
-
-            if (exists)
-                return BadRequest("Email already registered");
-
-            var request = new RegistrationRequest
+            catch (Exception ex)
             {
-                Username = req.Username,
-                Email = req.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
-                DepartmentId = req.DepartmentId,
-                RoleId = req.RoleId,
-                Designation = req.Designation,
-                Status = RegistrationStatus.Pending,
-                IsActive = false,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.RegistrationRequests.Add(request);
-            await _context.SaveChangesAsync();
-
-            return Ok("Registration submitted");
+                _logger.LogError(ex, "Unexpected error during registration for {Email}", req?.Email);
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
-        // =========================
-        // PENDING (ADMIN)
-        // =========================
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         [HttpGet("pending")]
         public async Task<IActionResult> GetPending()
         {
-            var data = await _context.RegistrationRequests
-                .Where(x => x.Status == RegistrationStatus.Pending)
-                .Include(x => x.Role)
-                .Include(x => x.Department)
-                .Select(x => new PendingRegistrationDto
-                {
-                    Id = x.Id,
-                    Username = x.Username,
-                    Email = x.Email,
-                    Designation = x.Designation,
-                    Department = x.Department != null ? x.Department.Name : string.Empty,
-                    Role = x.Role != null ? x.Role.Name : string.Empty,
-                    Status = x.Status.ToString(),
-                    CreatedAt = x.CreatedAt
-                })
-                .ToListAsync();
-
-            return Ok(data);
+            try
+            {
+                var data = await _registrationService.GetPendingRequestsAsync();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error fetching pending requests");
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
-        // =========================
-        // APPROVE
-        // =========================
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         [HttpPost("approve/{id}")]
         public async Task<IActionResult> Approve(int id)
         {
-            var req = await _context.RegistrationRequests.FindAsync(id);
-
-            if (req == null)
-                return NotFound("Request not found");
-
-            var exists = await _context.Users
-                .AnyAsync(x => x.Email == req.Email);
-
-            if (exists)
-                return BadRequest("User already exists");
-
-            var user = new User
+            try
             {
-                Username = req.Username,
-                Email = req.Email,
-                PasswordHash = PasswordUtils.LooksLikeBcryptHash(req.PasswordHash)
-                    ? req.PasswordHash
-                    : BCrypt.Net.BCrypt.HashPassword(req.PasswordHash ?? string.Empty),
-                DepartmentId = req.DepartmentId,
-                Designation = req.Designation,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
+                var result = await _registrationService.ApproveAsync(id);
+                if (!result.Success) return BadRequest(new { message = result.Message });
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            _context.UserRoles.Add(new UserRole
+                return Ok(new { message = result.Message });
+            }
+            catch (Exception ex)
             {
-                UserId = user.Id,
-                RoleId = req.RoleId
-            });
-
-            req.Status = RegistrationStatus.Approved;
-            req.IsActive = true;
-            req.ApprovedAt = DateTime.UtcNow;
-            req.PasswordHash = user.PasswordHash;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("User approved");
+                _logger.LogError(ex, "Unexpected error approving registration {Id}", id);
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
 
-        // =========================
-        // REJECT
-        // =========================
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "ADMIN")]
         [HttpPost("reject/{id}")]
         public async Task<IActionResult> Reject(int id)
         {
-            var req = await _context.RegistrationRequests.FindAsync(id);
+            try
+            {
+                var result = await _registrationService.RejectAsync(id);
+                if (!result.Success) return BadRequest(new { message = result.Message });
 
-            if (req == null)
-                return NotFound("Request not found");
-
-            req.Status = RegistrationStatus.Rejected;
-            req.IsActive = false;
-
-            await _context.SaveChangesAsync();
-
-            return Ok("User rejected");
+                return Ok(new { message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error rejecting registration {Id}", id);
+                return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
         }
     }
 }

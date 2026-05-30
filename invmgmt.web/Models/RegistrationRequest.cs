@@ -1,6 +1,9 @@
-﻿using System;
+using System;
+using Microsoft.EntityFrameworkCore;
+
 namespace invmgmt.web.Models
 {
+    [Index(nameof(Status), nameof(CreatedAt))]
     public class RegistrationRequest
     {
         public int Id { get; set; }

@@ -1,25 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Item, ItemCategory } from '../models/item';
+import { HttpClient } from '@angular/common/http';
+import { Item } from '../models/item';
 import { CartService } from '../services/cart.service';
-
-const CATEGORIES: ItemCategory[] = ['Stationary', 'IT Items', 'Housekeeping'];
-
-const ALL_ITEMS: Item[] = [
-  { id: 'st-pen', name: 'Ball Pen', category: 'Stationary', description: 'Blue/Black ink' },
-  { id: 'st-notebook', name: 'Notebook', category: 'Stationary', description: 'A4 ruled' },
-  { id: 'st-marker', name: 'Marker', category: 'Stationary', description: 'Permanent marker' },
-
-  { id: 'it-mouse', name: 'Mouse', category: 'IT Items', description: 'Wireless mouse' },
-  { id: 'it-keyboard', name: 'Keyboard', category: 'IT Items', description: 'USB keyboard' },
-  { id: 'it-headset', name: 'Headset', category: 'IT Items', description: 'With mic' },
-
-  { id: 'hk-cleaner', name: 'Floor Cleaner', category: 'Housekeeping', description: '1L bottle' },
-  { id: 'hk-gloves', name: 'Disposable Gloves', category: 'Housekeeping', description: 'Pack of 100' },
-  { id: 'hk-wipes', name: 'Cleaning Wipes', category: 'Housekeeping', description: 'Multi-surface' }
-];
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-user-item-list',
@@ -28,17 +14,90 @@ const ALL_ITEMS: Item[] = [
   templateUrl: './user-item-list.html',
   styleUrls: ['./user-item-list.css']
 })
-export class UserItemListComponent {
-  categories = CATEGORIES;
-  selectedCategory: ItemCategory = 'Stationary';
+export class UserItemListComponent implements OnInit {
+  allItems: Item[] = [];
+  categories: string[] = [];
+  selectedCategory = '';
+  searchText = '';
+  loading = true;
+  errorMsg = '';
 
-  constructor(private cart: CartService) {}
+  /** Toast feedback for "Added to cart" */
+  readonly toast = signal<{ visible: boolean; message: string }>({ visible: false, message: '' });
 
+  constructor(
+    private cart: CartService,
+    private http: HttpClient
+  ) {}
+
+  ngOnInit() {
+    this.fetchItems();
+  }
+
+  fetchItems() {
+    this.loading = true;
+    this.errorMsg = '';
+    this.http.get<any[]>(`${environment.apiUrl}/inventory`)
+      .subscribe({
+        next: (items) => {
+          this.allItems = items.map(i => ({
+            id: i.id,
+            name: i.name,
+            category: i.category || 'Uncategorized',
+            description: i.description
+          }));
+
+          const uniqueCats = new Set<string>();
+          this.allItems.forEach(i => uniqueCats.add(i.category));
+          this.categories = ['All', ...Array.from(uniqueCats).sort()];
+          this.selectedCategory = 'All';
+          this.loading = false;
+        },
+        error: () => {
+          this.errorMsg = 'Failed to load items. Please try again.';
+          this.loading = false;
+        }
+      });
+  }
+
+  /** Items filtered by both category and search text */
   get items(): Item[] {
-    return ALL_ITEMS.filter((i) => i.category === this.selectedCategory);
+    let result = this.allItems;
+
+    if (this.selectedCategory && this.selectedCategory !== 'All') {
+      result = result.filter(i => i.category === this.selectedCategory);
+    }
+
+    if (this.searchText.trim()) {
+      const q = this.searchText.toLowerCase().trim();
+      result = result.filter(i =>
+        i.name.toLowerCase().includes(q) ||
+        (i.description?.toLowerCase().includes(q)) ||
+        i.category.toLowerCase().includes(q)
+      );
+    }
+
+    return result;
+  }
+
+  selectCategory(cat: string) {
+    this.selectedCategory = cat;
   }
 
   addToCart(item: Item) {
     this.cart.addItem(item, 1);
+    this.showToast(`${item.name} added to cart`);
+  }
+
+  /**
+   * Track by function for ngFor performance optimization
+   */
+  trackById(index: number, item: Item): string | number {
+    return item.id;
+  }
+
+  private showToast(message: string) {
+    this.toast.set({ visible: true, message });
+    setTimeout(() => this.toast.set({ visible: false, message: '' }), 2200);
   }
 }

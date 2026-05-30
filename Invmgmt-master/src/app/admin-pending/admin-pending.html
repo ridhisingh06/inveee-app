@@ -1,49 +1,112 @@
-<app-navbar></app-navbar>
-
 <section class="pending-page">
-  <div class="pending-header">
-    <div>
+  <!-- ========== HEADER ========== -->
+  <header class="pending-header">
+    <div class="header-copy">
       <p class="eyebrow">Admin Console</p>
-      <h1>Pending Requests</h1>
+      <h1>Pending Registrations</h1>
       <p class="subcopy">
-        Review new user registrations and decide who can access the system.
+        Review and authorize new system users to maintain security compliance.
       </p>
     </div>
 
-    <button class="refresh-btn" (click)="loadPendingRequests()">Refresh</button>
+    <button class="refresh-btn" (click)="loadPendingRequests()" [disabled]="loading">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+        [class.animate-spin]="loading">
+        <path d="M23 4v6h-6"></path>
+        <path d="M1 20v-6h6"></path>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      Refresh List
+    </button>
+  </header>
+
+  <!-- ========== MESSAGES ========== -->
+  <div class="success-message fade-in" *ngIf="successMsg">
+    {{ successMsg }}
+  </div>
+  <div class="error-message fade-in" *ngIf="errorMsg">
+    {{ errorMsg }}
   </div>
 
-  <p class="status-message" *ngIf="loading">Loading pending requests...</p>
-  <p class="success-message" *ngIf="successMsg">{{ successMsg }}</p>
-  <p class="error-message" *ngIf="errorMsg">{{ errorMsg }}</p>
-
-  <div class="empty-state" *ngIf="!loading && !errorMsg && pendingRequests.length === 0">
-    No pending registration requests right now.
+  <!-- ========== EMPTY STATE ========== -->
+  <div class="empty-state slide-up" *ngIf="!loading && !errorMsg && pendingRequests.length === 0">
+    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"
+      style="margin-bottom: 1rem; opacity: 0.5;">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <p>Zero pending requests. The system is fully synchronized.</p>
   </div>
 
-  <div class="table-shell" *ngIf="pendingRequests.length > 0">
+  <!-- ========== SKELETON LOADER ========== -->
+  <div class="table-shell slide-up" *ngIf="loading && pendingRequests.length === 0">
     <table>
       <thead>
         <tr>
-          <th>#</th>
           <th>Name</th>
           <th>Email</th>
-          <th>Role</th>
-          <th>Action</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let request of pendingRequests; let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ request.username }}</td>
-          <td>{{ request.email }}</td>
-          <td>{{ request.role || '-' }}</td>
+        <tr *ngFor="let dummy of [1, 2, 3, 4, 5]">
+          <td>
+            <div class="skeleton skeleton-text" style="width: 120px; height: 16px;"></div>
+          </td>
+          <td>
+            <div class="skeleton skeleton-text" style="width: 160px; height: 16px;"></div>
+          </td>
+          <td>
+            <div class="skeleton skeleton-text" style="width: 80px; height: 16px;"></div>
+          </td>
+          <td>
+            <div class="skeleton skeleton-badge" style="width: 75px; height: 24px;"></div>
+          </td>
           <td class="action-cell">
-            <button class="approve-btn" (click)="approve(request.id, request.roleId, request.departmentId)">Approve</button>
+            <div class="skeleton skeleton-btn" style="width: 80px; height: 32px; display: inline-block;"></div>
+            <div class="skeleton skeleton-btn"
+              style="width: 80px; height: 32px; display: inline-block; margin-left: 8px;"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== TABLE ========== -->
+  <div class="table-shell slide-up" *ngIf="pendingRequests.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let request of pendingRequests; trackBy: trackById">
+          <td><span class="username">{{ request.username }}</span></td>
+          <td><span class="email">{{ request.email }}</span></td>
+          <td><span class="date">{{ request.createdAt | date:'mediumDate' }}</span></td>
+          <td><span class="status-badge pending">{{ request.status || 'PENDING' }}</span></td>
+          <td class="action-cell">
+            <button class="approve-btn"
+              (click)="approve(request.id, request.roleId, request.departmentId)">Approve</button>
             <button class="reject-btn" (click)="reject(request.id)">Reject</button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <div class="pagination-footer">
+      <button class="load-more-btn" (click)="loadMore()" [disabled]="loadingMore">
+        <span *ngIf="!loadingMore">Load More</span>
+        <span *ngIf="loadingMore">Loading...</span>
+      </button>
+      <div class="records-count">Showing {{ pendingRequests.length }} of {{ totalRecords }}</div>
+    </div>
   </div>
 </section>

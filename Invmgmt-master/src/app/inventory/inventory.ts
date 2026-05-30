@@ -1,14 +1,15 @@
-import { Component, OnInit, DoCheck } from '@angular/core';
+import { Component, DestroyRef, OnInit, DoCheck } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { NavbarComponent } from '../navbar/navbar';
+import { AuthService } from '../auth/services/service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule,NavbarComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './inventory.html',
   styleUrls: ['./inventory.css']
 })
@@ -27,20 +28,26 @@ export class InventoryComponent implements OnInit, DoCheck {
 
   role: string = '';
 
-  constructor(private http: HttpClient) { }
+  get lowStockCount(): number {
+    return this.items.filter(item => item.availableQuantity < 10).length;
+  }
+
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+    private destroyRef: DestroyRef
+  ) {
+    this.role = this.auth.getRole() ?? '';
+  }
 
   ngOnInit() {
     this.getItems();
     this.getCategories();
 
     // 🔐 Role fetch from token
-    const token = localStorage.getItem('token');
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      this.role =
-        payload['role'] ||
-        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    }
+    this.auth.role$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((r) => {
+      this.role = r ?? '';
+    });
   }
 
   // 🔍 Auto filter
@@ -86,8 +93,8 @@ export class InventoryComponent implements OnInit, DoCheck {
   // =========================
   addItem() {
 
-    if (this.role !== 'Admin') {
-      alert("Only Admins can add inventory items");
+    if (this.role !== 'ADMIN' && this.role !== 'ISSUER') {
+      alert("Only Admins and Issuers can add inventory items");
       return;
     }
 
@@ -134,6 +141,10 @@ export class InventoryComponent implements OnInit, DoCheck {
   // UPDATE ITEM
   // =========================
   updateItem() {
+    if (this.role !== 'ADMIN' && this.role !== 'ISSUER') {
+      alert("Only Admins and Issuers can update inventory items");
+      return;
+    }
 
     const payload = {
       name: this.itemName,
@@ -158,6 +169,10 @@ export class InventoryComponent implements OnInit, DoCheck {
   // DELETE ITEM
   // =========================
   deleteItem(id: number) {
+    if (this.role !== 'ADMIN' && this.role !== 'ISSUER') {
+      alert("Only Admins and Issuers can delete inventory items");
+      return;
+    }
     this.http.delete(`${environment.apiUrl}/inventory/${id}`)
       .subscribe({
         next: () => {

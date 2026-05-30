@@ -1,0 +1,318 @@
+<!-- ===== TOAST ===== -->
+<div class="toast" [class.visible]="toast().visible" [class.toast-error]="toast().type === 'error'">
+  <span class="toast-icon">{{ toast().type === 'success' ? '✓' : '✕' }}</span>
+  {{ toast().message }}
+</div>
+
+<div class="pde-page">
+
+  <!-- ===== HEADER ===== -->
+  <header class="pde-header">
+    <div class="pde-title-wrap">
+      <div class="breadcrumb">
+        <span>Admin Dashboard</span>
+        <span class="sep">›</span>
+        <span>Personnel Management</span>
+        <span class="sep">›</span>
+        <span>System Registers</span>
+        <span class="sep">›</span>
+        <span class="active">Personnel Details – New Entry</span>
+      </div>
+      <h1>{{ isEditMode() ? 'Edit Personnel Entry' : 'New Personnel Entry' }}</h1>
+      <p>{{ isEditMode() ? 'Update the selected personnel record and save changes.' : 'Complete all required fields to register a new personnel record.' }}</p>
+    </div>
+    <button class="back-btn" (click)="goBack()" type="button">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back
+    </button>
+  </header>
+
+  <!-- ===== FORM ===== -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="pde-form" id="personnel-new-entry-form">
+
+    <!-- ══════════════════════════════════════════
+         SECTION 1 – PERSONAL INFO
+    ══════════════════════════════════════════ -->
+    <section class="form-section">
+      <div class="section-head">
+        <div class="section-icon blue">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div>
+          <h2>Personal Information</h2>
+          <p>Basic identification and contact details</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- Name -->
+        <div class="field-wrap">
+          <label for="name" class="field-label">Full Name <span class="req">*</span></label>
+          <input id="name" type="text" formControlName="name" placeholder="e.g. Ahmad bin Sulaiman"
+            class="field-input" [class.invalid]="hasError('name')">
+          <div class="error-msg" *ngIf="hasError('name')">
+            <ng-container *ngIf="c('name').hasError('required')">Name is required.</ng-container>
+            <ng-container *ngIf="c('name').hasError('minlength')">Minimum 2 characters.</ng-container>
+          </div>
+        </div>
+
+        <!-- IC Number -->
+        <div class="field-wrap">
+          <label for="icNumber" class="field-label">IC Number <span class="req">*</span></label>
+          <input id="icNumber" type="text" formControlName="icNumber" placeholder="e.g. 900101-12-3456"
+            class="field-input" [class.invalid]="hasError('icNumber')">
+          <div class="field-hint">Format: YYMMDD-SS-NNNN</div>
+          <div class="error-msg" *ngIf="hasError('icNumber')">
+            <ng-container *ngIf="c('icNumber').hasError('required')">IC Number is required.</ng-container>
+            <ng-container *ngIf="c('icNumber').hasError('pattern')">Must match format: 900101-12-3456</ng-container>
+          </div>
+        </div>
+
+        <!-- Birth Date -->
+        <div class="field-wrap">
+          <label for="birthDate" class="field-label">Birth Date <span class="req">*</span></label>
+          <input id="birthDate" type="date" formControlName="birthDate" [max]="today"
+            class="field-input" [class.invalid]="hasError('birthDate')">
+          <div class="error-msg" *ngIf="hasError('birthDate')">
+            <ng-container *ngIf="c('birthDate').hasError('required')">Birth date is required.</ng-container>
+            <ng-container *ngIf="c('birthDate').hasError('notPastDate')">Must be a past date.</ng-container>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="field-wrap">
+          <label for="email" class="field-label">Email Address <span class="req">*</span></label>
+          <input id="email" type="email" formControlName="email" placeholder="e.g. ahmad@gov.my"
+            class="field-input" [class.invalid]="hasError('email')">
+          <div class="error-msg" *ngIf="hasError('email')">
+            <ng-container *ngIf="c('email').hasError('required')">Email is required.</ng-container>
+            <ng-container *ngIf="c('email').hasError('email')">Enter a valid email address.</ng-container>
+          </div>
+        </div>
+
+        <!-- Residential Phone -->
+        <div class="field-wrap">
+          <label for="residentialPhone" class="field-label">Residential Phone <span class="req">*</span></label>
+          <input id="residentialPhone" type="text" formControlName="residentialPhone" placeholder="e.g. 03-12345678"
+            class="field-input" [class.invalid]="hasError('residentialPhone')">
+          <div class="error-msg" *ngIf="hasError('residentialPhone')">
+            <ng-container *ngIf="c('residentialPhone').hasError('required')">Phone is required.</ng-container>
+            <ng-container *ngIf="c('residentialPhone').hasError('pattern')">Enter a valid phone number.</ng-container>
+          </div>
+        </div>
+
+        <!-- Office Phone -->
+        <div class="field-wrap">
+          <label for="officePhone" class="field-label">Office Phone</label>
+          <input id="officePhone" type="text" formControlName="officePhone" placeholder="e.g. 03-88001234"
+            class="field-input" [class.invalid]="hasError('officePhone')">
+          <div class="error-msg" *ngIf="hasError('officePhone')">
+            <ng-container *ngIf="c('officePhone').hasError('pattern')">Enter a valid phone number.</ng-container>
+          </div>
+        </div>
+
+        <!-- Residential Address (full width) -->
+        <div class="field-wrap full-width">
+          <label for="residentialAddress" class="field-label">Residential Address <span class="req">*</span></label>
+          <textarea id="residentialAddress" formControlName="residentialAddress" rows="3"
+            placeholder="Enter full residential address..." class="field-input textarea"
+            [class.invalid]="hasError('residentialAddress')"></textarea>
+          <div class="error-msg" *ngIf="hasError('residentialAddress')">
+            <ng-container *ngIf="c('residentialAddress').hasError('required')">Address is required.</ng-container>
+            <ng-container *ngIf="c('residentialAddress').hasError('minlength')">Minimum 10 characters.</ng-container>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 2 – EMPLOYMENT INFO
+    ══════════════════════════════════════════ -->
+    <section class="form-section">
+      <div class="section-head">
+        <div class="section-icon green">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+          </svg>
+        </div>
+        <div>
+          <h2>Employment Information</h2>
+          <p>Role, department and organisational placement</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- Designation -->
+        <div class="field-wrap">
+          <label for="designation" class="field-label">Designation <span class="req">*</span></label>
+          <input id="designation" type="text" formControlName="designation" placeholder="e.g. Senior Executive"
+            class="field-input" [class.invalid]="hasError('designation')">
+          <div class="error-msg" *ngIf="hasError('designation')">
+            <ng-container *ngIf="c('designation').hasError('required')">Designation is required.</ng-container>
+          </div>
+        </div>
+
+        <!-- Department -->
+        <div class="field-wrap">
+          <label for="department" class="field-label">Department / Stores Section <span class="req">*</span></label>
+          <select id="department" formControlName="department" class="field-input field-select"
+            [class.invalid]="hasError('department')">
+            <option value="" disabled selected>Select department…</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+          <div class="error-msg" *ngIf="hasError('department')">
+            Department is required.
+          </div>
+        </div>
+
+        <!-- Building -->
+        <div class="field-wrap">
+          <label for="building" class="field-label">Building <span class="req">*</span></label>
+          <input id="building" type="text" formControlName="building" placeholder="e.g. Block A, Main HQ"
+            class="field-input" [class.invalid]="hasError('building')">
+          <div class="error-msg" *ngIf="hasError('building')">
+            <ng-container *ngIf="c('building').hasError('required')">Building is required.</ng-container>
+          </div>
+        </div>
+
+        <!-- Reporting Officer -->
+        <div class="field-wrap">
+          <label for="reportingOfficer" class="field-label">Reporting Officer <span class="req">*</span></label>
+          <input id="reportingOfficer" type="text" formControlName="reportingOfficer" placeholder="e.g. Dato' Seri Razak"
+            class="field-input" [class.invalid]="hasError('reportingOfficer')">
+          <div class="error-msg" *ngIf="hasError('reportingOfficer')">
+            <ng-container *ngIf="c('reportingOfficer').hasError('required')">Reporting officer is required.</ng-container>
+          </div>
+        </div>
+
+        <!-- Is Stores Incharge? -->
+        <div class="field-wrap">
+          <label class="field-label">Is Stores Incharge? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-label" [class.selected]="form.get('isStoresIncharge')?.value === 'yes'">
+              <input type="radio" formControlName="isStoresIncharge" value="yes" id="incharge-yes"> Yes
+            </label>
+            <label class="radio-label" [class.selected]="form.get('isStoresIncharge')?.value === 'no'">
+              <input type="radio" formControlName="isStoresIncharge" value="no" id="incharge-no"> No
+            </label>
+          </div>
+        </div>
+
+        <!-- Job Description (full width) -->
+        <div class="field-wrap full-width">
+          <label for="jobDescription" class="field-label">Job Description <span class="req">*</span></label>
+          <textarea id="jobDescription" formControlName="jobDescription" rows="4"
+            placeholder="Describe key responsibilities and duties…"
+            class="field-input textarea" [class.invalid]="hasError('jobDescription')"></textarea>
+          <div class="error-msg" *ngIf="hasError('jobDescription')">
+            <ng-container *ngIf="c('jobDescription').hasError('required')">Job description is required.</ng-container>
+            <ng-container *ngIf="c('jobDescription').hasError('minlength')">Minimum 10 characters.</ng-container>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         SECTION 3 – ID CARD INFO
+    ══════════════════════════════════════════ -->
+    <section class="form-section">
+      <div class="section-head">
+        <div class="section-icon amber">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <circle cx="8" cy="12" r="2"></circle>
+            <path d="M14 10h4M14 14h3"></path>
+          </svg>
+        </div>
+        <div>
+          <h2>ID Card Information</h2>
+          <p>Access card details and photo upload</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- ID Card Number -->
+        <div class="field-wrap">
+          <label for="idCardNumber" class="field-label">ID Card Number <span class="req">*</span></label>
+          <input id="idCardNumber" type="text" formControlName="idCardNumber" placeholder="e.g. IMS-20240001"
+            class="field-input" [class.invalid]="hasError('idCardNumber')">
+          <div class="error-msg" *ngIf="hasError('idCardNumber')">
+            <ng-container *ngIf="c('idCardNumber').hasError('required')">ID Card Number is required.</ng-container>
+            <ng-container *ngIf="c('idCardNumber').hasError('pattern')">Alphanumeric, 4-20 characters.</ng-container>
+          </div>
+        </div>
+
+        <!-- ID Card Expiry Date -->
+        <div class="field-wrap">
+          <label for="idCardExpiryDate" class="field-label">ID Card Expiry Date <span class="req">*</span></label>
+          <input id="idCardExpiryDate" type="date" formControlName="idCardExpiryDate" [min]="today"
+            class="field-input" [class.invalid]="hasError('idCardExpiryDate')">
+          <div class="error-msg" *ngIf="hasError('idCardExpiryDate')">
+            <ng-container *ngIf="c('idCardExpiryDate').hasError('required')">Expiry date is required.</ng-container>
+            <ng-container *ngIf="c('idCardExpiryDate').hasError('notFutureDate')">Must be a future date.</ng-container>
+          </div>
+        </div>
+
+        <!-- Photo Upload (full width) -->
+        <div class="field-wrap full-width">
+          <label class="field-label">Upload Photo (JPG only, max 2 MB) <span class="req">*</span></label>
+          <div class="photo-upload-row">
+            <!-- Drop zone -->
+            <label for="photo" class="photo-dropzone" [class.has-photo]="photoPreviewUrl()">
+              <input id="photo" type="file" accept=".jpg,.jpeg" (change)="onPhotoChange($event)" hidden>
+              <ng-container *ngIf="!photoPreviewUrl()">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span>Click to choose JPG</span>
+                <small>or drag & drop here</small>
+              </ng-container>
+              <img *ngIf="photoPreviewUrl()" [src]="photoPreviewUrl()" alt="Preview" class="photo-preview">
+            </label>
+            <!-- Remove button -->
+            <button *ngIf="photoPreviewUrl()" type="button" class="remove-photo-btn" (click)="removePhoto()">
+              ✕ Remove
+            </button>
+          </div>
+          <div class="error-msg" *ngIf="hasError('photo')">
+            <ng-container *ngIf="c('photo').hasError('required')">Photo is required.</ng-container>
+            <ng-container *ngIf="c('photo').hasError('invalidType')">Only JPG/JPEG files are accepted.</ng-container>
+            <ng-container *ngIf="c('photo').hasError('fileTooLarge')">File must be under 2 MB.</ng-container>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== ACTION BUTTONS ===== -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-ghost" (click)="goBack()" id="btn-back-dashboard">
+        ← Dashboard
+      </button>
+      <div class="action-right">
+        <button type="button" class="btn btn-outline" (click)="onReset()" id="btn-reset-form">
+          Reset Form
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isSubmitting()" id="btn-save-personnel">
+          <span *ngIf="isSubmitting()" class="spinner"></span>
+          {{ isSubmitting() ? (isEditMode() ? 'Updating…' : 'Saving…') : (isEditMode() ? 'Update Personnel' : 'Save Personnel') }}
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>

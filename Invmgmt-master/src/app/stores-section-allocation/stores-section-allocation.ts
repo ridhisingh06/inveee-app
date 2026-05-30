@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, firstValueFrom, takeUntil } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { NavbarComponent } from '../navbar/navbar';
 
 type Mode = 'modify' | 'delete';
 
@@ -22,7 +21,7 @@ type EmployeeLookup = { code: string; name: string };
 @Component({
   selector: 'app-stores-section-allocation',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './stores-section-allocation.html',
   styleUrls: ['./stores-section-allocation.css']
 })

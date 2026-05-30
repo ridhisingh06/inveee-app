@@ -9,8 +9,18 @@ export interface PendingUser {
   email: string;
   role: string;
   status: string;
-  roleId: number; // Added roleId
-  departmentId: number; // Added departmentId
+  roleId: number;
+  departmentId: number;
+  departmentName?: string;
+  department?: string;
+  createdAt?: string;
+}
+
+export interface PaginatedPendingResponse {
+  totalRecords: number;
+  totalPages: number;
+  currentPage: number;
+  data: PendingUser[];
 }
 
 @Injectable({
@@ -19,8 +29,11 @@ export interface PendingUser {
 export class AdminPendingService {
   constructor(private http: HttpClient) {}
 
-  getPendingUsers(): Observable<PendingUser[]> {
-    return this.http.get<PendingUser[]>(`${environment.apiUrl}/admin/pending-users`);
+  getPendingUsers(afterId: number | null = null, limit: number = 10): Observable<PaginatedPendingResponse> {
+    const afterParam = afterId ? `&afterId=${afterId}` : '';
+    return this.http.get<PaginatedPendingResponse>(
+      `${environment.apiUrl}/admin/pending-users-cursor?limit=${limit}${afterParam}`
+    );
   }
 
   approveUser(id: number, payload: { roleId: number; departmentId: number }): Observable<{ message: string }> {

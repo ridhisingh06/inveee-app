@@ -1,56 +1,124 @@
 <nav class="navbar">
-
-  <!-- Logo -->
-  <div class="brand">
+  <!-- Left Section: Sidebar Toggle + Logos -->
+  <div class="navbar-left">
     <button
-      *ngIf="role === 'Admin' && showSidebarToggle"
       class="sidebar-toggle"
       type="button"
       (click)="toggleSidebar()"
       aria-label="Toggle admin sidebar"
+      [class.hidden]="!(role === 'ADMIN' && showSidebarToggle)"
+      [attr.aria-hidden]="!(role === 'ADMIN' && showSidebarToggle) ? 'true' : null"
+      [attr.tabindex]="!(role === 'ADMIN' && showSidebarToggle) ? -1 : null"
     >
-      <span class="burger" aria-hidden="true"></span>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+      </svg>
     </button>
-    <div class="logo">Stationary Store</div>
+    <img src="assets/images/govt.india.jpeg" alt="Govt of India" class="nav-logo">
+    <img src="assets/images/nic.logo.jpeg" alt="NIC" class="nav-logo">
   </div>
 
-  <!-- Links (same for all roles) -->
-  <div class="nav-links">
+  <!-- Center Section: Title & Navigation Links -->
+  <div class="navbar-center">
+    <h1 class="navbar-title">Inventory Management System</h1>
+    <nav class="nav-links">
+      <a 
+        [routerLink]="role === 'ADMIN' ? '/admin-dashboard' : role === 'USER' ? '/user-dashboard' : role === 'ISSUER' ? '/issuer-dashboard' : '/login'" 
+        routerLinkActive="active"
+        class="nav-link">
+        Dashboard
+      </a>
+      
+      <a routerLink="/inventory" routerLinkActive="active" class="nav-link">
+        Inventory
+      </a>
 
-    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      <!-- User Role Links -->
+      <a 
+        *ngIf="role === 'USER'"
+        routerLink="/user-dashboard/request-items" 
+        routerLinkActive="active"
+        class="nav-link">
+        Request Items
+      </a>
+      <a 
+        *ngIf="role === 'USER'"
+        routerLink="/user-dashboard/check-status" 
+        routerLinkActive="active"
+        class="nav-link">
+        Status
+      </a>
 
-    <!-- User links -->
-    <a *ngIf="role === 'User'" routerLink="/user-dashboard/request-items" routerLinkActive="active">Request Items</a>
-    <a *ngIf="role === 'User'" routerLink="/user-dashboard/check-status" routerLinkActive="active">Check Status</a>
+      <!-- Admin Role Links -->
+      <a 
+        *ngIf="role === 'ADMIN'"
+        routerLink="/pending-requests" 
+        routerLinkActive="active"
+        class="nav-link">
+        Requests
+      </a>
+      <a 
+        *ngIf="role === 'ADMIN'"
+        routerLink="/pending-approvals" 
+        routerLinkActive="active"
+        class="nav-link">
+        Pending Approvals
+      </a>
+      <a 
+        *ngIf="role === 'ADMIN'"
+        routerLink="/personnel-management" 
+        routerLinkActive="active"
+        class="nav-link">
+        Personnel
+      </a>
 
-    <!-- Admin links -->
-    <a *ngIf="role === 'Admin'" routerLink="/pending-requests" routerLinkActive="active">Pending Requests</a>
-    <a *ngIf="role === 'Admin'" routerLink="/personnel-management" routerLinkActive="active">Personnel Management</a>
+      <!-- Issuer Role Links -->
+      <a 
+        *ngIf="role === 'ISSUER'"
+        routerLink="/approved" 
+        routerLinkActive="active"
+        class="nav-link">
+        Approved
+      </a>
+      <a 
+        *ngIf="role === 'ISSUER'"
+        routerLink="/issue" 
+        routerLinkActive="active"
+        class="nav-link">
+        Issues
+      </a>
+    </nav>
+  </div>
 
-    <!-- Issuer links -->
-    <a *ngIf="role === 'Issuer'" routerLink="/approved" routerLinkActive="active">Approved</a>
-    <a *ngIf="role === 'Issuer'" routerLink="/issue" routerLinkActive="active">Issue</a>
-
-    <button
-      *ngIf="role === 'User'"
-      class="cart-btn"
-      type="button"
-      (click)="openCart()"
-      aria-label="Open cart"
-    >
-      <span class="cart-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="20" height="20">
-          <path
-            d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM6.2 6l.9 5h10.3l1.6-5H6.2zM4 4h2l.4 2h13.5c.7 0 1.2.7 1 1.4l-2.2 6.6c-.2.6-.8 1-1.4 1H7.2l-.2 1H19v2H6c-.7 0-1.2-.6-1.1-1.3L6 14 4.8 6H4V4z"
-            fill="currentColor"
-          />
+  <!-- Right Section: Actions + Logos -->
+  <div class="navbar-right">
+    <div class="nav-logos-right">
+      <img src="assets/images/bapuChasma.jpeg" alt="Swachh Bharat" class="nav-logo">
+      <img src="assets/images/digitalIndia.logo.jpeg" alt="Digital India" class="nav-logo">
+    </div>
+    <div class="right-actions">
+      <button
+        class="cart-btn"
+        type="button"
+        (click)="openCart()"
+        aria-label="Open shopping cart"
+        *ngIf="role === 'USER'"
+        title="Shopping Cart"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM6.2 6l.9 5h10.3l1.6-5H6.2zM4 4h2l.4 2h13.5c.7 0-1.2.7 1 1.4l-2.2 6.6c-.2.6-.8 1-1.4 1H7.2l-.2 1H19v2H6c-.7 0-1.2-.6-1.1-1.3L6 14 4.8 6H4V4z"/>
         </svg>
-      </span>
-      <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
-    </button>
+        <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+      </button>
 
-    <button class="logout-btn" (click)="logout()">Logout</button>
+      <div class="navbar-divider"></div>
 
+      <button class="logout-btn" (click)="logout()" title="Sign out">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M16 13v-2H7V8l-5 4 5 4v-3h9zm-2-7a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1V6z"/>
+        </svg>
+        <span class="logout-text">Logout</span>
+      </button>
+    </div>
   </div>
 </nav>

@@ -1,48 +1,40 @@
 <section class="login-shell">
-  <div class="login-panel">
+  <div class="login-panel bento-card">
     <div class="login-copy">
-      <p class="eyebrow">Inventory Management</p>
-      <h1>Sign in to continue your workflow.</h1>
-      
 
-      
+      <h1 class="animate-in">Inventory Management System</h1>
+
     </div>
 
     <form class="login-card" (ngSubmit)="login()">
       <div class="card-header">
-        <h2>Welcome back</h2>
-        <p>Use your registered email and password to enter the dashboard.</p>
+        <h2 class="text-gradient">Access Granted?</h2>
+
       </div>
 
       <label class="field">
-        <span>Email</span>
-        <input
-          [(ngModel)]="email"
-          name="email"
-          type="email"
-          autocomplete="email"
-          placeholder="Enter your email"
-        >
+        <span>Enter Your Email</span>
+        <input [(ngModel)]="email" name="email" type="email" autocomplete="email" placeholder="user@stationary.io" [disabled]="isLoading">
       </label>
 
       <label class="field">
-        <span>Password</span>
-        <input
-          [(ngModel)]="password"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="Enter your password"
-        >
+        <span>Enter Your Password </span>
+        <input [(ngModel)]="password" name="password" type="password" autocomplete="current-password"
+          placeholder="••••••••" [disabled]="isLoading">
       </label>
 
+      <p class="success" *ngIf="successMsg">{{ successMsg }}</p>
       <p class="error" *ngIf="errorMsg">{{ errorMsg }}</p>
 
-      <button type="submit">Login</button>
+      <button class="btn-neon login-btn" type="submit" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Sign In</span>
+        <span *ngIf="isLoading && !isRetrying">Signing In...</span>
+        <span *ngIf="isRetrying">Retrying Connection...</span>
+      </button>
 
       <p class="register-link">
-        New here?
-        <a routerLink="/register">Create an account</a>
+        New Here?
+        <a routerLink="/register">Register Here</a>
       </p>
     </form>
   </div>

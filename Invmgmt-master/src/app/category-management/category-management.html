@@ -1,0 +1,89 @@
+<div class="category-page">
+  
+  <header class="category-header">
+    <div class="header-title">
+      <h1>Category Management</h1>
+      <p>View linked items, distribution, and stock level summaries by category</p>
+    </div>
+  </header>
+
+  <div class="stats-grid" *ngIf="!loading && !errorMsg">
+    <div class="stat-card total">
+      <div class="stat-icon blue">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="label">Total Categories</span>
+        <span class="value">{{ totalCategories }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card items">
+      <div class="stat-icon green">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="label">Linked Items</span>
+        <span class="value">{{ totalLinkedItems }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card stock">
+      <div class="stat-icon orange">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <span class="label">Total Stock Units</span>
+        <span class="value">{{ totalStockUnits }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading categories data...</p>
+  </div>
+
+  <div class="error-state" *ngIf="errorMsg">
+    <p>{{ errorMsg }}</p>
+    <button (click)="fetchCategories()">Retry</button>
+  </div>
+
+  <section class="category-list-section" *ngIf="!loading && !errorMsg">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Category Name</th>
+            <th>Items Linked</th>
+            <th>Total Stock Available</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of categories">
+            <td>#{{ cat.id }}</td>
+            <td class="cat-name">{{ cat.name }}</td>
+            <td>
+              <span class="badge" [class.badge-empty]="cat.itemCount === 0" [class.badge-active]="cat.itemCount > 0">
+                {{ cat.itemCount }} items
+              </span>
+            </td>
+            <td>
+              <span class="stock-value" [class.low-stock]="cat.totalStock < 10">
+                {{ cat.totalStock }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
