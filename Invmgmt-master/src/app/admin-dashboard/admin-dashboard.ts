@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ADMIN_NAV_GROUPS } from '../models/nav-constants';
 import { environment } from '../../environments/environment';
 
@@ -19,10 +21,13 @@ interface SummaryData {
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   search = '';
   readonly navGroups = ADMIN_NAV_GROUPS;
   summary: SummaryData | null = null;
+  loadingError = '';
+
+  private destroy$ = new Subject<void>();
 
   constructor(private http: HttpClient) {}
 
@@ -30,14 +35,26 @@ export class AdminDashboardComponent implements OnInit {
     this.fetchSummary();
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Fetch admin dashboard summary with proper error handling
+   */
   fetchSummary() {
+    this.loadingError = '';
+    
     this.http.get<SummaryData>(`${environment.apiUrl}/admin/summary`)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
           this.summary = data;
         },
         error: (err) => {
-          console.error('Error fetching admin summary stats:', err);
+          console.error('[AdminDashboardComponent] Error fetching summary:', err);
+          this.loadingError = err?.error?.message || 'Failed to load dashboard summary. Please try again.';
         }
       });
   }

@@ -313,13 +313,17 @@ namespace invmgmt.web.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Items");
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Items", "public");
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Personnel", b =>

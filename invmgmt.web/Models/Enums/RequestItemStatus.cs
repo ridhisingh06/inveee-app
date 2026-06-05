@@ -6,6 +6,7 @@ namespace invmgmt.web.Models.Enums
         NotIssued = 1,
         PendingAdminApproval = 2,
         Approved = 3,
-        Rejected = 4
+        Rejected = 4,
+        Received = 5
     }
 }

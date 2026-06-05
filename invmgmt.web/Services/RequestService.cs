@@ -110,16 +110,20 @@ namespace invmgmt.web.Services
 
         public async Task<(bool Success, string Message)> ConfirmReceivedAsync(int requestId, int userId)
         {
-            var request = await _requestRepo.GetByIdAsync(requestId);
+            var request = await _requestRepo.GetByIdWithItemsAsync(requestId);
             if (request == null || request.UserId != userId)
                 return (false, "Request not found");
 
             if (request.Status != RequestStatus.Approved)
                 return (false, "Only approved requests can be marked as received");
 
+            // Mark all Approved items as Received at item level
+            foreach (var item in request.RequestItems.Where(ri => ri.Status == RequestItemStatus.Approved))
+                item.Status = RequestItemStatus.Received;
+
             request.Status = RequestStatus.Received;
             request.UpdatedAt = DateTime.UtcNow;
-            
+
             await _requestRepo.UpdateRequestAsync(request);
             await _requestRepo.SaveChangesAsync();
 

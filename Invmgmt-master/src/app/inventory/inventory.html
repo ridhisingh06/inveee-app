@@ -6,10 +6,28 @@
       <h1>Inventory Management</h1>
       <p>Monitor and manage system assets and stock levels</p>
     </div>
-    <div class="header-actions" *ngIf="role === 'ADMIN'">
-      <!-- Future: Export button or something -->
+    <div class="header-actions" *ngIf="role === 'ADMIN' || role === 'ISSUER'">
+      <!-- Action buttons -->
     </div>
   </header>
+
+  <!-- ========== MESSAGES ========== -->
+  <div class="message-container">
+    <div class="success-message" *ngIf="successMsg" [@slideIn]>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      {{ successMsg }}
+    </div>
+    <div class="error-message" *ngIf="errorMsg" [@slideIn]>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      {{ errorMsg }}
+    </div>
+  </div>
 
   <!-- ========== QUICK STATS ========== -->
   <div class="stats-grid">
@@ -55,24 +73,28 @@
   </div>
 
   <!-- ========== ADD NEW ITEM (ADMIN ONLY) ========== -->
-  <section class="add-item-section" *ngIf="role === 'ADMIN'">
+  <section class="add-item-section" *ngIf="(role === 'ADMIN' || role === 'ISSUER')">
     <h2 class="section-title">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
-      Register New Asset
+      {{ isEditing() ? 'Edit Asset' : 'Register New Asset' }}
     </h2>
     <div class="inventory-form">
       <div class="form-group">
         <label>Item Name</label>
         <input type="text" placeholder="Enter item name..." [(ngModel)]="itemName">
+        <!-- ✅ Show duplicate warning if item name already exists -->
+        <div class="duplicate-warning" *ngIf="getDuplicateItemWarning()">
+          {{ getDuplicateItemWarning() }}
+        </div>
       </div>
 
       <div class="form-group">
         <label>Category</label>
         <select [(ngModel)]="selectedCategoryId">
-          <option value="">Select Category</option>
+          <option [value]="null">Select Category</option>
           <option *ngFor="let c of categories" [value]="c.id">
             {{ c.name }}
           </option>
@@ -81,96 +103,194 @@
 
       <div class="form-group">
         <label>Initial Quantity</label>
-        <input type="number" placeholder="0" [(ngModel)]="quantity">
+        <input type="number" placeholder="0" [(ngModel)]="quantity" min="0">
       </div>
 
-      <button class="btn-primary" (click)="addItem()">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        Add to Inventory
-      </button>
+      <div class="form-actions">
+        <button 
+          class="btn-primary" 
+          (click)="isEditing() ? updateItem() : addItem()"
+          [disabled]="loading || isSubmitDisabledByDuplicate()"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          {{ isEditing() ? 'Update Item' : 'Add to Inventory' }}
+        </button>
+        <button 
+          class="btn-secondary" 
+          (click)="cancelEdit()"
+          *ngIf="isEditing()"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   </section>
 
+  <!-- ========== LOADING STATE ========== -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading inventory...</p>
+  </div>
+
   <!-- ========== INVENTORY LIST ========== -->
-  <section class="inventory-list-section">
+  <section class="inventory-list-section" *ngIf="!loading">
     <div class="table-toolbar">
       <div class="search-box">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"></circle>
           <path d="m21 21-4.35-4.35"></path>
         </svg>
-        <input type="text" placeholder="Search inventory..." [(ngModel)]="searchText">
+        <input 
+          type="text" 
+          placeholder="Search inventory by name or ID..." 
+          [(ngModel)]="searchText"
+          (input)="onSearchChange($event.target.value)"
+        >
       </div>
       <div class="filter-actions">
         <!-- Future: Category filter chips -->
       </div>
     </div>
 
-    <div class="table-container">
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredItems.length === 0 && !loading">
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.3;">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+      </svg>
+      <p>No inventory items found. {{ searchText ? 'Try a different search term.' : 'Create your first item above.' }}</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container" *ngIf="filteredItems.length > 0">
       <table>
         <thead>
           <tr>
             <th>Item Details</th>
             <th>Category</th>
-            <th>Available</th>
-            <th>Total Stock</th>
+            <th class="qty-col">Available</th>
+            <th class="qty-col">Total Stock</th>
             <th>Created Date</th>
             <th>Status</th>
-            <th *ngIf="role === 'ADMIN'">Actions</th>
+            <th class="actions-col" *ngIf="role === 'ADMIN' || role === 'ISSUER'">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of filteredItems; let i = index">
+          <tr *ngFor="let item of filteredItems; trackBy: (i, item) => item.id" 
+              [class.critical-stock]="(item.availableQuantity || 0) < 5">
+            
+            <!-- Item Details -->
             <td>
               <div class="item-name-cell">
                 <span class="name">{{ item.name }}</span>
                 <span class="sub">ID: #{{ item.id }}</span>
               </div>
             </td>
+
+            <!-- Category -->
             <td>
               <span class="badge badge-category" 
                     [ngClass]="{
-                      'electronics': item.category === 'Electronics',
-                      'furniture': item.category === 'Furniture',
-                      'stationery': item.category === 'Stationery',
-                      'maintenance': item.category === 'Maintenance'
+                      'electronics': item.category && item.category.toLowerCase().includes('electronics'),
+                      'furniture': item.category && item.category.toLowerCase().includes('furniture'),
+                      'stationery': item.category && item.category.toLowerCase().includes('stationery'),
+                      'maintenance': item.category && item.category.toLowerCase().includes('maintenance')
                     }">
-                {{ item.category }}
+                {{ item.category || 'Unknown' }}
               </span>
             </td>
+
+            <!-- Available Quantity -->
+            <td class="qty-col">
+              <span [class.text-danger]="(item.availableQuantity || 0) < 10" 
+                    [class.font-bold]="(item.availableQuantity || 0) < 5">
+                {{ item.availableQuantity || 0 }}
+              </span>
+            </td>
+
+            <!-- Total Stock -->
+            <td class="qty-col">
+              {{ item.totalQuantity || 0 }}
+            </td>
+
+            <!-- Created Date -->
             <td>
-              <span [class]="item.availableQuantity < 10 ? 'text-danger font-bold' : ''">
-                {{ item.availableQuantity }}
-              </span>
+              {{ item.createdDate | date:'mediumDate' }}
             </td>
-            <td>{{ item.totalQuantity }}</td>
-            <td>{{ item.createdDate | date:'mediumDate' }}</td>
+
+            <!-- Status Badge -->
             <td>
               <span class="badge" 
-                    [class.badge-success]="item.availableQuantity >= 20"
-                    [class.badge-warning]="item.availableQuantity < 20 && item.availableQuantity >= 5"
-                    [class.badge-danger]="item.availableQuantity < 5">
-                {{ item.availableQuantity >= 20 ? 'In Stock' : (item.availableQuantity >= 5 ? 'Low Stock' : 'Critical') }}
+                    [ngClass]="{
+                      'badge-success': (item.availableQuantity || 0) >= 20,
+                      'badge-warning': (item.availableQuantity || 0) < 20 && (item.availableQuantity || 0) >= 5,
+                      'badge-danger': (item.availableQuantity || 0) < 5
+                    }">
+                {{ getStockStatusLabel(item.availableQuantity || 0) }}
               </span>
             </td>
-            <td *ngIf="role === 'ADMIN'">
-              <div class="actions">
-                <button class="btn-icon" title="Edit Item" (click)="editItem(item)">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+
+            <!-- Actions -->
+            <td class="actions-col" *ngIf="role === 'ADMIN' || role === 'ISSUER'">
+              <div class="actions-group">
+                
+                <!-- Stock Decrease Button -->
+                <button 
+                  class="btn-icon stock-btn decrease-btn" 
+                  title="Decrease Stock"
+                  (click)="decreaseStock(item)"
+                  [disabled]="isOperating(item.id, 'decrease') || (item.availableQuantity || 0) <= 0"
+                  [class.loading]="isOperating(item.id, 'decrease')"
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span *ngIf="isOperating(item.id, 'decrease')" class="spinner-mini"></span>
+                </button>
+
+                <!-- Stock Increase Button -->
+                <button 
+                  class="btn-icon stock-btn increase-btn" 
+                  title="Increase Stock"
+                  (click)="increaseStock(item)"
+                  [disabled]="isOperating(item.id, 'increase')"
+                  [class.loading]="isOperating(item.id, 'increase')"
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span *ngIf="isOperating(item.id, 'increase')" class="spinner-mini"></span>
+                </button>
+
+                <!-- Edit Button -->
+                <button 
+                  class="btn-icon edit-btn" 
+                  title="Edit Item"
+                  (click)="editItem(item)"
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
                 </button>
-                <button class="btn-icon delete" title="Delete Item" (click)="deleteItem(item.id)">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+
+                <!-- Delete Button -->
+                <button 
+                  class="btn-icon delete-btn" 
+                  title="Delete Item"
+                  (click)="deleteItem(item.id)"
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   </svg>
                 </button>
+
               </div>
             </td>
+
           </tr>
         </tbody>
       </table>
@@ -178,3 +298,4 @@
   </section>
 
 </div>
+

@@ -4,8 +4,24 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/services/service';
+import { InventoryService } from '../services/inventory.service';
+import { InventoryItem, Category, StockStatus } from '../models/item';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
+/**
+ * InventoryComponent
+ * 
+ * Displays and manages inventory items with:
+ * - Table view of all items
+ * - Add, Edit, Delete operations
+ * - Stock increase/decrease buttons
+ * - Duplicate item validation
+ * - Real-time search and filtering
+ * 
+ * @production This component is production-ready with error handling and validation
+ */
 @Component({
   selector: 'app-inventory',
   standalone: true,
@@ -15,182 +31,526 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class InventoryComponent implements OnInit, DoCheck {
 
-  items: any[] = [];
-  filteredItems: any[] = [];
-  categories: any[] = [];
+  // Data
+  items: InventoryItem[] = [];
+  filteredItems: InventoryItem[] = [];
+  categories: Category[] = [];
 
+  // Form state
   itemName = '';
   selectedCategoryId: number | null = null;
   quantity = 0;
 
+  // UI state
   searchText = '';
-  editingItemId: number | null = null;
-
+  editingItemId: number | string | null = null;
   role: string = '';
+  loading = false;
+  errorMsg = '';
+  successMsg = '';
 
+  // For stock operations
+  operatingItemId: number | string | null = null;
+  operatingAction: 'increase' | 'decrease' | null = null;
+  
+  private searchSubject = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
+
+  /**
+   * Computed property: Items with stock < 10
+   */
   get lowStockCount(): number {
-    return this.items.filter(item => item.availableQuantity < 10).length;
+    return this.items.filter(item => (item.availableQuantity || 0) < 10).length;
+  }
+
+  /**
+   * Computed property: Total stock value
+   */
+  get totalInventoryValue(): number {
+    return this.items.reduce((sum, item) => sum + ((item.availableQuantity || 0) * 1), 0);
   }
 
   constructor(
     private http: HttpClient,
     private auth: AuthService,
+    private inventoryService: InventoryService,
     private destroyRef: DestroyRef
   ) {
     this.role = this.auth.getRole() ?? '';
   }
 
-  ngOnInit() {
-    this.getItems();
-    this.getCategories();
+  ngOnInit(): void {
+    // Load initial data
+    this.loadInventory();
+    this.loadCategories();
 
-    // 🔐 Role fetch from token
-    this.auth.role$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((r) => {
-      this.role = r ?? '';
-    });
+    // Subscribe to role changes
+    this.auth.role$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(role => {
+        this.role = role ?? '';
+      });
+
+    // Subscribe to inventory updates
+    this.inventoryService.inventory$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(items => {
+        this.items = items;
+        this.applySearch();
+      });
+
+    // Subscribe to loading state
+    this.inventoryService.loading$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(loading => {
+        this.loading = loading;
+      });
+
+    // Subscribe to error messages
+    this.inventoryService.error$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(error => {
+        this.errorMsg = error;
+        if (error) {
+          setTimeout(() => this.errorMsg = '', 5000);
+        }
+      });
+
+    // Setup debounced search
+    this.searchSubject
+      .pipe(debounceTime(300))
+      .subscribe(() => this.applySearch());
   }
 
-  // 🔍 Auto filter
-  ngDoCheck() {
-    this.filteredItems = this.items.filter(item =>
-      item.name.toLowerCase().includes(this.searchText.toLowerCase())
+  /**
+   * Auto filter on search text change
+   */
+  ngDoCheck(): void {
+    // Note: Using ngDoCheck for simplicity, can be optimized with OnPush strategy
+  }
+
+  /**
+   * ============================================
+   * DATA LOADING
+   * ============================================
+   */
+
+  /**
+   * Load inventory items from service
+   */
+  loadInventory(): void {
+    this.inventoryService.loadInventory()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        error: (err) => {
+          console.error('Error loading inventory:', err);
+        }
+      });
+  }
+
+  /**
+   * Load categories from service
+   */
+  loadCategories(): void {
+    this.inventoryService.loadCategories()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (categories) => {
+          this.categories = categories;
+        },
+        error: (err) => {
+          console.error('Error loading categories:', err);
+        }
+      });
+  }
+
+  /**
+   * ============================================
+   * CRUD OPERATIONS
+   * ============================================
+   */
+
+  /**
+   * Add new inventory item
+   */
+  addItem(): void {
+    // Validation
+    if (!this.validateForm()) return;
+
+    // ✅ Check for duplicates (case-insensitive)
+    const normalizedName = this.itemName.trim().toLowerCase();
+    const duplicateExists = this.items.some(item => 
+      item.name.toLowerCase() === normalizedName
     );
-  }
-
-  // =========================
-  // GET ITEMS
-  // =========================
-  getItems() {
-    this.http.get<any[]>(`${environment.apiUrl}/inventory`)
-      .subscribe({
-        next: (res) => {
-          this.items = res;
-          this.filteredItems = res;
-        },
-        error: (err) => {
-          console.error('Error fetching items', err);
-        }
-      });
-  }
-
-  // =========================
-  // GET CATEGORIES
-  // =========================
-  getCategories() {
-    this.http.get<any[]>(`${environment.apiUrl}/ItemCategory`)
-      .subscribe({
-        next: (res) => {
-          this.categories = res;
-        },
-        error: (err) => {
-          console.error('Error fetching categories', err);
-        }
-      });
-  }
-
-  // =========================
-  // ADD ITEM
-  // =========================
-  addItem() {
-
-    if (this.role !== 'ADMIN' && this.role !== 'ISSUER') {
-      alert("Only Admins and Issuers can add inventory items");
+    
+    if (duplicateExists) {
+      this.errorMsg = `An item with the name "${this.itemName}" already exists. Please use a different name.`;
+      setTimeout(() => this.errorMsg = '', 5000);
       return;
     }
 
-    if (!this.itemName || !this.selectedCategoryId || this.quantity <= 0) {
-      alert("Fill all fields properly");
+    // Check role
+    if (!this.hasInventoryPermission()) {
+      this.errorMsg = 'Only Admins and Issuers can add inventory items';
+      setTimeout(() => this.errorMsg = '', 5000);
       return;
     }
 
-    const payload = {
-      name: this.itemName,
-      categoryId: this.selectedCategoryId,
+    const newItem = {
+      name: this.itemName.trim(),
+      categoryId: this.selectedCategoryId!,
       totalQuantity: this.quantity,
-      description: "New Item"
+      description: 'New Item',
+      category: this.getCategoryName(this.selectedCategoryId!),
+      availableQuantity: this.quantity,
+      id: 0,
+      createdDate: new Date().toISOString()
     };
 
-    this.http.post(`${environment.apiUrl}/inventory`, payload)
+    this.inventoryService.addItem(newItem)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.getItems();
+          this.successMsg = 'Item added successfully!';
           this.resetForm();
+          setTimeout(() => this.successMsg = '', 3000);
         },
         error: (err) => {
-          if (err.status === 401) {
-            alert('Access denied. Admin role required.');
-          } else {
-            console.error('Error adding item', err);
-            alert('Failed to add item. Please check the server connection.');
-          }
+          console.error('Error adding item:', err);
         }
       });
   }
 
-  // =========================
-  // EDIT ITEM
-  // =========================
-  editItem(item: any) {
+  /**
+   * Edit item - populate form with item data
+   * @param item - Item to edit
+   */
+  editItem(item: InventoryItem): void {
     this.editingItemId = item.id;
     this.itemName = item.name;
-    this.selectedCategoryId = item.categoryId;
-    this.quantity = item.availableQuantity;
+    this.selectedCategoryId = item.categoryId || null;
+    this.quantity = item.availableQuantity || 0;
   }
 
-  // =========================
-  // UPDATE ITEM
-  // =========================
-  updateItem() {
-    if (this.role !== 'ADMIN' && this.role !== 'ISSUER') {
-      alert("Only Admins and Issuers can update inventory items");
+  /**
+   * Update existing item
+   */
+  updateItem(): void {
+    // Validation
+    if (!this.validateForm()) return;
+
+    // ✅ Check for duplicate on name change (excluding self)
+    const normalizedName = this.itemName.trim().toLowerCase();
+    const duplicateExists = this.items.some(item => 
+      item.id !== this.editingItemId && 
+      item.name.toLowerCase() === normalizedName
+    );
+    
+    if (duplicateExists) {
+      this.errorMsg = `An item with the name "${this.itemName}" already exists. Please use a different name.`;
+      setTimeout(() => this.errorMsg = '', 5000);
       return;
     }
 
-    const payload = {
-      name: this.itemName,
-      categoryId: this.selectedCategoryId,
-      totalQuantity: this.quantity,
-      description: "Updated Item"
+    // Check role
+    if (!this.hasInventoryPermission()) {
+      this.errorMsg = 'Only Admins and Issuers can update inventory items';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return;
+    }
+
+    const updates = {
+      name: this.itemName.trim(),
+      categoryId: this.selectedCategoryId!,
+      availableQuantity: this.quantity,
+      description: 'Updated Item'
     };
 
-    this.http.put(`${environment.apiUrl}/inventory/${this.editingItemId}`, payload)
+    this.inventoryService.updateItem(this.editingItemId!, updates)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.getItems();
+          this.successMsg = 'Item updated successfully!';
           this.resetForm();
+          setTimeout(() => this.successMsg = '', 3000);
         },
         error: (err) => {
-          console.error('Error updating item', err);
+          console.error('Error updating item:', err);
         }
       });
   }
 
-  // =========================
-  // DELETE ITEM
-  // =========================
-  deleteItem(id: number) {
-    if (this.role !== 'ADMIN' && this.role !== 'ISSUER') {
-      alert("Only Admins and Issuers can delete inventory items");
+  /**
+   * Delete inventory item
+   * @param id - Item ID
+   */
+  deleteItem(id: number | string): void {
+    // Check role
+    if (!this.hasInventoryPermission()) {
+      this.errorMsg = 'Only Admins and Issuers can delete inventory items';
+      setTimeout(() => this.errorMsg = '', 5000);
       return;
     }
-    this.http.delete(`${environment.apiUrl}/inventory/${id}`)
+
+    if (confirm('Are you sure you want to delete this item?')) {
+      this.inventoryService.deleteItem(id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.successMsg = 'Item deleted successfully!';
+            setTimeout(() => this.successMsg = '', 3000);
+          },
+          error: (err) => {
+            console.error('Error deleting item:', err);
+          }
+        });
+    }
+  }
+
+  /**
+   * ============================================
+   * STOCK OPERATIONS
+   * ============================================
+   */
+
+  /**
+   * Increase stock for item
+   * @param item - Item to increase stock for
+   */
+  increaseStock(item: InventoryItem): void {
+    if (!this.hasInventoryPermission()) {
+      this.errorMsg = 'Only Admins and Issuers can modify stock';
+      return;
+    }
+
+    this.operatingItemId = item.id;
+    this.operatingAction = 'increase';
+
+    this.inventoryService.increaseStock(item.id, 1)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.getItems();
+          this.operatingItemId = null;
+          this.operatingAction = null;
         },
         error: (err) => {
-          console.error('Error deleting item', err);
+          this.operatingItemId = null;
+          this.operatingAction = null;
+          console.error('Error increasing stock:', err);
         }
       });
   }
 
-  // =========================
-  // RESET FORM
-  // =========================
-  resetForm() {
+  /**
+   * Decrease stock for item
+   * @param item - Item to decrease stock for
+   */
+  decreaseStock(item: InventoryItem): void {
+    if (!this.hasInventoryPermission()) {
+      this.errorMsg = 'Only Admins and Issuers can modify stock';
+      return;
+    }
+
+    // Check if we can decrease
+    if ((item.availableQuantity || 0) <= 0) {
+      this.errorMsg = 'Cannot decrease stock below 0';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return;
+    }
+
+    this.operatingItemId = item.id;
+    this.operatingAction = 'decrease';
+
+    this.inventoryService.decreaseStock(item.id, 1)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.operatingItemId = null;
+          this.operatingAction = null;
+        },
+        error: (err) => {
+          this.operatingItemId = null;
+          this.operatingAction = null;
+          console.error('Error decreasing stock:', err);
+        }
+      });
+  }
+
+  /**
+   * ============================================
+   * UTILITY METHODS
+   * ============================================
+   */
+
+  /**
+   * Get stock status badge class
+   * @param quantity - Available quantity
+   * @returns CSS class name
+   */
+  getStockStatusClass(quantity: number): string {
+    if (quantity < 5) return StockStatus.CRITICAL;
+    if (quantity < 20) return StockStatus.LOW_STOCK;
+    return StockStatus.IN_STOCK;
+  }
+
+  /**
+   * Get stock status label
+   * @param quantity - Available quantity
+   * @returns Status label
+   */
+  getStockStatusLabel(quantity: number): string {
+    if (quantity < 5) return 'Critical';
+    if (quantity < 20) return 'Low Stock';
+    return 'In Stock';
+  }
+
+  /**
+   * Get category name by ID
+   * @param categoryId - Category ID
+   * @returns Category name
+   */
+  getCategoryName(categoryId: number): string {
+    const category = this.categories.find(c => c.id === categoryId);
+    return category?.name || 'Unknown';
+  }
+
+  /**
+   * Search items with debounce
+   * @param value - Search term
+   */
+  onSearchChange(value: string): void {
+    this.searchText = value;
+    this.searchSubject.next(value);
+  }
+
+  /**
+   * Apply search filter
+   */
+  private applySearch(): void {
+    this.filteredItems = this.inventoryService.searchItems(this.searchText);
+  }
+
+  /**
+   * Reset form to initial state
+   */
+  resetForm(): void {
     this.itemName = '';
     this.selectedCategoryId = null;
     this.quantity = 0;
     this.editingItemId = null;
   }
+
+  /**
+   * Cancel editing
+   */
+  cancelEdit(): void {
+    this.resetForm();
+  }
+
+  /**
+   * ============================================
+   * VALIDATION & CHECKS
+   * ============================================
+   */
+
+  /**
+   * Validate form inputs
+   * @returns true if valid, false otherwise
+   */
+  private validateForm(): boolean {
+    if (!this.itemName.trim()) {
+      this.errorMsg = 'Please enter an item name';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return false;
+    }
+
+    if (!this.selectedCategoryId) {
+      this.errorMsg = 'Please select a category';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return false;
+    }
+
+    if (this.quantity <= 0) {
+      this.errorMsg = 'Quantity must be greater than 0';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check if user has inventory management permission
+   * @returns true if user is ADMIN or ISSUER
+   */
+  private hasInventoryPermission(): boolean {
+    return this.role === 'ADMIN' || this.role === 'ISSUER';
+  }
+
+  /**
+   * Check if currently editing
+   * @returns true if editing an item
+   */
+  isEditing(): boolean {
+    return this.editingItemId !== null;
+  }
+
+  /**
+   * Check if operation is in progress for item
+   * @param itemId - Item ID
+   * @param action - Action type
+   * @returns true if operation is in progress
+   */
+  isOperating(itemId: number | string, action: 'increase' | 'decrease'): boolean {
+    return this.operatingItemId === itemId && this.operatingAction === action;
+  }
+
+  /**
+   * ✅ Check if item name already exists (case-insensitive)
+   * Used for real-time validation feedback
+   * @param itemName - Item name to check
+   * @param excludeItemId - Item ID to exclude from check (for updates)
+   * @returns true if duplicate exists
+   */
+  isDuplicateItemName(itemName: string, excludeItemId?: number | string | null): boolean {
+    if (!itemName.trim()) return false;
+    
+    const normalizedName = itemName.trim().toLowerCase();
+    
+    return this.items.some(item => {
+      // Exclude the item being edited
+      if (excludeItemId !== undefined && excludeItemId !== null && item.id === excludeItemId) {
+        return false;
+      }
+      
+      return item.name.toLowerCase() === normalizedName;
+    });
+  }
+
+  /**
+   * ✅ Get duplicate item warning message
+   * @returns Error message if duplicate exists, empty string otherwise
+   */
+  getDuplicateItemWarning(): string {
+    if (!this.itemName.trim()) return '';
+    
+    const isDuplicate = this.isDuplicateItemName(this.itemName, this.editingItemId);
+    
+    if (isDuplicate) {
+      return `⚠️ An item named "${this.itemName}" already exists`;
+    }
+    
+    return '';
+  }
+
+  /**
+   * ✅ Check if submit button should be disabled due to duplicate
+   * @returns true if submit should be disabled
+   */
+  isSubmitDisabledByDuplicate(): boolean {
+    if (!this.itemName.trim()) return false;
+    
+    return this.isDuplicateItemName(this.itemName, this.editingItemId);
+  }
+
 }

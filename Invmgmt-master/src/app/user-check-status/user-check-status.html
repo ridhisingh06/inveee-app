@@ -38,6 +38,7 @@
   </div>
 
   <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="success-msg" *ngIf="successMsg">{{ successMsg }}</div>
 
   <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
     <div class="empty-icon">--</div>
@@ -65,7 +66,28 @@
           <li *ngFor="let item of req.items">
             <span>{{ item.itemName }}</span>
             <span>x {{ item.quantityRequested }}</span>
-            <span class="tc-badge" [ngClass]="getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+            <span class="tc-badge" [ngClass]="getItemStatusClass(item.status)">{{ getItemStatusLabel(item.status) }}</span>
+
+            <!-- Receive checkbox — only for Approved items -->
+            <span class="receive-action" *ngIf="isItemApproved(item.status)">
+              <label class="receive-label">
+                <input
+                  type="checkbox"
+                  class="receive-checkbox"
+                  [disabled]="receivingMap[item.id]"
+                  (change)="receiveItem(req.id, item.id)"
+                />
+                <span class="receive-text">{{ receivingMap[item.id] ? 'Saving…' : 'Mark Received' }}</span>
+              </label>
+            </span>
+
+            <!-- Received badge -->
+            <span class="receive-done" *ngIf="isItemReceived(item.status)">
+              <svg viewBox="0 0 20 20" width="13" height="13" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              Received
+            </span>
           </li>
         </ul>
       </div>

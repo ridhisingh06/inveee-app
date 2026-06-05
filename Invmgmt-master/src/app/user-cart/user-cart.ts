@@ -18,6 +18,7 @@ export class UserCartComponent implements OnInit, OnDestroy {
   lines: CartLine[] = [];
   submitting = false;
   errorMsg = '';
+  successMsg = '';
   canRequest = true;
 
   private destroy$ = new Subject<void>();
@@ -32,7 +33,20 @@ export class UserCartComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.checkCanRequest();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Check if current user can submit a request
+   */
+  private checkCanRequest() {
     this.http.get<{canRequest: boolean, message: string}>(`${environment.apiUrl}/requests/can-request`)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           this.canRequest = res.canRequest;
@@ -41,14 +55,11 @@ export class UserCartComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.error(err);
+          console.error('[UserCartComponent] Error checking request permission:', err);
+          this.errorMsg = err?.error?.message || 'Unable to verify request permissions. Please try again.';
+          this.canRequest = false;
         }
       });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   /** Single method handles both +1 and -1 delta — avoids duplicate logic */
@@ -71,14 +82,19 @@ export class UserCartComponent implements OnInit, OnDestroy {
     return this.lines.reduce((acc, line) => acc + line.qty, 0);
   }
 
+  /**
+   * Submit the cart as a new request
+   */
   requestAll() {
     if (this.lines.length === 0) return;
+    
     this.submitting = true;
     this.errorMsg = '';
+    this.successMsg = '';
 
     // Transform cart lines into backend format
     const payload = {
-      categoryId: null, // Since we might have mixed categories, let backend handle it or set null
+      categoryId: null,
       items: this.lines.map(line => ({
         itemId: Number(line.item.id),
         quantity: line.qty
@@ -86,13 +102,20 @@ export class UserCartComponent implements OnInit, OnDestroy {
     };
 
     this.http.post(`${environment.apiUrl}/requests`, payload)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
+          this.successMsg = 'Request submitted successfully!';
           this.cart.clear();
           this.submitting = false;
-          this.router.navigate(['/user-dashboard/check-status']);
+          
+          // Navigate after a short delay to show success message
+          setTimeout(() => {
+            this.router.navigate(['/user-dashboard/check-status']);
+          }, 1500);
         },
         error: (err) => {
+          console.error('[UserCartComponent] Error submitting request:', err);
           this.errorMsg = err?.error?.message || 'Failed to submit request. Please try again.';
           this.submitting = false;
         }

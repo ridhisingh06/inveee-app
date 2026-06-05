@@ -17,10 +17,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1.5rem;
-  height: 70px; /* Exact height as requested */
+  padding: 0.75rem 2rem;
+  height: 90px; /* ✅ Thicker navbar */
   background: var(--nav-bg);
-  border-bottom: 1px solid var(--nav-border);
+  border-bottom: 2px solid var(--nav-border);
   position: fixed;
   top: 0;
   left: 0;
@@ -43,8 +43,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 8px;
   border: 1px solid var(--nav-border);
   background: rgba(255, 255, 255, 0.1);
@@ -65,13 +65,13 @@
 }
 
 .nav-logo {
-  max-height: 55px; /* Fits well inside 70px navbar */
+  max-height: 70px; /* ✅ Taller logos for thicker navbar */
   width: auto;
   object-fit: contain;
   transition: var(--transition);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.95); /* White bg to make logos pop against gradient */
-  padding: 2px;
+  padding: 4px;
 }
 
 .nav-logo:hover {
@@ -173,8 +173,8 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 8px;
   border: 1px solid var(--nav-border);
   background: rgba(255, 255, 255, 0.1);
@@ -217,7 +217,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
+  padding: 0.625rem 1.5rem;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.15);
@@ -284,8 +284,8 @@
   .navbar-center {
     order: 3;
     flex-basis: 100%;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--nav-border);
   }
   
@@ -293,11 +293,15 @@
     font-size: 1rem;
     margin-bottom: 0.25rem;
   }
+  
+  .nav-logo {
+    max-height: 50px;
+  }
 }
 
 @media (max-width: 768px) {
   .nav-logo {
-    max-height: 40px;
+    max-height: 44px;
   }
   
   .logout-text {
@@ -305,9 +309,14 @@
   }
 
   .logout-btn {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     padding: 0;
+  }
+  
+  .cart-btn {
+    width: 45px;
+    height: 45px;
   }
   
   .right-actions {
@@ -342,8 +351,8 @@
   }
   
   .sidebar-toggle, .cart-btn, .logout-btn {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
   
   .nav-logo {

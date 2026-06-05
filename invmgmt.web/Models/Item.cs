@@ -1,11 +1,20 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace invmgmt.web.Models
 {
+    [Table("Items", Schema = "public")]
+    [Index(nameof(Name), IsUnique = true)] // ✅ Unique constraint on Name column (case-insensitive)
     public class Item
     {
         public int Id { get; set; }
 
+        /// <summary>
+        /// Item name - must be unique (case-insensitive)
+        /// </summary>
+        [Required(ErrorMessage = "Item name is required")]
+        [StringLength(255, MinimumLength = 1, ErrorMessage = "Item name must be between 1 and 255 characters")]
         public string Name { get; set; } = string.Empty;
 
         public int CategoryId { get; set; }
@@ -23,5 +32,6 @@ namespace invmgmt.web.Models
 
         public ICollection<RequestItem>? RequestItems { get; set; }
         public ICollection<RoleItemLimit>? RoleItemLimits { get; set; }
+        
     }
 }

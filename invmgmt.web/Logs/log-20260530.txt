@@ -3077,3 +3077,490 @@ SELECT 1
 2026-05-30 13:19:17.900 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
 SELECT 1
 2026-05-30 13:19:17.902 +00:00 [INF] HTTP GET /health responded 200 in 7.0010 ms
+2026-05-30 13:19:33.002 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:19:33.004 +00:00 [INF] HTTP GET /health responded 200 in 9.4577 ms
+2026-05-30 13:19:48.126 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:19:48.127 +00:00 [INF] HTTP GET /health responded 200 in 8.6881 ms
+2026-05-30 13:20:03.266 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:20:03.268 +00:00 [INF] HTTP GET /health responded 200 in 14.8293 ms
+2026-05-30 13:20:18.411 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:20:18.412 +00:00 [INF] HTTP GET /health responded 200 in 7.1125 ms
+2026-05-30 13:20:33.530 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:20:33.531 +00:00 [INF] HTTP GET /health responded 200 in 14.1346 ms
+2026-05-30 13:20:48.633 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:20:48.635 +00:00 [INF] HTTP GET /health responded 200 in 6.6814 ms
+2026-05-30 13:21:03.813 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:21:03.813 +00:00 [INF] HTTP GET /health responded 200 in 9.3657 ms
+2026-05-30 13:21:18.900 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:21:18.901 +00:00 [INF] HTTP GET /health responded 200 in 4.1729 ms
+2026-05-30 13:21:34.018 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:21:34.019 +00:00 [INF] HTTP GET /health responded 200 in 5.2245 ms
+2026-05-30 13:21:49.171 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:21:49.172 +00:00 [INF] HTTP GET /health responded 200 in 12.0180 ms
+2026-05-30 13:22:04.270 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:22:04.272 +00:00 [INF] HTTP GET /health responded 200 in 6.6227 ms
+2026-05-30 13:22:19.374 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:22:19.375 +00:00 [INF] HTTP GET /health responded 200 in 4.5947 ms
+2026-05-30 13:22:34.463 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:22:34.466 +00:00 [INF] HTTP GET /health responded 200 in 8.0295 ms
+2026-05-30 13:22:49.703 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:22:49.704 +00:00 [INF] HTTP GET /health responded 200 in 10.2487 ms
+2026-05-30 13:23:04.853 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:23:04.854 +00:00 [INF] HTTP GET /health responded 200 in 9.3301 ms
+2026-05-30 13:23:20.243 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:23:20.244 +00:00 [INF] HTTP GET /health responded 200 in 16.0028 ms
+2026-05-30 13:23:35.409 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:23:35.410 +00:00 [INF] HTTP GET /health responded 200 in 54.5085 ms
+2026-05-30 13:23:50.505 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:23:50.506 +00:00 [INF] HTTP GET /health responded 200 in 7.0901 ms
+2026-05-30 13:24:05.642 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:24:05.644 +00:00 [INF] HTTP GET /health responded 200 in 9.3193 ms
+2026-05-30 13:24:20.732 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:24:20.734 +00:00 [INF] HTTP GET /health responded 200 in 8.9685 ms
+2026-05-30 13:24:35.819 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:24:35.824 +00:00 [INF] HTTP GET /health responded 200 in 13.6911 ms
+2026-05-30 13:24:51.304 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:24:51.307 +00:00 [INF] HTTP GET /health responded 200 in 18.8928 ms
+2026-05-30 13:25:22.344 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:25:22.358 +00:00 [INF] HTTP GET /health responded 200 in 234.1699 ms
+2026-05-30 13:25:38.863 +00:00 [INF] Executed DbCommand (50ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:25:38.883 +00:00 [INF] HTTP GET /health responded 200 in 249.6987 ms
+2026-05-30 13:25:54.233 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:25:54.234 +00:00 [INF] HTTP GET /health responded 200 in 19.7097 ms
+2026-05-30 13:26:09.349 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:26:09.359 +00:00 [INF] HTTP GET /health responded 200 in 16.8215 ms
+2026-05-30 13:26:24.599 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:26:24.600 +00:00 [INF] HTTP GET /health responded 200 in 8.9081 ms
+2026-05-30 13:26:45.219 +00:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:26:45.256 +00:00 [INF] HTTP GET /health responded 200 in 148.5407 ms
+2026-05-30 13:27:00.607 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:27:00.651 +00:00 [INF] HTTP GET /health responded 200 in 62.7912 ms
+2026-05-30 13:27:16.816 +00:00 [INF] Executed DbCommand (28ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:27:16.825 +00:00 [INF] HTTP GET /health responded 200 in 163.9561 ms
+2026-05-30 13:27:31.989 +00:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:27:31.993 +00:00 [INF] HTTP GET /health responded 200 in 25.4634 ms
+2026-05-30 13:27:47.116 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:27:47.119 +00:00 [INF] HTTP GET /health responded 200 in 8.5406 ms
+2026-05-30 13:28:02.277 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:28:02.279 +00:00 [INF] HTTP GET /health responded 200 in 9.5987 ms
+2026-05-30 13:28:17.393 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:28:17.397 +00:00 [INF] HTTP GET /health responded 200 in 19.6024 ms
+2026-05-30 13:28:32.508 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:28:32.509 +00:00 [INF] HTTP GET /health responded 200 in 4.9466 ms
+2026-05-30 13:28:47.664 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:28:47.666 +00:00 [INF] HTTP GET /health responded 200 in 8.0281 ms
+2026-05-30 13:29:02.828 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:29:02.829 +00:00 [INF] HTTP GET /health responded 200 in 46.6174 ms
+2026-05-30 13:29:17.992 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:29:17.993 +00:00 [INF] HTTP GET /health responded 200 in 7.7546 ms
+2026-05-30 13:29:33.099 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:29:33.100 +00:00 [INF] HTTP GET /health responded 200 in 5.2861 ms
+2026-05-30 13:29:48.208 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:29:48.210 +00:00 [INF] HTTP GET /health responded 200 in 5.2503 ms
+2026-05-30 13:30:03.382 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:30:03.384 +00:00 [INF] HTTP GET /health responded 200 in 13.0100 ms
+2026-05-30 13:30:18.504 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:30:18.505 +00:00 [INF] HTTP GET /health responded 200 in 8.2458 ms
+2026-05-30 13:30:33.605 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:30:33.606 +00:00 [INF] HTTP GET /health responded 200 in 6.2297 ms
+2026-05-30 13:30:48.738 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:30:48.739 +00:00 [INF] HTTP GET /health responded 200 in 7.4579 ms
+2026-05-30 13:31:03.859 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:31:03.860 +00:00 [INF] HTTP GET /health responded 200 in 13.8283 ms
+2026-05-30 13:31:19.015 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:31:19.016 +00:00 [INF] HTTP GET /health responded 200 in 7.1522 ms
+2026-05-30 13:31:34.105 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:31:34.106 +00:00 [INF] HTTP GET /health responded 200 in 3.0953 ms
+2026-05-30 13:31:50.121 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:31:50.197 +00:00 [INF] HTTP GET /health responded 200 in 382.1316 ms
+2026-05-30 13:32:05.310 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:32:05.311 +00:00 [INF] HTTP GET /health responded 200 in 7.9486 ms
+2026-05-30 13:32:20.404 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:32:20.405 +00:00 [INF] HTTP GET /health responded 200 in 4.5551 ms
+2026-05-30 13:32:35.545 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:32:35.546 +00:00 [INF] HTTP GET /health responded 200 in 5.5511 ms
+2026-05-30 13:32:50.623 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:32:50.624 +00:00 [INF] HTTP GET /health responded 200 in 5.4652 ms
+2026-05-30 13:33:05.739 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:33:05.741 +00:00 [INF] HTTP GET /health responded 200 in 5.4180 ms
+2026-05-30 13:33:20.872 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:33:20.873 +00:00 [INF] HTTP GET /health responded 200 in 13.8031 ms
+2026-05-30 13:33:35.967 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:33:35.968 +00:00 [INF] HTTP GET /health responded 200 in 7.6547 ms
+2026-05-30 13:33:51.215 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:33:51.217 +00:00 [INF] HTTP GET /health responded 200 in 11.1206 ms
+2026-05-30 13:34:06.568 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:34:06.570 +00:00 [INF] HTTP GET /health responded 200 in 177.4024 ms
+2026-05-30 13:34:21.828 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:34:21.829 +00:00 [INF] HTTP GET /health responded 200 in 5.6193 ms
+2026-05-30 13:34:36.933 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:34:36.934 +00:00 [INF] HTTP GET /health responded 200 in 6.2319 ms
+2026-05-30 13:34:52.058 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:34:52.060 +00:00 [INF] HTTP GET /health responded 200 in 9.3814 ms
+2026-05-30 13:35:07.163 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:35:07.164 +00:00 [INF] HTTP GET /health responded 200 in 4.3644 ms
+2026-05-30 13:35:22.285 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:35:22.286 +00:00 [INF] HTTP GET /health responded 200 in 7.6957 ms
+2026-05-30 13:35:37.422 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:35:37.423 +00:00 [INF] HTTP GET /health responded 200 in 6.6553 ms
+2026-05-30 13:35:52.543 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:35:52.544 +00:00 [INF] HTTP GET /health responded 200 in 5.7440 ms
+2026-05-30 13:36:07.647 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:36:07.648 +00:00 [INF] HTTP GET /health responded 200 in 6.4037 ms
+2026-05-30 13:36:22.766 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:36:22.767 +00:00 [INF] HTTP GET /health responded 200 in 5.3943 ms
+2026-05-30 13:36:37.893 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:36:37.893 +00:00 [INF] HTTP GET /health responded 200 in 5.9593 ms
+2026-05-30 13:36:52.994 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:36:52.995 +00:00 [INF] HTTP GET /health responded 200 in 4.7939 ms
+2026-05-30 13:37:08.158 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:37:08.160 +00:00 [INF] HTTP GET /health responded 200 in 7.7076 ms
+2026-05-30 13:37:23.272 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:37:23.273 +00:00 [INF] HTTP GET /health responded 200 in 6.4587 ms
+2026-05-30 13:37:38.385 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:37:38.386 +00:00 [INF] HTTP GET /health responded 200 in 6.8527 ms
+2026-05-30 13:37:53.515 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:37:53.517 +00:00 [INF] HTTP GET /health responded 200 in 12.6391 ms
+2026-05-30 13:38:08.612 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:38:08.613 +00:00 [INF] HTTP GET /health responded 200 in 7.1125 ms
+2026-05-30 13:38:23.725 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:38:23.727 +00:00 [INF] HTTP GET /health responded 200 in 8.0733 ms
+2026-05-30 13:38:38.844 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:38:38.845 +00:00 [INF] HTTP GET /health responded 200 in 7.0670 ms
+2026-05-30 13:38:53.964 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:38:53.966 +00:00 [INF] HTTP GET /health responded 200 in 5.7242 ms
+2026-05-30 13:39:09.158 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:39:09.159 +00:00 [INF] HTTP GET /health responded 200 in 63.2806 ms
+2026-05-30 13:39:24.329 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:39:24.333 +00:00 [INF] HTTP GET /health responded 200 in 11.5863 ms
+2026-05-30 13:39:39.451 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:39:39.453 +00:00 [INF] HTTP GET /health responded 200 in 9.1649 ms
+2026-05-30 13:39:54.570 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:39:54.571 +00:00 [INF] HTTP GET /health responded 200 in 9.4496 ms
+2026-05-30 13:40:09.704 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:40:09.705 +00:00 [INF] HTTP GET /health responded 200 in 8.9294 ms
+2026-05-30 13:40:24.862 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:40:24.863 +00:00 [INF] HTTP GET /health responded 200 in 5.7023 ms
+2026-05-30 13:40:40.369 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:40:40.381 +00:00 [INF] HTTP GET /health responded 200 in 70.7090 ms
+2026-05-30 13:40:56.036 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:40:56.040 +00:00 [INF] HTTP GET /health responded 200 in 161.4819 ms
+2026-05-30 13:41:11.311 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:41:11.314 +00:00 [INF] HTTP GET /health responded 200 in 15.1862 ms
+2026-05-30 13:41:26.515 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:41:26.519 +00:00 [INF] HTTP GET /health responded 200 in 14.3723 ms
+2026-05-30 13:41:45.320 +00:00 [INF] Executed DbCommand (28ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:41:45.348 +00:00 [INF] HTTP GET /health responded 200 in 215.9144 ms
+2026-05-30 13:42:00.533 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:42:00.534 +00:00 [INF] HTTP GET /health responded 200 in 11.0015 ms
+2026-05-30 13:42:15.795 +00:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:42:15.800 +00:00 [INF] HTTP GET /health responded 200 in 43.0249 ms
+2026-05-30 13:42:30.883 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:42:30.885 +00:00 [INF] HTTP GET /health responded 200 in 11.5419 ms
+2026-05-30 13:42:46.059 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:42:46.072 +00:00 [INF] HTTP GET /health responded 200 in 11.5674 ms
+2026-05-30 13:43:01.219 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:43:01.220 +00:00 [INF] HTTP GET /health responded 200 in 10.5030 ms
+2026-05-30 13:43:16.342 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:43:16.343 +00:00 [INF] HTTP GET /health responded 200 in 3.3076 ms
+2026-05-30 13:43:31.455 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:43:31.457 +00:00 [INF] HTTP GET /health responded 200 in 8.0990 ms
+2026-05-30 13:43:46.589 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:43:46.590 +00:00 [INF] HTTP GET /health responded 200 in 5.8325 ms
+2026-05-30 13:44:01.670 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:44:01.676 +00:00 [INF] HTTP GET /health responded 200 in 11.0542 ms
+2026-05-30 13:44:16.950 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:44:16.953 +00:00 [INF] HTTP GET /health responded 200 in 114.2798 ms
+2026-05-30 13:44:32.073 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:44:32.078 +00:00 [INF] HTTP GET /health responded 200 in 8.0618 ms
+2026-05-30 13:44:47.584 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:44:47.623 +00:00 [INF] HTTP GET /health responded 200 in 51.4421 ms
+2026-05-30 13:45:02.762 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:45:02.774 +00:00 [INF] HTTP GET /health responded 200 in 31.7914 ms
+2026-05-30 13:45:19.181 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:45:19.186 +00:00 [INF] HTTP GET /health responded 200 in 29.6777 ms
+2026-05-30 13:45:34.305 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:45:34.306 +00:00 [INF] HTTP GET /health responded 200 in 6.3909 ms
+2026-05-30 13:45:49.413 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:45:49.414 +00:00 [INF] HTTP GET /health responded 200 in 6.7203 ms
+2026-05-30 13:46:04.502 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:46:04.503 +00:00 [INF] HTTP GET /health responded 200 in 13.3031 ms
+2026-05-30 13:46:19.645 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:46:19.647 +00:00 [INF] HTTP GET /health responded 200 in 9.5677 ms
+2026-05-30 13:46:34.771 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:46:34.772 +00:00 [INF] HTTP GET /health responded 200 in 6.4948 ms
+2026-05-30 13:46:49.862 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:46:49.863 +00:00 [INF] HTTP GET /health responded 200 in 6.1835 ms
+2026-05-30 13:47:04.965 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:47:04.967 +00:00 [INF] HTTP GET /health responded 200 in 6.0918 ms
+2026-05-30 13:47:20.045 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:47:20.046 +00:00 [INF] HTTP GET /health responded 200 in 7.3407 ms
+2026-05-30 13:47:35.139 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:47:35.144 +00:00 [INF] HTTP GET /health responded 200 in 12.5982 ms
+2026-05-30 13:47:50.234 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:47:50.235 +00:00 [INF] HTTP GET /health responded 200 in 5.3705 ms
+2026-05-30 13:48:05.321 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:48:05.322 +00:00 [INF] HTTP GET /health responded 200 in 5.8111 ms
+2026-05-30 13:48:20.401 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:48:20.402 +00:00 [INF] HTTP GET /health responded 200 in 4.6977 ms
+2026-05-30 13:48:35.476 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:48:35.477 +00:00 [INF] HTTP GET /health responded 200 in 5.9473 ms
+2026-05-30 13:48:50.607 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:48:50.608 +00:00 [INF] HTTP GET /health responded 200 in 7.1563 ms
+2026-05-30 13:49:05.694 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:49:05.697 +00:00 [INF] HTTP GET /health responded 200 in 8.1565 ms
+2026-05-30 13:49:20.881 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:49:20.882 +00:00 [INF] HTTP GET /health responded 200 in 78.8939 ms
+2026-05-30 13:49:35.988 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:49:35.989 +00:00 [INF] HTTP GET /health responded 200 in 5.7683 ms
+2026-05-30 13:49:51.081 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:49:51.082 +00:00 [INF] HTTP GET /health responded 200 in 5.3818 ms
+2026-05-30 13:50:06.231 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:50:06.232 +00:00 [INF] HTTP GET /health responded 200 in 5.3096 ms
+2026-05-30 13:50:21.318 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:50:21.319 +00:00 [INF] HTTP GET /health responded 200 in 6.3325 ms
+2026-05-30 13:50:36.413 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:50:36.415 +00:00 [INF] HTTP GET /health responded 200 in 4.2641 ms
+2026-05-30 13:50:51.496 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:50:51.497 +00:00 [INF] HTTP GET /health responded 200 in 3.3021 ms
+2026-05-30 13:51:06.569 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:51:06.570 +00:00 [INF] HTTP GET /health responded 200 in 6.3510 ms
+2026-05-30 13:51:21.669 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:51:21.670 +00:00 [INF] HTTP GET /health responded 200 in 5.0035 ms
+2026-05-30 13:51:36.799 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:51:36.800 +00:00 [INF] HTTP GET /health responded 200 in 24.2636 ms
+2026-05-30 13:51:51.881 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:51:51.882 +00:00 [INF] HTTP GET /health responded 200 in 7.0686 ms
+2026-05-30 13:52:06.980 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:52:06.981 +00:00 [INF] HTTP GET /health responded 200 in 8.5204 ms
+2026-05-30 13:52:22.055 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:52:22.056 +00:00 [INF] HTTP GET /health responded 200 in 3.4719 ms
+2026-05-30 13:52:37.135 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:52:37.136 +00:00 [INF] HTTP GET /health responded 200 in 7.8837 ms
+2026-05-30 13:52:52.221 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:52:52.223 +00:00 [INF] HTTP GET /health responded 200 in 5.1850 ms
+2026-05-30 13:53:07.322 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:53:07.326 +00:00 [INF] HTTP GET /health responded 200 in 8.5104 ms
+2026-05-30 13:53:22.440 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:53:22.442 +00:00 [INF] HTTP GET /health responded 200 in 5.7286 ms
+2026-05-30 13:53:37.521 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:53:37.521 +00:00 [INF] HTTP GET /health responded 200 in 4.7170 ms
+2026-05-30 13:53:52.602 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:53:52.603 +00:00 [INF] HTTP GET /health responded 200 in 10.2685 ms
+2026-05-30 13:54:07.704 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:54:07.705 +00:00 [INF] HTTP GET /health responded 200 in 4.6341 ms
+2026-05-30 13:54:22.836 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:54:22.840 +00:00 [INF] HTTP GET /health responded 200 in 35.1839 ms
+2026-05-30 13:54:37.942 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:54:37.944 +00:00 [INF] HTTP GET /health responded 200 in 6.5483 ms
+2026-05-30 13:54:53.015 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:54:53.016 +00:00 [INF] HTTP GET /health responded 200 in 4.2140 ms
+2026-05-30 13:55:08.089 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:55:08.090 +00:00 [INF] HTTP GET /health responded 200 in 2.1047 ms
+2026-05-30 13:55:23.215 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:55:23.225 +00:00 [INF] HTTP GET /health responded 200 in 17.1218 ms
+2026-05-30 13:55:38.552 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:55:38.553 +00:00 [INF] HTTP GET /health responded 200 in 4.2133 ms
+2026-05-30 13:55:55.027 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:55:55.034 +00:00 [INF] HTTP GET /health responded 200 in 11.0648 ms
+2026-05-30 13:56:10.157 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:56:10.158 +00:00 [INF] HTTP GET /health responded 200 in 6.3310 ms
+2026-05-30 13:56:25.063 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:56:25.064 +00:00 [INF] HTTP GET /health responded 200 in 3.4459 ms
+2026-05-30 13:56:40.218 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:56:40.219 +00:00 [INF] HTTP GET /health responded 200 in 3.6151 ms
+2026-05-30 13:56:55.319 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:56:55.320 +00:00 [INF] HTTP GET /health responded 200 in 4.5380 ms
+2026-05-30 13:57:10.469 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:57:10.473 +00:00 [INF] HTTP GET /health responded 200 in 7.7668 ms
+2026-05-30 13:57:25.649 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:57:25.650 +00:00 [INF] HTTP GET /health responded 200 in 2.8568 ms
+2026-05-30 13:57:40.789 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:57:40.797 +00:00 [INF] HTTP GET /health responded 200 in 11.9178 ms
+2026-05-30 13:57:55.930 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:57:55.931 +00:00 [INF] HTTP GET /health responded 200 in 2.6277 ms
+2026-05-30 13:58:11.058 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:58:11.059 +00:00 [INF] HTTP GET /health responded 200 in 17.4790 ms
+2026-05-30 13:58:26.164 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:58:26.165 +00:00 [INF] HTTP GET /health responded 200 in 3.5308 ms
+2026-05-30 13:58:41.310 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:58:41.312 +00:00 [INF] HTTP GET /health responded 200 in 2.4903 ms
+2026-05-30 13:58:56.433 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:58:56.434 +00:00 [INF] HTTP GET /health responded 200 in 2.7974 ms
+2026-05-30 13:59:11.592 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:59:11.595 +00:00 [INF] HTTP GET /health responded 200 in 5.8816 ms
+2026-05-30 13:59:26.942 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:59:26.943 +00:00 [INF] HTTP GET /health responded 200 in 164.2416 ms
+2026-05-30 13:59:42.211 +00:00 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:59:42.219 +00:00 [INF] HTTP GET /health responded 200 in 14.8627 ms
+2026-05-30 13:59:57.372 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 13:59:57.373 +00:00 [INF] HTTP GET /health responded 200 in 3.3140 ms
+2026-05-30 14:00:12.470 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 14:00:12.471 +00:00 [INF] HTTP GET /health responded 200 in 2.7944 ms
+2026-05-30 14:00:27.565 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 14:00:27.567 +00:00 [INF] HTTP GET /health responded 200 in 3.9119 ms
+2026-05-30 14:00:42.697 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-05-30 14:00:42.698 +00:00 [INF] HTTP GET /health responded 200 in 13.2225 ms
+2026-05-30 14:00:46.074 +00:00 [INF] Application is shutting down...

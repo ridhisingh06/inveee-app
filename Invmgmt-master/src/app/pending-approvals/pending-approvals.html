@@ -62,15 +62,15 @@
             <ul class="items-list" *ngIf="req.items.length">
               <li *ngFor="let item of req.items">
                 <span class="item-name">{{ item.itemName }}</span>
-                <span class="item-qty">x {{ item.quantityIssued }}</span>
+                <span class="item-qty">x {{ item.quantityRequested || item.quantityIssued }}</span>
                 <span class="item-actions">
-                  <ng-container *ngIf="(statusMap[item.id] || item.status) === 'Approved'">
-                    <button class="approve-btn small-btn" disabled>Approved</button>
+                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) === 'approved'">
+                    <button class="approve-btn small-btn" disabled>Approved ✓</button>
                   </ng-container>
-                  <ng-container *ngIf="(statusMap[item.id] || item.status) === 'Rejected'">
+                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) === 'rejected'">
                     <button class="reject-btn small-btn" disabled>Rejected</button>
                   </ng-container>
-                  <ng-container *ngIf="(statusMap[item.id] || item.status) !== 'Approved' && (statusMap[item.id] || item.status) !== 'Rejected'">
+                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) !== 'approved' && normalizeStatus(statusMap[item.id] || item.status) !== 'rejected'">
                     <button class="approve-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="approve(req.id, item.id)">
                       <ng-container *ngIf="processingMap[item.id] === 'approving'">Approving...</ng-container>
                       <ng-container *ngIf="processingMap[item.id] !== 'approving'">Approve</ng-container>
@@ -87,7 +87,7 @@
 
           <td class="qty-col">{{ getTotalQty(req) }}</td>
           <td class="date-col">{{ req.updatedAt | date:'mediumDate' }}</td>
-          <td class="status-col"><span class="badge issued">{{ getStatusLabel(req.status) }}</span></td>
+          <td class="status-col"><span class="badge" [ngClass]="'badge-' + normalizeStatus(req.status)">{{ getStatusLabel(req.status) }}</span></td>
           <td class="actions-col">Per item</td>
         </tr>
       </tbody>

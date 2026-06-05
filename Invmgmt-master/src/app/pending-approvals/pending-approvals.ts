@@ -1,12 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-
-import { RequestStateService, IssuedRequest, IssuedRequestItem, PaginatedRequests } from '../services/request-state.service';
+import { environment } from '../../environments/environment';
+import {
+  RequestStateService,
+  IssuedRequest,
+  PaginatedRequests
+} from '../services/request-state.service';
+import { normalizeStatus, getStatusLabel } from '../utils/status.util';
 
 @Component({
   selector: 'app-pending-approvals',
@@ -16,25 +20,28 @@ import { RequestStateService, IssuedRequest, IssuedRequestItem, PaginatedRequest
   styleUrls: ['./pending-approvals.css']
 })
 export class PendingApprovalsComponent implements OnInit, OnDestroy {
-  requests: IssuedRequest[] = [];
-  loading = true;
-  errorMsg = '';
-  successMsg = '';
+  requests:     IssuedRequest[] = [];
+  loading        = true;
+  errorMsg       = '';
+  successMsg     = '';
   processingMap: { [itemId: number]: 'approving' | 'rejecting' } = {};
-  statusMap: { [itemId: number]: string } = {};
+  statusMap:     { [itemId: number]: string }                    = {};
 
-  searchText = '';
-  private search$ = new Subject<string>();
-  private destroy$ = new Subject<void>();
-
+  searchText  = '';
   currentPage = 1;
-  pageSize = 10;
-  total = 0;
-  totalPages = 0;
+  pageSize    = 10;
+  total       = 0;
+  totalPages  = 0;
 
-  constructor(private http: HttpClient, private requestState: RequestStateService) {}
+  private readonly search$  = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
 
-  ngOnInit() {
+  constructor(
+    private readonly http:         HttpClient,
+    private readonly requestState: RequestStateService
+  ) {}
+
+  ngOnInit(): void {
     this.search$
       .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => this.fetchRequests(1));
@@ -42,97 +49,93 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
     this.requestState.pendingAdminRequests$
       .pipe(takeUntil(this.destroy$))
       .subscribe((state: PaginatedRequests) => {
-        this.requests = state.data;
-        this.total = state.total;
-        this.totalPages = state.totalPages;
+        this.requests    = state.data;
+        this.total       = state.total;
+        this.totalPages  = state.totalPages;
         this.currentPage = state.currentPage;
-        this.loading = false;
+        this.loading     = false;
       });
 
     this.fetchRequests();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  onSearchChange(value: string) {
+  onSearchChange(value: string): void {
     this.searchText = value;
     this.search$.next(value);
   }
 
-  fetchRequests(page: number = 1) {
-    this.loading = true;
+  fetchRequests(page = 1): void {
+    this.loading  = true;
     this.errorMsg = '';
-    const search = this.searchText?.trim();
-    this.requestState.fetchPendingAdminRequests(page, this.pageSize, search);
+    this.requestState.fetchPendingAdminRequests(page, this.pageSize, this.searchText.trim());
   }
 
-  approve(requestId: number, requestItemId: number) {
-    this.successMsg = '';
-    this.errorMsg = '';
+  approve(requestId: number, requestItemId: number): void {
     this.processingMap[requestItemId] = 'approving';
-    
-    this.http.patch(`${environment.apiUrl}/requests/${requestId}/items/${requestItemId}/approve`, {})
-      .subscribe({
-        next: () => {
-          this.successMsg = `Item #${requestItemId} has been approved.`;
-          delete this.processingMap[requestItemId];
-          this.statusMap[requestItemId] = 'Approved';
-          // Hide toast after 3s
-          setTimeout(() => { this.successMsg = ''; }, 3000);
-        },
-        error: (err) => {
-          console.error(err);
-          this.errorMsg = err?.error?.message || 'Failed to approve request.';
-          delete this.processingMap[requestItemId];
-        }
-      });
-  }
-
-  reject(requestId: number, requestItemId: number) {
     this.successMsg = '';
-    this.errorMsg = '';
-    this.processingMap[requestItemId] = 'rejecting';
-    
-    this.http.patch(`${environment.apiUrl}/requests/${requestId}/items/${requestItemId}/reject`, {})
+    this.errorMsg   = '';
+
+    this.http
+      .patch(`${environment.apiUrl}/requests/${requestId}/items/${requestItemId}/approve`, {})
       .subscribe({
         next: () => {
-          this.successMsg = `Item #${requestItemId} has been rejected.`;
+          this.successMsg = `Item #${requestItemId} approved.`;
           delete this.processingMap[requestItemId];
-          this.statusMap[requestItemId] = 'Rejected';
-          // Hide toast after 3s
+          this.statusMap[requestItemId] = 'approved';
+          this.requestState.updateItemStatus('ADMIN', requestId, requestItemId, 'Approved');
           setTimeout(() => { this.successMsg = ''; }, 3000);
         },
-        error: (err) => {
-          console.error(err);
-          this.errorMsg = err?.error?.message || 'Failed to reject request.';
+        error: (err: any) => {
+          this.errorMsg = err?.error?.message ?? 'Failed to approve item.';
           delete this.processingMap[requestItemId];
         }
       });
   }
 
-  private findItem(requestId: number, requestItemId: number): IssuedRequestItem | null {
-    const req = this.requests.find(r => r.id === requestId);
-    if (!req) return null;
-    return req.items.find(i => i.id === requestItemId) || null;
+  reject(requestId: number, requestItemId: number): void {
+    this.processingMap[requestItemId] = 'rejecting';
+    this.successMsg = '';
+    this.errorMsg   = '';
+
+    this.http
+      .patch(`${environment.apiUrl}/requests/${requestId}/items/${requestItemId}/reject`, {})
+      .subscribe({
+        next: () => {
+          this.successMsg = `Item #${requestItemId} rejected.`;
+          delete this.processingMap[requestItemId];
+          this.statusMap[requestItemId] = 'rejected';
+          this.requestState.updateItemStatus('ADMIN', requestId, requestItemId, 'Rejected');
+          setTimeout(() => { this.successMsg = ''; }, 3000);
+        },
+        error: (err: any) => {
+          this.errorMsg = err?.error?.message ?? 'Failed to reject item.';
+          delete this.processingMap[requestItemId];
+        }
+      });
   }
 
-  prevPage() { if (this.currentPage > 1) this.fetchRequests(this.currentPage - 1); }
-  nextPage() { if (this.currentPage < this.totalPages) this.fetchRequests(this.currentPage + 1); }
+  prevPage(): void { if (this.currentPage > 1)              this.fetchRequests(this.currentPage - 1); }
+  nextPage(): void { if (this.currentPage < this.totalPages) this.fetchRequests(this.currentPage + 1); }
 
   getTotalQty(req: IssuedRequest): number {
-    return (req.items ?? []).reduce((sum, it) => sum + Number(it.quantityIssued ?? 0), 0);
+    // At PendingAdminApproval stage quantityRequested is available; fall back to quantityIssued
+    return (req.items ?? []).reduce(
+      (sum, it) => sum + Number((it as any).quantityRequested ?? it.quantityIssued ?? 0), 0
+    );
   }
 
-  getStatusLabel(status: string): string {
-    const s = (status || '').toLowerCase();
-    if (s === 'pendingadminapproval' || s === 'issued') return 'Pending Admin Approval';
-    if (s === 'approved') return 'Approved';
-    if (s === 'rejected') return 'Rejected';
-    return status || 'Pending Admin Approval';
+  // ── Template helpers (delegates to shared util) ─────────────────────────
+
+  normalizeStatus(status: string | null | undefined): string {
+    return normalizeStatus(status);
   }
 
-  // Removed private removeFromList and removeItemFromList since we are keeping items in the list
+  getStatusLabel(status: string | null | undefined): string {
+    return getStatusLabel(status);
+  }
 }

@@ -14,6 +14,10 @@ export class UserCheckStatusComponent implements OnInit {
   requests: any[] = [];
   loading = true;
   errorMsg = '';
+  successMsg = '';
+
+  /** Tracks in-flight per-item receive calls: itemId → true */
+  receivingMap: { [itemId: number]: boolean } = {};
 
   constructor(private http: HttpClient) {}
 
@@ -35,6 +39,40 @@ export class UserCheckStatusComponent implements OnInit {
       });
   }
 
+  // ── Per-item receive ──────────────────────────────────────────────────────
+
+  receiveItem(requestId: number, itemId: number) {
+    this.receivingMap[itemId] = true;
+    this.successMsg = '';
+    this.errorMsg = '';
+
+    this.http.patch(`${environment.apiUrl}/requests/${requestId}/items/${itemId}/receive`, {})
+      .subscribe({
+        next: () => {
+          const req = this.requests.find((r: any) => r.id === requestId);
+          if (req?.items) {
+            const item = req.items.find((i: any) => i.id === itemId);
+            if (item) item.status = 'Received';
+
+            const allTerminal = req.items.every((i: any) => {
+              const s = this.normalizeStatus(i.status);
+              return s === 'received' || s === 'notissued' || s === 'rejected';
+            });
+            if (allTerminal) req.status = 'Received';
+          }
+          this.successMsg = 'Item marked as received.';
+          delete this.receivingMap[itemId];
+          setTimeout(() => { this.successMsg = ''; }, 3000);
+        },
+        error: err => {
+          this.errorMsg = err?.error?.message || 'Failed to mark item as received.';
+          delete this.receivingMap[itemId];
+        }
+      });
+  }
+
+  // ── Status helpers (request level) ───────────────────────────────────────
+
   getStatusClass(status: string): string {
     const s = this.normalizeStatus(status);
     if (s === 'pendingwithissuer') return 'status-requested';
@@ -53,7 +91,7 @@ export class UserCheckStatusComponent implements OnInit {
     if (s === 'pendingadminapproval') return '2';
     if (s === 'approved') return '3';
     if (s === 'rejected') return 'x';
-    if (s === 'received') return '4';
+    if (s === 'received') return '✓';
     return '-';
   }
 
@@ -68,29 +106,28 @@ export class UserCheckStatusComponent implements OnInit {
     return status || 'Pending';
   }
 
+  // ── Status helpers (item level) ───────────────────────────────────────────
+
+  getItemStatusClass(status: string): string { return this.getStatusClass(status); }
+  getItemStatusLabel(status: string): string { return this.getStatusLabel(status); }
+  isItemApproved(status: string): boolean { return this.normalizeStatus(status) === 'approved'; }
+  isItemReceived(status: string): boolean { return this.normalizeStatus(status) === 'received'; }
+
+  // ── Counters ──────────────────────────────────────────────────────────────
+
   get pendingCount() {
     return this.requests.filter(r => {
-      const status = this.normalizeStatus(r.status);
-      return status === 'pendingwithissuer' || status === 'pendingadminapproval';
+      const s = this.normalizeStatus(r.status);
+      return s === 'pendingwithissuer' || s === 'pendingadminapproval';
     }).length;
   }
-
-  get requestedCount() {
-    return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingwithissuer').length;
-  }
-
-  get issuedCount() {
-    return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingadminapproval').length;
-  }
-
-  get approvedCount() {
-    return this.requests.filter(r => this.normalizeStatus(r.status) === 'approved').length;
-  }
-
-  get rejectedCount() {
+  get requestedCount() { return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingwithissuer').length; }
+  get issuedCount()    { return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingadminapproval').length; }
+  get approvedCount()  { return this.requests.filter(r => this.normalizeStatus(r.status) === 'approved').length; }
+  get rejectedCount()  {
     return this.requests.filter(r => {
-      const status = this.normalizeStatus(r.status);
-      return status === 'rejected' || status === 'notissued';
+      const s = this.normalizeStatus(r.status);
+      return s === 'rejected' || s === 'notissued';
     }).length;
   }
 

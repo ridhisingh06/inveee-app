@@ -301,6 +301,53 @@ public sealed class RequestsController : ControllerBase
     }
 
     /// <summary>
+    /// PATCH /api/requests/{requestId}/items/{requestItemId}/receive
+    /// User confirms they received a single approved item -> Received.
+    /// If all items reach a terminal state, the whole request becomes Received.
+    /// </summary>
+    [Authorize(Roles = "USER")]
+    [HttpPatch("{requestId:int}/items/{requestItemId:int}/receive")]
+    public async Task<IActionResult> ReceiveItem(int requestId, int requestItemId)
+    {
+        try
+        {
+            var strategy = _context.Database.CreateExecutionStrategy();
+            IActionResult? earlyReturn = null;
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                var userId = User.GetUserId();
+                var request = await _context.Requests
+                    .Include(r => r.RequestItems)
+                    .FirstOrDefaultAsync(r => r.Id == requestId);
+
+                if (request == null || request.UserId != userId)
+                { earlyReturn = NotFound(new { message = "Request not found" }); return; }
+
+                var requestItem = request.RequestItems.FirstOrDefault(ri => ri.Id == requestItemId);
+                if (requestItem == null)
+                { earlyReturn = NotFound(new { message = "Request item not found" }); return; }
+
+                if (requestItem.Status != RequestItemStatus.Approved)
+                { earlyReturn = BadRequest(new { message = $"Only approved items can be marked as received. Current status: {requestItem.Status}" }); return; }
+
+                requestItem.Status = RequestItemStatus.Received;
+                RecalculateRequestStatus(request);
+                request.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            });
+            return earlyReturn ?? Ok(new { message = "Item marked as received" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in RequestsController.ReceiveItem (RequestId={RequestId}, RequestItemId={RequestItemId})", requestId, requestItemId);
+            return StatusCode(500, new { message = "An internal server error occurred." });
+        }
+    }
+
+    /// <summary>
     /// DELETE /api/requests/{id}
     /// User can cancel/delete only PendingWithIssuer (and legacy PENDING) requests.
     /// </summary>
@@ -806,7 +853,19 @@ public sealed class RequestsController : ControllerBase
             return;
         }
 
-        if (itemStatuses.All(status => status == RequestItemStatus.Approved || status == RequestItemStatus.NotIssued))
+        if (itemStatuses.All(status => status == RequestItemStatus.Received || status == RequestItemStatus.NotIssued || status == RequestItemStatus.Rejected))
+        {
+            // All items are in a terminal state
+            if (itemStatuses.All(status => status == RequestItemStatus.Received || status == RequestItemStatus.NotIssued))
+            {
+                request.Status = RequestStatus.Received;
+                return;
+            }
+            request.Status = RequestStatus.Rejected;
+            return;
+        }
+
+        if (itemStatuses.All(status => status == RequestItemStatus.Approved || status == RequestItemStatus.NotIssued || status == RequestItemStatus.Received))
         {
             request.Status = RequestStatus.Approved;
             return;

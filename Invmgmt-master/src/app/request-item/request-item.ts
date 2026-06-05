@@ -49,6 +49,8 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   showDetailModal = false;
   selectedRequestId: number | null = null;
   showStockOnly = false;
+  localErrorMsg = '';
+  successMsg = '';
 
   // Search form
   searchForm: FormGroup;
@@ -85,21 +87,23 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load all inventory items
+   * Load all inventory items with proper error handling
    */
   private loadItems(): void {
     this.itemService
       .getItems()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (items: InventoryItem[]) => {
+      .subscribe({
+        next: (items: InventoryItem[]) => {
           this.items = items;
+          this.localErrorMsg = '';
           this.applyFilters();
         },
-        (error) => {
-          console.error('Failed to load items:', error);
+        error: (error) => {
+          console.error('[RequestItemComponent] Error loading items:', error);
+          this.localErrorMsg = error?.message || 'Failed to load items. Please try again.';
         }
-      );
+      });
   }
 
   /**
@@ -213,10 +217,11 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Submit draft as request for approval
+   * Submit draft as request for approval with proper error handling
    */
   submitRequest(): void {
     if (this.draftItems.length === 0) {
+      this.localErrorMsg = 'Please add items to the draft before submitting.';
       return;
     }
 
@@ -227,20 +232,27 @@ export class RequestItemComponent implements OnInit, OnDestroy {
       }))
     };
 
+    this.localErrorMsg = '';
+    this.successMsg = '';
+
     this.requestService
       .createRequest(createRequestDto)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (response) => {
+      .subscribe({
+        next: (response) => {
+          this.successMsg = 'Request submitted successfully!';
           this.draftItems = [];
-          this.showSuccessMessage('Request submitted successfully!');
           this.selectedRequestId = response.id;
           this.showDetailModal = true;
+          
+          // Auto-hide success message after 3 seconds
+          setTimeout(() => { this.successMsg = ''; }, 3000);
         },
-        (error) => {
-          console.error('Failed to submit request:', error);
+        error: (error) => {
+          console.error('[RequestItemComponent] Error submitting request:', error);
+          this.localErrorMsg = error?.message || 'Failed to submit request. Please try again.';
         }
-      );
+      });
   }
 
   /**
@@ -249,6 +261,7 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   clearDraft(): void {
     if (confirm('Are you sure you want to clear the draft?')) {
       this.draftItems = [];
+      this.localErrorMsg = '';
     }
   }
 
@@ -261,15 +274,23 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Refresh items list
+   * Refresh items list with proper error handling
    */
   refreshItems(): void {
-    this.itemService.refreshCache().pipe(takeUntil(this.destroy$)).subscribe(
-      (items) => {
-        this.items = items;
-        this.applyFilters();
-      }
-    );
+    this.localErrorMsg = '';
+    
+    this.itemService.refreshCache()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (items) => {
+          this.items = items;
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('[RequestItemComponent] Error refreshing items:', error);
+          this.localErrorMsg = error?.message || 'Failed to refresh items. Please try again.';
+        }
+      });
   }
 
   /**
@@ -278,13 +299,6 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   closeDetailModal(): void {
     this.showDetailModal = false;
     this.selectedRequestId = null;
-  }
-
-  /**
-   * Show success message (can be replaced with toast service)
-   */
-  private showSuccessMessage(message: string): void {
-    alert(message); // TODO: Replace with proper toast notification service
   }
 
   /**
