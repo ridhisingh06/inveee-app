@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # ===================================
+  # PostgreSQL Database
+  # ===================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: invmgmt-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - invmgmt-network
+    restart: unless-stopped
+
+  # ===================================
+  # ASP.NET Core Backend API
+  # ===================================
+  backend:
+    build:
+      context: ./invmgmt.web
+      dockerfile: Dockerfile
+    container_name: invmgmt-backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-postgres};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-changeme};Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Disable
+      Jwt__Key: ${JWT_KEY:-CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_KEY_MIN_32_CHARS}
+      Jwt__Issuer: ${JWT_ISSUER:-invmgmt-api}
+      Jwt__Audience: ${JWT_AUDIENCE:-invmgmt-frontend}
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - invmgmt-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===================================
+  # Angular Frontend (Nginx)
+  # ===================================
+  frontend:
+    build:
+      context: ./Invmgmt-master
+      dockerfile: Dockerfile
+    container_name: invmgmt-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - invmgmt-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  invmgmt-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
