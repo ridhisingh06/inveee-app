@@ -10,5 +10,5 @@ import { NavbarComponent } from './navbar/navbar';
   imports: [RouterOutlet, NavbarComponent]
 })
 export class AppComponent {
-  title = 'Inventory Management';
+  title = 'Online Stationary Management System';
 }

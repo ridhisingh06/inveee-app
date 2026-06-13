@@ -4,7 +4,8 @@ import {
   EventEmitter,
   Input,
   OnInit,
-  Output
+  Output,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -22,6 +23,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class NavbarComponent implements OnInit {
   role: string = '';
+  username: string = '';
   cartCount = 0;
   get showSidebarToggle(): boolean {
     const adminRoutes = [
@@ -43,17 +45,26 @@ export class NavbarComponent implements OnInit {
     private cart: CartService,
     private router: Router,
     private sidebar: SidebarService,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.role = this.auth.getRole() ?? '';
     this.auth.role$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((r) => {
       this.role = r ?? '';
+      this.cdr.detectChanges();
+    });
+
+    this.username = this.auth.getUsername() ?? '';
+    this.auth.username$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((u) => {
+      this.username = u ?? '';
+      this.cdr.detectChanges();
     });
 
     this.cart.lines$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.cartCount = this.cart.getItemCountSnapshot();
+      this.cdr.detectChanges();
     });
   }
 

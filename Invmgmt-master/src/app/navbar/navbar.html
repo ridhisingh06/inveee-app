@@ -20,7 +20,7 @@
 
   <!-- Center Section: Title & Navigation Links -->
   <div class="navbar-center">
-    <h1 class="navbar-title">Inventory Management System</h1>
+    <h1 class="navbar-title">Online Stationary Management System</h1>
     <nav class="nav-links">
       <a 
         [routerLink]="role === 'ADMIN' ? '/admin-dashboard' : role === 'USER' ? '/user-dashboard' : role === 'ISSUER' ? '/issuer-dashboard' : '/login'" 
@@ -119,6 +119,16 @@
         </svg>
         <span class="logout-text">Logout</span>
       </button>
+
+      <div class="navbar-divider"></div>
+
+      <div class="user-profile" *ngIf="username">
+        <div class="avatar">{{ username.charAt(0).toUpperCase() }}</div>
+        <div class="user-info">
+          <span class="user-name">{{ username }}</span>
+          <span class="user-role">({{ role }})</span>
+        </div>
+      </div>
     </div>
   </div>
 </nav>

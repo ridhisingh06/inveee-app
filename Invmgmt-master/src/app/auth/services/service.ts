@@ -8,22 +8,29 @@ const CTX = 'AuthService';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly tokenSubject = new BehaviorSubject<string | null>(
-    localStorage.getItem('token')
-  );
+  private readonly tokenSubject = new BehaviorSubject<string | null>(null);
   readonly token$ = this.tokenSubject.asObservable();
 
-  private readonly roleSubject = new BehaviorSubject<string | null>(
-    this.extractRole(this.tokenSubject.value)
-  );
+  private readonly roleSubject = new BehaviorSubject<string | null>(null);
   readonly role$ = this.roleSubject.asObservable();
 
-  constructor(private logger: LoggerService) {}
+  private readonly usernameSubject = new BehaviorSubject<string | null>(null);
+  readonly username$ = this.usernameSubject.asObservable();
+
+  constructor(private logger: LoggerService) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.tokenSubject.next(token);
+      this.roleSubject.next(this.extractRole(token));
+      this.usernameSubject.next(this.extractUsername(token));
+    }
+  }
 
   setToken(token: string) {
     localStorage.setItem('token', token);
     this.tokenSubject.next(token);
     this.roleSubject.next(this.extractRole(token));
+    this.usernameSubject.next(this.extractUsername(token));
     this.logger.log(CTX, 'User logged in (token stored)');
   }
 
@@ -33,6 +40,10 @@ export class AuthService {
 
   getRole(): string | null {
     return this.roleSubject.value;
+  }
+
+  getUsername(): string | null {
+    return this.usernameSubject.value;
   }
 
   isAdmin(): boolean {
@@ -56,6 +67,7 @@ export class AuthService {
     localStorage.removeItem('role'); // extra safe (legacy key)
     this.tokenSubject.next(null);
     this.roleSubject.next(null);
+    this.usernameSubject.next(null);
     this.logger.log(CTX, 'User logged out');
   }
 
@@ -90,6 +102,29 @@ export class AuthService {
     );
 
     return role ? role.toUpperCase() : null;
+  }
+
+  private extractUsername(token: string | null): string | null {
+    if (!token) return null;
+    const payload = this.decodeJwtPayload(token);
+    if (!payload) return null;
+
+    const username = (
+      payload.name ||
+      payload.unique_name ||
+      payload.email ||
+      payload.sub ||
+      payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+      payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ||
+      'User'
+    );
+
+    // If it's an email, we can extract the local part before '@'
+    if (username.includes('@')) {
+      return username.split('@')[0];
+    }
+    
+    return username;
   }
 
   isTokenExpired(): boolean {

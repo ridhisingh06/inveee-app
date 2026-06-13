@@ -480,11 +480,13 @@ export class InventoryComponent implements OnInit, DoCheck {
   }
 
   /**
-   * Check if user has inventory management permission
+   * Check if user has online stationary management system permission
    * @returns true if user is ADMIN or ISSUER
    */
-  private hasInventoryPermission(): boolean {
-    return this.role === 'ADMIN' || this.role === 'ISSUER';
+  hasInventoryPermission(): boolean {
+    if (!this.role) return false;
+    const r = this.role.toUpperCase();
+    return r === 'ADMIN' || r === 'ISSUER';
   }
 
   /**

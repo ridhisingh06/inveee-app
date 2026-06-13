@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: '/api' //  Proxy via Nginx
+  apiUrl: 'http://100.55.99.251/api' //  Development: direct to backend
 };

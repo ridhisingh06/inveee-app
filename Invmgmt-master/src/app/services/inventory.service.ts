@@ -117,7 +117,7 @@ export class InventoryService {
         catchError(err => {
           let errorMsg = this.handleError(err, 'Failed to add item');
           
-          // ✅ Handle backend duplicate check error
+          //  Handle backend duplicate check error
           if (err?.status === 400 && err?.error?.message && err.error.message.includes('already exists')) {
             errorMsg = err.error.message;
           }

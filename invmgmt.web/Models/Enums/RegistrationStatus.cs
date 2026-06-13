@@ -10,4 +10,4 @@
 }
 
 
-// This enum defines the possible statuses for a user registration request in the inventory management system. 
+ 

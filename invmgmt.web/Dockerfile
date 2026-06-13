@@ -11,9 +11,8 @@ ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true \
 # Copy project files only for optimal layer caching
 COPY *.csproj ./
 
-# Restore dependencies with stability options
-# Disable parallel processing to prevent NuGet EOF errors
-RUN dotnet restore --disable-parallel --force
+# Restore dependencies
+RUN dotnet restore
 
 # Copy remaining source code
 COPY . .
