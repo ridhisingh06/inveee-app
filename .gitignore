@@ -1,21 +1,112 @@
-# Environment secrets (use .env.example as template)
-.env
-
-# -----------------------------------------------
-# ASP.NET Core environment-specific appsettings
-# These may contain real DB credentials / secrets
-# NEVER commit these files — use appsettings.json
-# as a template and add credentials only here.
-# -----------------------------------------------
-invmgmt.web/appsettings.Production.json
-invmgmt.web/appsettings.Staging.json
-
-# Build artifacts
+# ===========================
+# Node / Angular / npm
+# ===========================
 node_modules/
-.vs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+dist/
+.angular/
+
+# ===========================
+# Build outputs
+# ===========================
 bin/
 obj/
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+build/
+out/
 
-# Docker volumes (local dev)
+# ===========================
+# Terraform
+# ===========================
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.*
+terraform/.terraform.lock.hcl
+terraform/crash.log
+terraform/*.tfvars
+terraform/*.tfvars.json
+
+# ===========================
+# IDE / Editor
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# ===========================
+# Logs and temporary files
+# ===========================
+logs/
+Logs/
+*.log
+.Logs/
+*.tmp
+*.temp
+temp/
+
+# ===========================
+# C# / .NET
+# ===========================
+invmgmt.web_buildtmp/
+bin_buildcheck/
+obj_build2/
+.vs/
+*.user
+*.suo
+Properties/launchSettings.json
+
+# ===========================
+# ASP.NET Core environment-specific appsettings
+# NEVER commit these files — use appsettings.json
+# as a template and add credentials only here
+# ===========================
+invmgmt.web/appsettings.Production.json
+invmgmt.web/appsettings.Development.json
+invmgmt.web/appsettings.Staging.json
+
+# ===========================
+# Secrets and credentials
+# ===========================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+
+# ===========================
+# Docker
+# ===========================
+.dockerignore
+docker-compose.override.yml
 pgdata/
 seqdata/
+
+# ===========================
+# OS specific
+# ===========================
+.AppleDouble
+.LSOverride
+desktop.ini
+
+# ===========================
+# Test outputs
+# ===========================
+coverage/
+test-results/
