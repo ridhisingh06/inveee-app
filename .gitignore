@@ -27,12 +27,14 @@ out/
 # Terraform
 # ===========================
 terraform/.terraform/
+terraform/bin/
 terraform/terraform.tfstate
 terraform/terraform.tfstate.*
 terraform/.terraform.lock.hcl
 terraform/crash.log
 terraform/*.tfvars
 terraform/*.tfvars.json
+terraform/crash.*.log
 
 # ===========================
 # IDE / Editor
