@@ -108,6 +108,9 @@ echo -e "${YELLOW}  Building backend...${NC}"
 docker build -t invmgmt-backend:latest ./invmgmt.web -f ./invmgmt.web/Dockerfile
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}  ✓ Backend image built${NC}"
+    echo -e "${YELLOW}  Cleaning up backend build dependencies to free disk space...${NC}"
+    docker image rm mcr.microsoft.com/dotnet/sdk:10.0 2>/dev/null || true
+    docker builder prune -af 2>/dev/null || true
 else
     echo -e "${RED}  ✗ Backend build failed${NC}"
     exit 1
