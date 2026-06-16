@@ -10,7 +10,7 @@ jobs:
 
     env:
       SOURCE_DIR: Invmgmt-master/dist/invmgmt-frontend/browser
-      AWS_S3_BUCKET: invmgmt-master   # ✅ direct bucket name (no empty error)
+      AWS_S3_BUCKET: invmgmt-master   # 
 
     steps:
       # Checkout code (updated version)
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       # Install dependencies
       - name: Install dependencies
