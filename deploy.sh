@@ -35,17 +35,13 @@ echo -e "\n${YELLOW}[2/7] Cleaning up existing deployment...${NC}"
 REPO_PATH="/home/ubuntu/inveee-app"
 
 if [ -d "$REPO_PATH" ]; then
-    echo -e "${YELLOW}  Removing old repository...${NC}"
+    echo -e "${YELLOW}  Removing old repository with sudo...${NC}"
     cd "$REPO_PATH" || exit 1
-    
-    # Stop and remove containers
-    docker-compose down -v 2>/dev/null || true
-    
-    # Go back to parent
+    # Stop and remove containers with sudo
+    sudo docker-compose down -v 2>/dev/null || true
     cd ..
-    
-    # Remove directory
-    rm -rf "$REPO_PATH"
+    # Remove directory with sudo
+    sudo rm -rf "$REPO_PATH"
     echo -e "${GREEN}  ✓ Old deployment cleaned${NC}"
 else
     echo -e "${YELLOW}  No existing deployment found${NC}"
@@ -103,9 +99,15 @@ echo -e "${GREEN}  ✓ Environment configured${NC}"
 echo -e "\n${YELLOW}[5/7] Building Docker images...${NC}"
 echo -e "${YELLOW}  This may take 5-10 minutes...${NC}"
 
-# Build backend
-echo -e "${YELLOW}  Building backend...${NC}"
-docker build -t invmgmt-backend:latest ./invmgmt.web -f ./invmgmt.web/Dockerfile
+# Build backend (using temporary workspace)
+BUILD_TMP="/home/ubuntu/build_tmp"
+echo -e "${YELLOW}  Preparing temporary build workspace...${NC}"
+rm -rf "$BUILD_TMP"
+mkdir -p "$BUILD_TMP/invmgmt.web"
+cp -r ./invmgmt.web/* "$BUILD_TMP/invmgmt.web/"
+export NUGET_PACKAGES="$BUILD_TMP/.nuget"
+echo -e "${YELLOW}  Building backend in temporary workspace...${NC}"
+docker build -t invmgmt-backend:latest "$BUILD_TMP/invmgmt.web" -f "$BUILD_TMP/invmgmt.web/Dockerfile"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}  ✓ Backend image built${NC}"
     echo -e "${YELLOW}  Cleaning up backend build dependencies to free disk space...${NC}"

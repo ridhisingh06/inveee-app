@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj": {}
+    "D:\\inveee-app\\invmgmt.web\\invmgmt.web.csproj": {}
   },
   "projects": {
-    "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj": {
+    "D:\\inveee-app\\invmgmt.web\\invmgmt.web.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj",
+        "projectUniqueName": "D:\\inveee-app\\invmgmt.web\\invmgmt.web.csproj",
         "projectName": "invmgmt.web",
-        "projectPath": "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj",
+        "projectPath": "D:\\inveee-app\\invmgmt.web\\invmgmt.web.csproj",
         "packagesPath": "C:\\Users\\singh\\.nuget\\packages\\",
-        "outputPath": "D:\\inveeeR\\invmgmt.web\\obj\\",
+        "outputPath": "D:\\inveee-app\\invmgmt.web\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

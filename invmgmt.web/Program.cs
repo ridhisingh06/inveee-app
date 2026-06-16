@@ -12,7 +12,7 @@ using invmgmt.web.Models;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Configuration.AddEnvironmentVariables(); // Load env vars, including Docker secrets
 var config = builder.Configuration;
 
 builder.Host.UseSerilog((ctx, services, serilogConfig) =>

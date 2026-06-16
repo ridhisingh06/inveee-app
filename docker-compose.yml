@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   # ===================================
@@ -9,7 +9,7 @@ services:
     container_name: invmgmt-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Ridhisingh}
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
     ports:
       - "5432:5432"
@@ -35,7 +35,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ASPNETCORE_URLS: http://+:5000
-      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-postgres};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-changeme};Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Disable
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-postgres};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-Ridhisingh};Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Disable
       Jwt__Key: ${JWT_KEY:-CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_KEY_MIN_32_CHARS}
       Jwt__Issuer: ${JWT_ISSUER:-invmgmt-api}
       Jwt__Audience: ${JWT_AUDIENCE:-invmgmt-frontend}
@@ -70,10 +70,10 @@ services:
       - invmgmt-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD-SHELL", "while ! curl -sf http://localhost/; do sleep 1; done"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
 
 networks:
   invmgmt-network:
