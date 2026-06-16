@@ -15,7 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # 
       - name: Install dependencies
         run: npm install
         working-directory: Invmgmt-master
@@ -24,7 +23,6 @@ jobs:
         run: npm run build -- --configuration production
         working-directory: Invmgmt-master
 
-      # AWS setup
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -32,7 +30,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # Deploy
       - name: Deploy to S3
         run: |
           if [ ! -d "$SOURCE_DIR" ]; then
