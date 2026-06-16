@@ -1,4 +1,5 @@
 name: Deploy
+
 on:
   push:
     branches: [main]
@@ -6,33 +7,30 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     env:
-      # Path to the Angular build output (relative to the repo root)
       SOURCE_DIR: Invmgmt-master/dist/invmgmt-frontend/browser
-      # S3 bucket name – stored as a secret (do **not** hard‑code the bucket)
       AWS_S3_BUCKET: ${{ secrets.S3_BUCKET }}
 
     steps:
-      #  Checkout the repository
+      # Checkout code
       - uses: actions/checkout@v3
 
-      # Configure AWS credentials – uses secrets, **no hard‑coded keys**
+      # Configure AWS (FIXED LINE HERE ✅)
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credential​s@v4
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          # Fixed region – hard‑coded to a valid value as requested
           aws-region: us-east-1
 
-      #  Deploy the built files to the S3 bucket
+      # Deploy to S3
       - name: Deploy to S3
         run: |
-          # Verify that the source directory exists (helps avoid exit‑code 128)
           if [ ! -d "$SOURCE_DIR" ]; then
-            echo " SOURCE_DIR \"$SOURCE_DIR\" does not exist."
+            echo "SOURCE_DIR \"$SOURCE_DIR\" does not exist."
             exit 1
           fi
 
-          echo " Syncing $SOURCE_DIR → s3://$AWS_S3_BUCKET"
+          echo "Syncing $SOURCE_DIR → s3://$AWS_S3_BUCKET"
           aws s3 sync "$SOURCE_DIR" "s3://$AWS_S3_BUCKET" --delete
