@@ -13,10 +13,18 @@ jobs:
       AWS_S3_BUCKET: ${{ secrets.S3_BUCKET }}
 
     steps:
-      # Checkout code
       - uses: actions/checkout@v3
 
-      
+      # 
+      - name: Install dependencies
+        run: npm install
+        working-directory: Invmgmt-master
+
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+        working-directory: Invmgmt-master
+
+      # AWS setup
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -24,7 +32,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # Deploy to S3
+      # Deploy
       - name: Deploy to S3
         run: |
           if [ ! -d "$SOURCE_DIR" ]; then
@@ -32,5 +40,4 @@ jobs:
             exit 1
           fi
 
-          echo "Syncing $SOURCE_DIR → s3://$AWS_S3_BUCKET"
           aws s3 sync "$SOURCE_DIR" "s3://$AWS_S3_BUCKET" --delete
