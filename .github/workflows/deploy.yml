@@ -88,17 +88,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
-          cache-dependency-path: invmgmt-master/package-lock.json
+          cache-dependency-path: Invmgmt-master/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: invmgmt-master
+        working-directory: Invmgmt-master
 
       - name: Build Angular app
         run: npm run build -- --configuration production
-        working-directory: invmgmt-master
+        working-directory: Invmgmt-master
 
       - name: Debug - Check build output
         run: |
@@ -109,7 +109,7 @@ jobs:
           else
             echo "❌ dist folder NOT found"
           fi
-        working-directory: invmgmt-master
+        working-directory: Invmgmt-master
 
   # ========================================
   # DEPLOY (Frontend to S3 + Backend to ECS)
@@ -147,17 +147,17 @@ jobs:
       - name: Setup Node for Frontend Build
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
-          cache-dependency-path: invmgmt-master/package-lock.json
+          cache-dependency-path: Invmgmt-master/package-lock.json
 
       - name: Install frontend dependencies
         run: npm ci
-        working-directory: invmgmt-master
+        working-directory: Invmgmt-master
 
       - name: Build frontend for production
         run: npm run build -- --configuration production
-        working-directory: invmgmt-master
+        working-directory: Invmgmt-master
 
       - name: Detect Angular build output path
         id: detect-dist
@@ -165,19 +165,19 @@ jobs:
           echo "=== Detecting Angular build output ==="
           
           # Try common paths (Angular v17+ uses 'browser' subfolder)
-          if [ -d "invmgmt-master/dist/invmgmt-frontend/browser" ]; then
-            DIST_PATH="invmgmt-master/dist/invmgmt-frontend/browser"
+          if [ -d "Invmgmt-master/dist/invmgmt-frontend/browser" ]; then
+            DIST_PATH="Invmgmt-master/dist/invmgmt-frontend/browser"
             echo "✅ Found: $DIST_PATH"
-          elif [ -d "invmgmt-master/dist/invmgmt-frontend" ]; then
-            DIST_PATH="invmgmt-master/dist/invmgmt-frontend"
+          elif [ -d "Invmgmt-master/dist/invmgmt-frontend" ]; then
+            DIST_PATH="Invmgmt-master/dist/invmgmt-frontend"
             echo "✅ Found: $DIST_PATH"
-          elif [ -d "invmgmt-master/dist" ]; then
-            DIST_PATH="invmgmt-master/dist"
+          elif [ -d "Invmgmt-master/dist" ]; then
+            DIST_PATH="Invmgmt-master/dist"
             echo "✅ Found: $DIST_PATH"
           else
             echo "❌ ERROR: Could not find Angular build output"
             echo "Searching for dist folders:"
-            find invmgmt-master -name "dist" -type d
+            find Invmgmt-master -name "dist" -type d
             exit 1
           fi
           
