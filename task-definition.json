@@ -5,10 +5,11 @@
   "cpu": "256",
   "memory": "512",
   "executionRoleArn": "arn:aws:iam::396287094524:role/inveee-task-execution-role",
+  "taskRoleArn": "arn:aws:iam::396287094524:role/inveee-app-task-role",
   "containerDefinitions": [
     {
       "name": "app",
-      "image": "PLACEHOLDER_IMAGE",
+      "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:latest",
       "essential": true,
       "portMappings": [
         {
@@ -29,6 +30,10 @@
         {
           "name": "FRONTEND_URL",
           "value": "http://invmgmt-master.s3-website-us-east-1.amazonaws.com"
+        },
+        {
+          "name": "ConnectionStrings__DefaultConnection",
+          "value": "Host=inveee-postgres.citg4maasb05.us-east-1.rds.amazonaws.com;Port=5432;Database=inventorydb;Username=postgres;Password=ridhi608Secure2024;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Require"
         }
       ],
       "healthCheck": {
