@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  id-token: write  # Required for OIDC token
+
 jobs:
   build-backend:
     runs-on: ubuntu-latest
@@ -59,7 +63,7 @@ jobs:
       SOURCE_DIR: inveee-app/Invmgmt-master/dist/invmgmt-frontend/browser
       AWS_S3_BUCKET: invmgmt-master
       AWS_REGION: us-east-1
-      ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+      AWS_ACCOUNT_ID: '396287094524'
       ECR_REPOSITORY: inveee-app
       ECS_SERVICE: inveee-service
       ECS_CLUSTER: inveee-cluster
@@ -68,13 +72,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Configure AWS
-      - name: Configure AWS Credentials
+      # OPTION A: Use OIDC (No secrets needed - RECOMMENDED)
+      - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::396287094524:role/github-actions-role
           aws-region: ${{ env.AWS_REGION }}
+          role-skip-session-tagging: true
+
+      # OPTION B: Use Long-term Credentials (If OIDC not set up)
+      # Uncomment below and comment out OPTION A if using traditional secrets
+      # - name: Configure AWS Credentials (IAM User)
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
 
       # Deploy Frontend to S3
       - name: Setup Node for Frontend
@@ -104,6 +117,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: ${{ env.AWS_ACCOUNT_ID }}
 
       - name: Build, tag, and push image to Amazon ECR
         env:
@@ -137,4 +152,5 @@ jobs:
           echo "Backend deployed to ECS cluster: ${{ env.ECS_CLUSTER }}"
           echo "Service: ${{ env.ECS_SERVICE }}"
           echo "Docker image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+
 
