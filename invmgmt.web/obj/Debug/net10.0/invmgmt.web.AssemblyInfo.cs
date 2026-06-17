@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("invmgmt.web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dde9f0cbf25bc405b8fa9d92174291ca5293dcbd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+851e7b53027f555b4b6e3da489fef71e5fd9ebc4")]
 [assembly: System.Reflection.AssemblyProductAttribute("invmgmt.web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("invmgmt.web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
