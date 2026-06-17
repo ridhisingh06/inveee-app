@@ -86,18 +86,41 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
+# RDS DB Subnet Group (explicitly define instead of using default)
+resource "aws_db_subnet_group" "default" {
+  name       = "inveee-db-subnet-group"
+  subnet_ids = data.aws_subnets.default.ids
+
+  tags = {
+    Name = "inveee-db-subnet-group"
+  }
+}
+
 # RDS Instance
 resource "aws_db_instance" "postgres" {
-  identifier             = "inveee-postgres"
-  engine                 = "postgres"
-  instance_class         = "db.t3.micro"
-  allocated_storage      = 20
-  db_name                = "inventorydb"
-  username               = "postgres"
-  password               = var.db_password
-  publicly_accessible    = true
-  skip_final_snapshot    = true
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  identifier               = "inveee-postgres"
+  engine                   = "postgres"
+  engine_version           = "15.3"
+  instance_class           = "db.t3.micro"
+  allocated_storage        = 20
+  db_name                  = "inventorydb"
+  username                 = "postgres"
+  password                 = var.db_password
+  publicly_accessible      = true
+  skip_final_snapshot      = true
+  vpc_security_group_ids   = [aws_security_group.rds_sg.id]
+  db_subnet_group_name     = aws_db_subnet_group.default.name
+  multi_az                 = false
+  storage_type             = "gp2"
+  storage_encrypted        = false
+  
+  # Performance & reliability
+  backup_retention_period  = 7
+  backup_window            = "03:00-04:00"
+  maintenance_window       = "mon:04:00-mon:05:00"
+  
+  # SSL/TLS - Important: RDS PostgreSQL uses certificates
+  ca_cert_identifier       = "rds-ca-2019"  # Latest RDS CA certificate
 }
 
 # ECS Cluster
@@ -152,7 +175,11 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         {
           name  = "ConnectionStrings__DefaultConnection"
-          value = "Host=${aws_db_instance.postgres.address};Port=5432;Database=inventorydb;Username=postgres;Password=${var.db_password};Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Require;Trust Server Certificate=true;"
+          value = "Host=${aws_db_instance.postgres.address};Port=5432;Database=inventorydb;Username=postgres;Password=${var.db_password};Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Prefer;Trust Server Certificate=true;Application Name=invmgmt-api;"
+        },
+        {
+          name  = "ASPNETCORE_ENVIRONMENT"
+          value = "Production"
         }
       ]
       logConfiguration = {
@@ -177,8 +204,14 @@ resource "aws_ecs_service" "app" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = data.aws_subnets.default.ids
-    security_groups  = [aws_security_group.ecs_sg.id]
-    assign_public_ip = true
+    subnets           = data.aws_subnets.default.ids
+    security_groups   = [aws_security_group.ecs_sg.id]
+    assign_public_ip  = true
   }
+
+  # Ensure RDS is created before ECS tries to connect
+  depends_on = [
+    aws_db_instance.postgres,
+    aws_iam_role_policy_attachment.ecs_task_execution_role_policy
+  ]
 }
