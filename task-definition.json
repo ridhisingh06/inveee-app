@@ -4,7 +4,7 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
-  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/inveee-task-execution-role",
+  "executionRoleArn": "arn:aws:iam::396287094524:role/inveee-task-execution-role",
   "containerDefinitions": [
     {
       "name": "app",
