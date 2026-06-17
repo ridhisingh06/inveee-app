@@ -36,12 +36,12 @@ jobs:
           fi
           echo ""
           echo "=== Check Frontend Folder ==="
-          if [ -d "invmgmt-master" ]; then
-            echo "✅ invmgmt-master folder found (lowercase)"
-            ls -la invmgmt-master/ | head -20
-          elif [ -d "Invmgmt-master" ]; then
-            echo "⚠️  Invmgmt-master found (capital I - needs fix)"
+          if [ -d "Invmgmt-master" ]; then
+            echo "✅ Invmgmt-master folder found"
             ls -la Invmgmt-master/ | head -20
+          elif [ -d "invmgmt-master" ]; then
+            echo "⚠️  invmgmt-master found (lowercase - case mismatch)"
+            ls -la invmgmt-master/ | head -20
           else
             echo "❌ Frontend folder NOT found"
           fi
