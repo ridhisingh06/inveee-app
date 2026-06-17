@@ -95,14 +95,14 @@ ssh -i $KeyPath -o StrictHostKeyChecking=no "$InstanceUser@$InstanceIP" `
 # Copy deployment script
 Write-Host "Uploading deployment script..." -ForegroundColor $Yellow
 scp -i $KeyPath -o StrictHostKeyChecking=no deploy.sh `
-    "$InstanceUser@$InstanceIP:/home/$InstanceUser/deploy.sh"
+    "$InstanceUser@${InstanceIP}:/home/$InstanceUser/deploy.sh"
 
 # Make it executable and run
 Write-Host "`nRunning deployment on EC2..." -ForegroundColor $Yellow
 Write-Host "This may take 10-15 minutes..." -ForegroundColor $Yellow
 
-ssh -i $KeyPath -o StrictHostKeyChecking=no "$InstanceUser@$InstanceIP" `
-    "chmod +x /home/$InstanceUser/deploy.sh && /home/$InstanceUser/deploy.sh"
+$remoteCmd = "chmod +x /home/$InstanceUser/deploy.sh ; /home/$InstanceUser/deploy.sh"
+ssh -i $KeyPath -o StrictHostKeyChecking=no "$InstanceUser@$InstanceIP" $remoteCmd
 
 if ($LASTEXITCODE -eq 0) {
     Write-Header "✓ Deployment Successful!"
@@ -116,7 +116,8 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "  View logs:      ssh -i $KeyPath $InstanceUser@$InstanceIP 'docker-compose logs -f'" -ForegroundColor $Blue
     Write-Host "  Stop services:  ssh -i $KeyPath $InstanceUser@$InstanceIP 'docker-compose down'" -ForegroundColor $Blue
     Write-Host "  Restart:        ssh -i $KeyPath $InstanceUser@$InstanceIP 'docker-compose restart'" -ForegroundColor $Blue
-} else {
+}
+if ($LASTEXITCODE -ne 0) {
     Write-Error-Custom "Deployment failed on EC2"
     Write-Host "Check EC2 instance logs for details" -ForegroundColor $Yellow
     exit 1

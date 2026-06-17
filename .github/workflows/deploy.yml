@@ -1,0 +1,52 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SOURCE_DIR: Invmgmt-master/dist/invmgmt-frontend/browser
+      AWS_S3_BUCKET: invmgmt-master
+
+    steps:
+      # Checkout code (updated version)
+      - uses: actions/checkout@v4
+
+      # Setup Node (important for Angular build)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+        working-directory: Invmgmt-master
+
+      # Build Angular app
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+        working-directory: Invmgmt-master
+
+      # Configure AWS
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Deploy to S3
+      - name: Deploy to S3
+        run: |
+          if [ ! -d "$SOURCE_DIR" ]; then
+            echo "SOURCE_DIR \"$SOURCE_DIR\" does not exist."
+            exit 1
+          fi
+
+          echo "Uploading to S3 bucket..."
+          aws s3 sync "$SOURCE_DIR" "s3://$AWS_S3_BUCKET" --delete

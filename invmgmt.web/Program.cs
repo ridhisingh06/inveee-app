@@ -13,6 +13,17 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ---------------------------------------------------------------
+// Kestrel – listen on every interface, HTTP port 5001
+// ---------------------------------------------------------------
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Bind to 0.0.0.0:5001  (accessible from any NIC)
+    options.ListenAnyIP(5001);
+    // When you have a cert you can enable HTTPS on 5001:
+    // options.ListenAnyIP(5001, o => o.UseHttps("path/to/cert.pfx", "password"));
+});
+builder.Configuration.AddEnvironmentVariables(); // Load env vars, including Docker secrets
 var config = builder.Configuration;
 
 builder.Host.UseSerilog((ctx, services, serilogConfig) =>
@@ -58,12 +69,23 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
     options.UseNpgsql(connString, npgsqlOptions =>
     {
+        // Log connection string details (without password)
+        var connStringForLog = System.Text.RegularExpressions.Regex.Replace(
+            connString, 
+            @"Password=[^;]+", 
+            "Password=***", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        Console.WriteLine($"[STARTUP] Connection String: {connStringForLog}");
+        
         // Connection resilience settings
         npgsqlOptions.EnableRetryOnFailure(
             maxRetryCount: 5,
             maxRetryDelay:TimeSpan.FromSeconds(30),
             errorCodesToAdd: null);
         npgsqlOptions.CommandTimeout(30);
+        
+        // Add timeout settings
+        npgsqlOptions.ProvideClientCertificatesCallback(null);
     });
 });
 
