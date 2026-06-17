@@ -14,12 +14,12 @@ using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------------------------------------------------------------
-// Kestrel – listen on every interface, HTTP port 5001
+// Kestrel – listen on every interface, HTTP port 5000
 // ---------------------------------------------------------------
 builder.WebHost.ConfigureKestrel(options =>
 {
-    // Bind to 0.0.0.0:5001  (accessible from any NIC)
-    options.ListenAnyIP(5001);
+    // Bind to 0.0.0.0:5000  (accessible from any NIC)
+    options.ListenAnyIP(5000);
     // When you have a cert you can enable HTTPS on 5001:
     // options.ListenAnyIP(5001, o => o.UseHttps("path/to/cert.pfx", "password"));
 });
@@ -113,17 +113,25 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<invmgmt.web.Repositories.IPersonnelRepository, invmgmt.web.Repositories.PersonnelRepository>();
 builder.Services.AddScoped<invmgmt.web.Services.IPersonnelService, invmgmt.web.Services.PersonnelService>();
 // =======================
-// CORS (FIXED)
+// CORS (PRODUCTION CONFIGURED)
 // =======================
 builder.Services.AddCors(options =>
 {
+    var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://invmgmt-master.s3-website-us-east-1.amazonaws.com";
+    
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins(
+            frontendUrl,
+            "http://localhost:4200",  // Local development
+            "http://localhost:3000"   // Alternative local port
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
     });
 });
+
 
 // =======================
 // JWT
