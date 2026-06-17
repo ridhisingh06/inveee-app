@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Full Stack
 
 on:
   push:
@@ -8,38 +8,47 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # Required for OIDC token
+  id-token: write
 
 jobs:
+  # ========================================
+  # DEBUG JOB - Verify Repo Structure
+  # ========================================
   debug:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: Debug - Show directory structure
+      - name: Debug - Show repository structure
         run: |
           echo "=== Current Working Directory ==="
           pwd
           echo ""
-          echo "=== Contents of repository root ==="
+          echo "=== Repository Root Contents ==="
           ls -la
           echo ""
-          echo "=== Check if invmgmt.web exists ==="
+          echo "=== Check Backend Folder ==="
           if [ -d "invmgmt.web" ]; then
             echo "✅ invmgmt.web folder found"
-            ls -la invmgmt.web/
+            ls -la invmgmt.web/ | head -20
           else
             echo "❌ invmgmt.web NOT found"
           fi
           echo ""
-          echo "=== Check if Invmgmt-master exists ==="
-          if [ -d "Invmgmt-master" ]; then
-            echo "✅ Invmgmt-master folder found"
-            ls -la Invmgmt-master/
+          echo "=== Check Frontend Folder ==="
+          if [ -d "invmgmt-master" ]; then
+            echo "✅ invmgmt-master folder found (lowercase)"
+            ls -la invmgmt-master/ | head -20
+          elif [ -d "Invmgmt-master" ]; then
+            echo "⚠️  Invmgmt-master found (capital I - needs fix)"
+            ls -la Invmgmt-master/ | head -20
           else
-            echo "❌ Invmgmt-master NOT found"
+            echo "❌ Frontend folder NOT found"
           fi
 
+  # ========================================
+  # BUILD BACKEND (.NET 10)
+  # ========================================
   build-backend:
     runs-on: ubuntu-latest
     needs: debug
@@ -47,10 +56,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Setup .NET 10 Preview
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
 
       - name: Restore dependencies
         run: dotnet restore
@@ -65,6 +75,9 @@ jobs:
         working-directory: invmgmt.web
         continue-on-error: true
 
+  # ========================================
+  # BUILD FRONTEND (Angular)
+  # ========================================
   build-frontend:
     runs-on: ubuntu-latest
     needs: debug
@@ -72,26 +85,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: invmgmt-master/package-lock.json
 
       - name: Install dependencies
-        run: npm install
-        working-directory: Invmgmt-master
+        run: npm ci
+        working-directory: invmgmt-master
 
       - name: Build Angular app
         run: npm run build -- --configuration production
-        working-directory: Invmgmt-master
+        working-directory: invmgmt-master
 
+      - name: Debug - Check build output
+        run: |
+          echo "=== Checking dist folder ==="
+          if [ -d "dist" ]; then
+            echo "✅ dist folder found"
+            find dist -type f | head -20
+          else
+            echo "❌ dist folder NOT found"
+          fi
+        working-directory: invmgmt-master
+
+  # ========================================
+  # DEPLOY (Frontend to S3 + Backend to ECS)
+  # ========================================
   deploy:
     needs: [build-backend, build-frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     env:
-      SOURCE_DIR: Invmgmt-master/dist/invmgmt-frontend/browser
       AWS_S3_BUCKET: invmgmt-master
       AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: '396287094524'
@@ -103,63 +131,121 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # OPTION A: Use Long-term Credentials (Since OIDC not set up)
-      - name: Configure AWS Credentials (IAM User)
+      # ========================================
+      # AWS AUTHENTICATION
+      # ========================================
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Deploy Frontend to S3
-      - name: Setup Node for Frontend
+      # ========================================
+      # FRONTEND DEPLOYMENT (S3)
+      # ========================================
+      - name: Setup Node for Frontend Build
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: invmgmt-master/package-lock.json
 
       - name: Install frontend dependencies
-        run: npm install
-        working-directory: Invmgmt-master
+        run: npm ci
+        working-directory: invmgmt-master
 
-      - name: Build frontend
+      - name: Build frontend for production
         run: npm run build -- --configuration production
-        working-directory: Invmgmt-master
+        working-directory: invmgmt-master
+
+      - name: Detect Angular build output path
+        id: detect-dist
+        run: |
+          echo "=== Detecting Angular build output ==="
+          
+          # Try common paths (Angular v17+ uses 'browser' subfolder)
+          if [ -d "invmgmt-master/dist/invmgmt-frontend/browser" ]; then
+            DIST_PATH="invmgmt-master/dist/invmgmt-frontend/browser"
+            echo "✅ Found: $DIST_PATH"
+          elif [ -d "invmgmt-master/dist/invmgmt-frontend" ]; then
+            DIST_PATH="invmgmt-master/dist/invmgmt-frontend"
+            echo "✅ Found: $DIST_PATH"
+          elif [ -d "invmgmt-master/dist" ]; then
+            DIST_PATH="invmgmt-master/dist"
+            echo "✅ Found: $DIST_PATH"
+          else
+            echo "❌ ERROR: Could not find Angular build output"
+            echo "Searching for dist folders:"
+            find invmgmt-master -name "dist" -type d
+            exit 1
+          fi
+          
+          echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
+          echo "Files to deploy:"
+          ls -la "$DIST_PATH"
 
       - name: Deploy frontend to S3
         run: |
-          if [ ! -d "$SOURCE_DIR" ]; then
-            echo "SOURCE_DIR \"$SOURCE_DIR\" does not exist."
-            exit 1
-          fi
-          echo "Uploading frontend to S3 bucket..."
-          aws s3 sync "$SOURCE_DIR" "s3://$AWS_S3_BUCKET" --delete
-          echo "Frontend deployed successfully!"
+          DIST_PATH="${{ steps.detect-dist.outputs.dist_path }}"
+          
+          echo "=== Deploying to S3 ==="
+          echo "Source: $DIST_PATH"
+          echo "Bucket: s3://$AWS_S3_BUCKET"
+          
+          # Sync with cache control for assets
+          aws s3 sync "$DIST_PATH" "s3://$AWS_S3_BUCKET" \
+            --delete \
+            --cache-control "public, max-age=31536000" \
+            --exclude "index.html"
+          
+          # Upload index.html without cache
+          aws s3 cp "$DIST_PATH/index.html" "s3://$AWS_S3_BUCKET/index.html" \
+            --cache-control "no-cache, no-store, must-revalidate"
+          
+          echo "✅ Frontend deployed successfully!"
 
-      # Deploy Backend to ECS
+      # ========================================
+      # BACKEND DEPLOYMENT (ECS)
+      # ========================================
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registries: ${{ env.AWS_ACCOUNT_ID }}
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build, tag, and push Docker image to ECR
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA invmgmt.web/
+          echo "=== Building Docker Image ==="
+          echo "Registry: $ECR_REGISTRY"
+          echo "Repository: $ECR_REPOSITORY"
+          echo "Tag: $IMAGE_TAG"
+          
+          # Build Docker image
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+                       -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+                       invmgmt.web/
+          
+          # Push both tags
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA" >> $GITHUB_OUTPUT
+          
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "✅ Docker image pushed successfully!"
 
-      - name: Update ECS task definition
+      - name: Update ECS task definition with new image
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          image: ${{ steps.build-image.outputs.image }}
 
-      - name: Deploy to Amazon ECS service
+      - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
@@ -167,12 +253,29 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
+      # ========================================
+      # DEPLOYMENT SUMMARY
+      # ========================================
       - name: Deployment Summary
         run: |
-          echo "=== DEPLOYMENT SUMMARY ==="
-          echo "Frontend deployed to: https://${{ env.AWS_S3_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
-          echo "Backend deployed to ECS cluster: ${{ env.ECS_CLUSTER }}"
-          echo "Service: ${{ env.ECS_SERVICE }}"
-          echo "Docker image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+          echo ""
+          echo "╔═══════════════════════════════════════════════════════╗"
+          echo "║         🚀 DEPLOYMENT COMPLETED SUCCESSFULLY          ║"
+          echo "╚═══════════════════════════════════════════════════════╝"
+          echo ""
+          echo "📦 Frontend (S3):"
+          echo "   URL: http://${{ env.AWS_S3_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
+          echo ""
+          echo "🔧 Backend (ECS):"
+          echo "   Cluster: ${{ env.ECS_CLUSTER }}"
+          echo "   Service: ${{ env.ECS_SERVICE }}"
+          echo "   Image: ${{ steps.build-image.outputs.image }}"
+          echo ""
+          echo "📊 Resources:"
+          echo "   Region: ${{ env.AWS_REGION }}"
+          echo "   Account: ${{ env.AWS_ACCOUNT_ID }}"
+          echo ""
+          echo "✅ All systems operational!"
+          echo ""
 
 
