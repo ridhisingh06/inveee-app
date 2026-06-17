@@ -1,0 +1,248 @@
+INVEEE APP - PROJECT DIRECTORY TREE
+===================================
+
+inveee-app/
+│
+├── 📂 .github/                          # GitHub Configuration
+│   ├── workflows/
+│   │   ├── deploy.yml                  # CI/CD Pipeline (Backend & Frontend)
+│   │   └── terraform.yml               # Terraform Deployment
+│   └── [GitHub settings]
+│
+├── 📂 .git/                            # Git Repository
+├── 📂 .vs/                             # Visual Studio Cache
+├── 📂 .vscode/                         # VS Code Settings
+│
+├── 📂 invmgmt.web/                     # BACKEND (.NET 10 API)
+│   ├── 📂 Controllers/                 # API Endpoints
+│   │   ├── AuthController.cs
+│   │   ├── UserController.cs
+│   │   └── [Other controllers]
+│   │
+│   ├── 📂 Models/                      # Domain Models
+│   │   ├── User.cs
+│   │   ├── Role.cs
+│   │   ├── Category.cs
+│   │   └── [Other entities]
+│   │
+│   ├── 📂 DTOs/                        # Data Transfer Objects
+│   │   ├── UserRegisterDto.cs
+│   │   ├── UserLoginDto.cs
+│   │   └── [Other DTOs]
+│   │
+│   ├── 📂 Data/                        # Database Layer
+│   │   ├── AppDbContext.cs
+│   │   └── [EF Core configuration]
+│   │
+│   ├── 📂 Repositories/                # Data Access Layer
+│   │   ├── IUserRepository.cs
+│   │   ├── UserRepository.cs
+│   │   └── [Other repositories]
+│   │
+│   ├── 📂 Services/                    # Business Logic
+│   │   ├── IAuthService.cs
+│   │   ├── AuthService.cs
+│   │   └── [Other services]
+│   │
+│   ├── 📂 Utils/                       # Utilities
+│   │   ├── PasswordUtils.cs
+│   │   └── TraceIdEnricherMiddleware.cs
+│   │
+│   ├── 📂 Migrations/                  # EF Core Migrations
+│   │   ├── [Migration files]
+│   │   └── AppDbContextModelSnapshot.cs
+│   │
+│   ├── 📂 Logs/                        # Application Logs
+│   ├── 📂 Properties/                  # Project Properties
+│   ├── 📂 wwwroot/                     # Static Files (CSS, JS, uploads)
+│   ├── 📂 Views/                       # Razor Views (if used)
+│   ├── 📂 bin/                         # Build Output
+│   ├── 📂 obj/                         # Object Files
+│   │
+│   ├── 📄 Program.cs                   # Application Startup
+│   ├── 📄 invmgmt.web.csproj          # Project File
+│   ├── 📄 Dockerfile                   # Docker Image Config
+│   ├── 📄 appsettings.json            # Production Settings
+│   ├── 📄 appsettings.Development.json # Dev Settings
+│   ├── 📄 .dockerignore
+│   │
+│   └── 📄 [Test & SQL Scripts]
+│       ├── test_auth.ps1
+│       ├── test_reg.ps1
+│       ├── query.sql
+│       └── [Other scripts]
+│
+├── 📂 Invmgmt-master/                  # FRONTEND (Angular 16+)
+│   ├── 📂 src/
+│   │   ├── 📂 app/                     # Angular Application
+│   │   │   ├── 📂 components/          # Reusable Components
+│   │   │   ├── 📂 pages/               # Page Components
+│   │   │   ├── 📂 services/            # HTTP Services
+│   │   │   ├── 📂 models/              # TypeScript Interfaces
+│   │   │   ├── app.component.ts
+│   │   │   └── app-routing.module.ts
+│   │   │
+│   │   ├── 📂 assets/                  # Static Assets
+│   │   │   ├── images/
+│   │   │   └── icons/
+│   │   │
+│   │   ├── 📂 environments/            # Environment Configs
+│   │   │   ├── environment.ts
+│   │   │   └── environment.prod.ts
+│   │   │
+│   │   ├── index.html                  # HTML Entry Point
+│   │   ├── main.ts                     # Bootstrap File
+│   │   └── styles.css                  # Global Styles
+│   │
+│   ├── 📂 public/                      # Public Assets
+│   ├── 📂 node_modules/                # NPM Dependencies (not versioned)
+│   ├── 📂 dist/                        # Build Output (ignored)
+│   │   └── invmgmt-frontend/
+│   │       └── browser/                # Compiled Angular
+│   │
+│   ├── 📄 package.json                 # NPM Configuration
+│   ├── 📄 package-lock.json            # Dependency Lock
+│   ├── 📄 angular.json                 # Angular CLI Config
+│   ├── 📄 tsconfig.json                # TypeScript Config
+│   ├── 📄 tsconfig.app.json
+│   ├── 📄 tsconfig.spec.json
+│   │
+│   ├── 📄 Dockerfile                   # Docker Image
+│   ├── 📄 nginx.default.conf           # Nginx Config
+│   ├── 📄 entrypoint.sh                # Docker Entrypoint
+│   ├── 📄 proxy.conf.json              # Dev Proxy Config
+│   │
+│   ├── 📄 .prettierrc                  # Code Formatter
+│   ├── 📄 .editorconfig
+│   ├── 📄 .dockerignore
+│   └── 📄 README.md
+│
+├── 📂 invmgmt.web.Tests/               # Backend Unit Tests
+│   └── [Test Files]
+│
+├── 📂 invmgmt.web_buildtmp/            # Temporary Build Folder
+│
+├── 📂 terraform/                       # AWS INFRASTRUCTURE (IaC)
+│   ├── 📄 main.tf                      # Main Infrastructure
+│   │   ├── VPC & Networking
+│   │   ├── Security Groups
+│   │   ├── ECR Repository
+│   │   ├── RDS PostgreSQL
+│   │   ├── ECS Cluster & Service
+│   │   ├── Auto-Scaling
+│   │   ├── IAM Roles
+│   │   └── CloudWatch Logs
+│   │
+│   ├── 📄 variables.tf                 # Input Variables
+│   │   ├── aws_region: us-east-1
+│   │   └── db_password: [sensitive]
+│   │
+│   ├── 📄 outputs.tf                   # Output Values
+│   │
+│   ├── 📂 .terraform/                  # Downloaded Plugins
+│   ├── 📄 .terraform.lock.hcl          # Lock File
+│   ├── 📄 terraform.tfstate            # Current State
+│   ├── 📄 terraform.tfstate.backup     # State Backup
+│   │
+│   └── 📄 [Plan Files]
+│       ├── tfplan-prod
+│       └── tfplan-prod2
+│
+├── 📂 scripts/                         # Utility Scripts
+│   └── [Build & deployment scripts]
+│
+├── 📂 node_modules/                    # Root NPM Packages (if any)
+│
+├── 📄 .gitignore                       # Git Ignore Rules
+├── 📄 docker-compose.yml               # Local Development
+├── 📄 .env.example                     # Environment Template
+├── 📄 .env.prod                        # Production Env (ignored)
+├── 📄 task-definition.json             # ECS Task Definition
+│
+├── 📄 README.md                        # Project Overview
+│
+└── 📄 DOCUMENTATION/
+    ├── 📄 DEPLOYMENT.md
+    ├── 📄 DEPLOYMENT_QUICK_REFERENCE.md
+    ├── 📄 EC2_DEPLOYMENT_CHECKLIST.md
+    ├── 📄 PRODUCTION_DEPLOYMENT_GUIDE.md
+    ├── 📄 PRODUCTION_HARDENING_COMPLETE.md
+    ├── 📄 GITHUB_ACTIONS_PATH_FIX.md
+    ├── 📄 ECS_TASK_DEFINITION_ROLE_FIX.md
+    ├── 📄 AWS_DEPLOYMENT_READINESS.md
+    ├── 📄 AWS_RDS_SETUP_REFERENCE.md
+    ├── 📄 PROJECT_STRUCTURE.md
+    ├── 📄 PROJECT_TREE.txt
+    └── [Other documentation]
+
+===================================
+TECHNOLOGY STACK
+===================================
+
+Frontend:
+  - Framework: Angular 16+
+  - Language: TypeScript
+  - Styling: CSS
+  - Package Manager: npm
+  - Container: Docker + Nginx
+
+Backend:
+  - Runtime: .NET 10
+  - Framework: ASP.NET Core Web API
+  - Language: C#
+  - Database: PostgreSQL 18.3
+  - ORM: Entity Framework Core
+  - Auth: JWT Tokens
+  - Logging: Serilog
+  - Container: Docker
+
+Infrastructure:
+  - Cloud Platform: AWS (us-east-1)
+  - Compute: ECS Fargate
+  - Database: RDS PostgreSQL
+  - Container Registry: ECR
+  - IaC Tool: Terraform
+  - CI/CD: GitHub Actions
+  - Monitoring: CloudWatch
+  - Security: IAM, KMS, Security Groups
+
+===================================
+DEPLOYMENT FLOW
+===================================
+
+GitHub (Source Code)
+        ↓
+GitHub Actions (CI/CD)
+        ├─→ debug job
+        ├─→ build-backend (.NET build & test)
+        ├─→ build-frontend (Angular build)
+        └─→ deploy
+                ├─→ Docker build
+                ├─→ Push to ECR
+                ├─→ Update ECS
+                └─→ Upload to S3
+        ↓
+AWS Infrastructure
+        ├─→ ECS Fargate (Backend API)
+        ├─→ S3 (Frontend)
+        ├─→ RDS (Database)
+        └─→ CloudWatch (Logs)
+
+===================================
+ENVIRONMENT SETUP
+===================================
+
+Production:
+  - Backend: http://54.89.134.48:5000
+  - Frontend: S3 website
+  - Database: RDS PostgreSQL (us-east-1)
+
+Development:
+  - Backend: localhost:5000 (or :5001)
+  - Frontend: localhost:4200
+  - Database: PostgreSQL (local or docker-compose)
+
+===================================
+Generated: June 17, 2026
+Status: Production Ready ✅
+===================================
