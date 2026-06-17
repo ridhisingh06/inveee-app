@@ -11,8 +11,38 @@ permissions:
   id-token: write  # Required for OIDC token
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Debug - Show directory structure
+        run: |
+          echo "=== Current Working Directory ==="
+          pwd
+          echo ""
+          echo "=== Contents of repository root ==="
+          ls -la
+          echo ""
+          echo "=== Check if invmgmt.web exists ==="
+          if [ -d "invmgmt.web" ]; then
+            echo "✅ invmgmt.web folder found"
+            ls -la invmgmt.web/
+          else
+            echo "❌ invmgmt.web NOT found"
+          fi
+          echo ""
+          echo "=== Check if Invmgmt-master exists ==="
+          if [ -d "Invmgmt-master" ]; then
+            echo "✅ Invmgmt-master folder found"
+            ls -la Invmgmt-master/
+          else
+            echo "❌ Invmgmt-master NOT found"
+          fi
+
   build-backend:
     runs-on: ubuntu-latest
+    needs: debug
     
     steps:
       - uses: actions/checkout@v4
@@ -24,19 +54,20 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore
-        working-directory: inveee-app/invmgmt.web
+        working-directory: invmgmt.web
 
       - name: Build backend
         run: dotnet build --configuration Release --no-restore
-        working-directory: inveee-app/invmgmt.web
+        working-directory: invmgmt.web
 
       - name: Run tests
         run: dotnet test --configuration Release --no-build --verbosity normal
-        working-directory: inveee-app/invmgmt.web
+        working-directory: invmgmt.web
         continue-on-error: true
 
   build-frontend:
     runs-on: ubuntu-latest
+    needs: debug
 
     steps:
       - uses: actions/checkout@v4
@@ -48,11 +79,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: inveee-app/Invmgmt-master
+        working-directory: Invmgmt-master
 
       - name: Build Angular app
         run: npm run build -- --configuration production
-        working-directory: inveee-app/Invmgmt-master
+        working-directory: Invmgmt-master
 
   deploy:
     needs: [build-backend, build-frontend]
@@ -60,7 +91,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     env:
-      SOURCE_DIR: inveee-app/Invmgmt-master/dist/invmgmt-frontend/browser
+      SOURCE_DIR: Invmgmt-master/dist/invmgmt-frontend/browser
       AWS_S3_BUCKET: invmgmt-master
       AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: '396287094524'
@@ -72,22 +103,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # OPTION A: Use OIDC (No secrets needed - RECOMMENDED)
-      - name: Configure AWS Credentials (OIDC)
+      # OPTION A: Use Long-term Credentials (Since OIDC not set up)
+      - name: Configure AWS Credentials (IAM User)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::396287094524:role/github-actions-role
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-          role-skip-session-tagging: true
-
-      # OPTION B: Use Long-term Credentials (If OIDC not set up)
-      # Uncomment below and comment out OPTION A if using traditional secrets
-      # - name: Configure AWS Credentials (IAM User)
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ env.AWS_REGION }}
 
       # Deploy Frontend to S3
       - name: Setup Node for Frontend
@@ -97,11 +119,11 @@ jobs:
 
       - name: Install frontend dependencies
         run: npm install
-        working-directory: inveee-app/Invmgmt-master
+        working-directory: Invmgmt-master
 
       - name: Build frontend
         run: npm run build -- --configuration production
-        working-directory: inveee-app/Invmgmt-master
+        working-directory: Invmgmt-master
 
       - name: Deploy frontend to S3
         run: |
@@ -124,7 +146,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA inveee-app/invmgmt.web/
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA invmgmt.web/
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA" >> $GITHUB_OUTPUT
@@ -133,7 +155,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: inveee-app/task-definition.json
+          task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
 
