@@ -66,6 +66,7 @@ temp/
 invmgmt.web_buildtmp/
 bin_buildcheck/
 obj_build2/
+backend/obj/
 .vs/
 *.user
 *.suo
