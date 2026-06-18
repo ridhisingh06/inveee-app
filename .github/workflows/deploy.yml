@@ -116,24 +116,43 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Debug – Show all files after Angular build
+        run: ls -R frontend
+        working-directory: .
       - name: Detect Angular build output path
         id: detect-dist
         run: |
-          echo "=== Detecting Angular build output ==="
-          if [ -d "frontend/dist/invmgmt-frontend/browser" ]; then
-            DIST_PATH="frontend/dist/invmgmt-frontend/browser"
-          elif [ -d "frontend/dist/invmgmt-frontend" ]; then
-            DIST_PATH="frontend/dist/invmgmt-frontend"
-          elif [ -d "frontend/dist" ]; then
-            DIST_PATH="frontend/dist"
+          echo "=== Detecting Angular output path from angular.json ==="
+          # Try to extract explicit outputPath from angular.json
+          OUTPUT_PATH=$(grep -Po '"outputPath"\s*:\s*"\K[^"]+' frontend/angular.json | head -1)
+          if [ -z "$OUTPUT_PATH" ]; then
+            echo "⚠️ outputPath not defined, falling back to default Angular dist location"
           else
-            echo "❌ Unable to locate Angular dist folder"
+            echo "✅ Found outputPath: $OUTPUT_PATH"
+          fi
+          # Determine final dist path
+          if [ -n "$OUTPUT_PATH" ]; then
+            DIST_PATH="frontend/$OUTPUT_PATH"
+          else
+            # Default to <project-name> folder under dist if exists, else generic dist
+            DEFAULT_PATH=$(ls frontend/dist 2>/dev/null | head -1)
+            if [ -n "$DEFAULT_PATH" ]; then
+              DIST_PATH="frontend/dist/$DEFAULT_PATH"
+            else
+              DIST_PATH="frontend/dist"
+            fi
+          fi
+          if [ -d "$DIST_PATH" ]; then
+            echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
+            echo "=== Found Angular dist folder: $DIST_PATH ==="
+            ls -la "$DIST_PATH"
+          else
+            echo "❌ Unable to locate Angular dist folder at $DIST_PATH"
+            echo "Available dist directories:"
+            echo "Available dist locations:"
             find frontend -type d -name dist
             exit 1
           fi
-          echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
-          echo "=== Found $DIST_PATH ==="
-          ls -la "$DIST_PATH"
       - name: Deploy frontend to S3
         run: |
           DIST_PATH="${{ steps.detect-dist.outputs.dist_path }}"
