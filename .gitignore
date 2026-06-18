@@ -76,9 +76,9 @@ Properties/launchSettings.json
 # NEVER commit these files — use appsettings.json
 # as a template and add credentials only here
 # ===========================
-invmgmt.web/appsettings.Production.json
-invmgmt.web/appsettings.Development.json
-invmgmt.web/appsettings.Staging.json
+backend/appsettings.Production.json
+backend/appsettings.Development.json
+backend/appsettings.Staging.json
 
 # ===========================
 # Secrets and credentials

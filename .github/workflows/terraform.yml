@@ -1,9 +1,9 @@
+# .github/workflows/terraform.yml
 name: "Terraform Deployment"
 
 on:
   push:
-    branches:
-      - main # Change this if your default branch is different
+    branches: [main]
     paths:
       - 'terraform/**'
   pull_request:
@@ -22,6 +22,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Debug folders (list repo)
+        run: ls -R
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -32,7 +35,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Change if using a different region
+          aws-region: us-east-1
 
       - name: Terraform Init
         run: terraform init
