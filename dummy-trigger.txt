@@ -1,0 +1,2 @@
+# Trigger for CI/CD
+# This file exists solely to generate a push event and start the workflow.
