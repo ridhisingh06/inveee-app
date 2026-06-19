@@ -118,7 +118,7 @@ jobs:
 
           # Verify the path exists – fall back if needed
           if [ -d "$DIST_PATH" ]; then
-            echo "Dist folder found: $DIST_PATH"
+            echo "✅ Dist folder found: $DIST_PATH"
           else
             echo "⚠️ Detected path $DIST_PATH does not exist, falling back to frontend/dist"
             DIST_PATH=frontend/dist
