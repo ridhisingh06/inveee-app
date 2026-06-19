@@ -31,7 +31,7 @@ jobs:
             echo "=== frontend contents ==="
             ls -Rla frontend | head -200
           else
-            echo "❌ frontend folder NOT found"
+            echo "frontend folder NOT found"
           fi
 
   # ------------------------------------------------------------
@@ -64,6 +64,8 @@ jobs:
   build-frontend:
     runs-on: ubuntu-latest
     needs: debug
+    outputs:
+      dist_path: ${{ steps.detect-dist.outputs.dist_path }}
     steps:
       - uses: actions/checkout@v4
       - name: Debug – Show frontend tree after checkout
@@ -152,9 +154,25 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Re‑detect Angular dist path (safety)
+        id: detect-dist-deploy
+        run: |
+          echo "=== Detecting Angular output path from angular.json ==="
+          OUTPUT_PATH=$(grep -Po "\"outputPath\"\s*:\s*\"\K[^\"]+" frontend/angular.json | head -1)
+          if [ -n "$OUTPUT_PATH" ]; then
+            DIST_PATH="frontend/$OUTPUT_PATH"
+          else
+            if [ -d "frontend/dist" ]; then
+              FOUND=$(find frontend/dist -mindepth 1 -maxdepth 1 -type d | head -1)
+              DIST_PATH=${FOUND:-frontend/dist}
+            else
+              DIST_PATH=frontend/dist
+            fi
+          fi
+          echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
       - name: Deploy frontend to S3
         run: |
-          DIST_PATH="${{ steps.detect-dist.outputs.dist_path }}"
+          DIST_PATH="${{ needs.build-frontend.outputs.dist_path }}"
           echo "=== Syncing $DIST_PATH to s3://${{ env.AWS_S3_BUCKET }} ==="
           aws s3 sync "$DIST_PATH" "s3://${{ env.AWS_S3_BUCKET }}" \
             --delete \
@@ -209,4 +227,4 @@ jobs:
           echo " Resources:"
           echo "   Region: ${{ env.AWS_REGION }}"
           echo "   Account: ${{ env.AWS_ACCOUNT_ID }}\n"
-          echo "✅ All systems operational!"
+          echo "All systems operational!"
