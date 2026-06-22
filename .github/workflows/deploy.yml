@@ -146,8 +146,7 @@ jobs:
       - name: Set DIST_PATH variable
         id: set-dist
         run: |
-          DIST_ROOT=$(find frontend-dist -type d -mindepth 1 -maxdepth 1 | head -1)
-          echo "dist_path=$DIST_ROOT" >> $GITHUB_OUTPUT
+          echo "dist_path=frontend-dist/dist/frontend" >> $GITHUB_OUTPUT
 
       - name: List extracted dist folder contents (debug)
         run: |
