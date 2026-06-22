@@ -248,3 +248,6 @@ jobs:
           echo "   Region: ${{ env.AWS_REGION }}"
           echo "   Account: ${{ env.AWS_ACCOUNT_ID }}\n"
           echo "All systems operational!"
+    
+    - name: Invalidate CloudFront cache
+      run: aws cloudfront create-invalidation --distribution-id E2OWWBTAD00Z79 --paths "/*"
