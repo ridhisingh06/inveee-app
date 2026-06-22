@@ -101,29 +101,14 @@ jobs:
         id: detect-dist
         run: |
           echo "=== Detecting Angular output path from angular.json ==="
-          OUTPUT_PATH=$(grep -Po "\"outputPath\"\s*:\s*\"\K[^"]+" frontend/angular.json | head -1)
-
+          OUTPUT_PATH=$(grep -Po "\"outputPath\"\s*:\s*\"\K[^\"]+" frontend/angular.json | head -1 || true) || true
           if [ -n "$OUTPUT_PATH" ]; then
             DIST_PATH="frontend/$OUTPUT_PATH"
             echo "✅ outputPath found: $OUTPUT_PATH"
           else
             echo "⚠️ outputPath not defined, using fallback"
-            if [ -d "frontend/dist" ]; then
-              FOUND=$(find frontend/dist -mindepth 1 -maxdepth 1 -type d | head -1)
-              DIST_PATH=${FOUND:-frontend/dist}
-            else
-              DIST_PATH=frontend/dist
-            fi
-          fi
-
-          # Verify the path exists – fall back if needed
-          if [ -d "$DIST_PATH" ]; then
-            echo "✅ Dist folder found: $DIST_PATH"
-          else
-            echo "⚠️ Detected path $DIST_PATH does not exist, falling back to frontend/dist"
             DIST_PATH=frontend/dist
           fi
-
           echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
           echo "=== Using Angular dist folder: $DIST_PATH ==="
 
