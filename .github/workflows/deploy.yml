@@ -224,3 +224,14 @@ jobs:
 
       - name: Invalidate CloudFront cache
         run: aws cloudfront create-invalidation --distribution-id E2OWWBTAD00Z79 --paths "/*"
+
+      - name: Clean up orphan processes
+        if: always()
+        run: |
+          echo "🧹 Cleaning up Docker resources and lingering processes"
+          # Remove stopped containers, unused networks, images, and build cache
+          docker system prune -af --volumes || true
+          # Kill any stray background processes that might linger (e.g., npm, node)
+          pkill -f node || true
+          pkill -f npm || true
+          echo "✅ Cleanup complete"
