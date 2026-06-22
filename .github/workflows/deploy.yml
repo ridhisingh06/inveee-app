@@ -192,7 +192,7 @@ jobs:
 
       - name: Deploy frontend to S3
         run: |
-          aws s3 sync ${{ steps.set-dist.outputs.dist_path }} s3://${{ env.AWS_S3_BUCKET }} --delete
+          aws s3 sync ${{ steps.set-dist.outputs.dist_path }}/ s3://${{ env.AWS_S3_BUCKET }} --delete
 
       # --------------------------------------------------------
       # Backend Docker image build & push (unchanged)
