@@ -185,7 +185,10 @@ jobs:
       # --------------------------------------------------------
       # Deploy frontend to S3 (assets + index.html)
       # --------------------------------------------------------
-      - name: Deploy frontend to S3
+      - name: Verify AWS credentials
+  run: |
+    aws sts get-caller-identity
+    aws s3 ls s3://${{ env.AWS_S3_BUCKET }} --region ${{ env.AWS_REGION }}
         run: |
           npm run build -- --configuration production
           aws s3 sync frontend/dist/frontend s3://invmgmt-master --delete
