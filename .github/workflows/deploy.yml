@@ -143,15 +143,36 @@ jobs:
           name: frontend-build
           path: frontend-dist
 
-      - name: Set DIST_PATH variable
-        id: set-dist
+      - name: Detect Angular dist folder dynamically after download
+        id: detect-dist-deploy
         run: |
-          echo "dist_path=frontend-dist/dist/frontend" >> $GITHUB_OUTPUT
+          echo "=== Detecting Angular output path from downloaded artifact ==="
+          # Find index.html in the extracted artifact directory
+          FOUND=$(find frontend-dist -type f -name "index.html" | head -n 1)
+          if [ -z "$FOUND" ]; then
+            echo "⚠️ index.html not found, falling back to default path"
+            DIST_PATH=frontend-dist/dist
+          else
+            # Derive directory containing index.html
+            DIR=$(dirname "$FOUND")
+            DIST_PATH=$DIR
+            echo "✅ Detected dist folder: $DIST_PATH"
+          fi
+          echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
 
       - name: List extracted dist folder contents (debug)
         run: |
           echo "=== Extracted dist folder contents ==="
-          ls -Rla ${{ steps.set-dist.outputs.dist_path }}
+          ls -Rla ${{ steps.detect-dist-deploy.outputs.dist_path }}
+
+      - name: Verify index.html exists
+        run: |
+          if [ -f "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" ]; then
+            echo "✅ index.html found."
+          else
+            echo "[ERROR] index.html is missing in the dist folder. Failing the job."
+            exit 1
+          fi
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -189,9 +210,17 @@ jobs:
           EOF
           aws s3api put-bucket-policy --bucket ${{ env.AWS_S3_BUCKET }} --policy file://bucket-policy.json
 
-      - name: Deploy frontend to S3
+      - name: Deploy index.html to S3 with no-cache headers
         run: |
-          aws s3 sync ${{ steps.set-dist.outputs.dist_path }}/ s3://${{ env.AWS_S3_BUCKET }} --delete
+          aws s3 cp "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" s3://${{ env.AWS_S3_BUCKET }}/index.html \
+            --cache-control "max-age=0, no-cache, no-store, must-revalidate"
+
+      - name: Sync assets to S3 with long cache headers
+        run: |
+          aws s3 sync "${{ steps.detect-dist-deploy.outputs.dist_path }}/" s3://${{ env.AWS_S3_BUCKET }}/ \
+            --exclude "index.html" \
+            --delete \
+            --cache-control "max-age=31536000, public"
 
       - name: Login to Amazon ECR
         id: login-ecr
