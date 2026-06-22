@@ -101,7 +101,7 @@ jobs:
         id: detect-dist
         run: |
           echo "=== Detecting Angular output path from angular.json ==="
-          OUTPUT_PATH=$(grep -Po "\"outputPath\"\s*:\s*\"\K[^\"]+" frontend/angular.json | head -1)
+          OUTPUT_PATH=$(grep -Po "\"outputPath\"\s*:\s*\"\K[^"]+" frontend/angular.json | head -1)
 
           if [ -n "$OUTPUT_PATH" ]; then
             DIST_PATH="frontend/$OUTPUT_PATH"
@@ -126,6 +126,45 @@ jobs:
 
           echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
           echo "=== Using Angular dist folder: $DIST_PATH ==="
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ${{ steps.detect-dist.outputs.dist_path }}
+          if-no-files-found: error
+
+  # ------------------------------------------------------------
+  # DEPLOY – S3 (frontend) + ECS (backend)
+  # ------------------------------------------------------------
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    env:
+      AWS_S3_BUCKET: invmgmt-master
+      AWS_REGION: us-east-1
+      AWS_ACCOUNT_ID: '396287094524'
+      ECR_REPOSITORY: inveee-app
+      ECS_SERVICE: inveee-service
+      ECS_CLUSTER: inveee-cluster
+      CONTAINER_NAME: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend-dist
+
+      - name: Set DIST_PATH variable
+        id: set-dist
+        run: |
+          DIST_ROOT=$(find frontend-dist -type d -mindepth 1 -maxdepth 1 | head -1)
+          echo "dist_path=$DIST_ROOT" >> $GITHUB_OUTPUT
+
+      - name: List extracted dist folder contents (debug)
         run: |
           echo "=== Extracted dist folder contents ==="
           ls -Rla ${{ steps.set-dist.outputs.dist_path }}
@@ -137,9 +176,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # --------------------------------------------------------
-      # Deploy frontend to S3 (assets + index.html)
-      # --------------------------------------------------------
       - name: Verify AWS credentials
         run: |
           aws sts get-caller-identity
@@ -149,9 +185,6 @@ jobs:
         run: |
           aws s3 sync ${{ steps.set-dist.outputs.dist_path }}/ s3://${{ env.AWS_S3_BUCKET }} --delete
 
-      # --------------------------------------------------------
-      # Backend Docker image build & push (unchanged)
-      # --------------------------------------------------------
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -203,6 +236,6 @@ jobs:
           echo "   Region: ${{ env.AWS_REGION }}"
           echo "   Account: ${{ env.AWS_ACCOUNT_ID }}\n"
           echo "All systems operational!"
-    
-    - name: Invalidate CloudFront cache
-      run: aws cloudfront create-invalidation --distribution-id E2OWWBTAD00Z79 --paths "/*"
+
+      - name: Invalidate CloudFront cache
+        run: aws cloudfront create-invalidation --distribution-id E2OWWBTAD00Z79 --paths "/*"
