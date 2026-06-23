@@ -1,4 +1,5 @@
 # .github/workflows/deploy.yml
+# CI trigger comment added on 2026-06-23
 name: Deploy Full Stack
 
 # ------------------------------------------------------------
@@ -142,38 +143,11 @@ jobs:
         with:
           name: frontend-build
           path: frontend-dist
-
-      - name: Detect Angular dist folder dynamically after download
-        id: detect-dist-deploy
-        run: |
-          echo "=== Detecting Angular output path from downloaded artifact ==="
-          # Find index.html in the extracted artifact directory
-          FOUND=$(find frontend-dist -type f -name "index.html" | head -n 1)
-          if [ -z "$FOUND" ]; then
-            echo "⚠️ index.html not found, falling back to default path"
-            DIST_PATH=frontend-dist/dist
-          else
-            # Derive directory containing index.html
-            DIR=$(dirname "$FOUND")
-            DIST_PATH=$DIR
-            echo "✅ Detected dist folder: $DIST_PATH"
-          fi
-          echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
-
-      - name: List extracted dist folder contents (debug)
-        run: |
-          echo "=== Extracted dist folder contents ==="
-          ls -Rla ${{ steps.detect-dist-deploy.outputs.dist_path }}
-
-      - name: Verify index.html exists
-        run: |
-          if [ -f "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" ]; then
-            echo "✅ index.html found."
-          else
-            echo "[ERROR] index.html is missing in the dist folder. Failing the job."
-            exit 1
-          fi
-
+      - name: List repository tree (debug)\n        run: |\n          echo "=== Repository tree after artifact download ==="\n          ls -R\n\n      - name: Detect Angular dist folder dynamically\n        id: detect-dist-deploy\n        run: |\n          echo "=== Detecting Angular dist folder dynamically ==="\n          # Find the first directory that matches */dist/*\n          DIST_DIR=$(find . -type d -path "*/dist/*" | head -n 1)\n          if [ -z "$DIST_DIR" ]; then\n            echo "⚠️ No dist folder found, failing the job"\n            exit 1\n          fi\n          echo "Detected dist folder: $DIST_DIR"\n          echo "dist_path=$DIST_DIR" >> $GITHUB_OUTPUT\n\n      - name: List extracted dist folder contents (debug)\n        run: |\n          echo "=== Extracted dist folder contents ==="\n          ls -R ${{ steps.detect-dist-deploy.outputs.dist_path }}\n\n      - name: Verify index.html exists\n        run: |\n          if [ -f "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" ]; then\n            echo "✅ index.html found."\n          else\n            echo "[ERROR] index.html is missing in the dist folder. Failing the job."\n            exit 1\n          fi\n\n      - name: Deploy index.html to S3 with no-cache headers\n        run: |\n          aws s3 cp "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" s3://${{ env.AWS_S3_BUCKET }}/index.html \\
+            --cache-control "max-age=0, no-cache, no-store, must-revalidate"\n\n      - name: Sync assets to S3 with long cache headers\n        run: |\n          aws s3 sync "${{ steps.detect-dist-deploy.outputs.dist_path }}/" s3://${{ env.AWS_S3_BUCKET }}/ \\
+            --exclude "index.html" \\
+            --delete \\
+            --cache-control "max-age=31536000, public"
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -210,17 +184,7 @@ jobs:
           EOF
           aws s3api put-bucket-policy --bucket ${{ env.AWS_S3_BUCKET }} --policy file://bucket-policy.json
 
-      - name: Deploy index.html to S3 with no-cache headers
-        run: |
-          aws s3 cp "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" s3://${{ env.AWS_S3_BUCKET }}/index.html \
-            --cache-control "max-age=0, no-cache, no-store, must-revalidate"
 
-      - name: Sync assets to S3 with long cache headers
-        run: |
-          aws s3 sync "${{ steps.detect-dist-deploy.outputs.dist_path }}/" s3://${{ env.AWS_S3_BUCKET }}/ \
-            --exclude "index.html" \
-            --delete \
-            --cache-control "max-age=31536000, public"
 
       - name: Login to Amazon ECR
         id: login-ecr

@@ -14,7 +14,7 @@ Write-Host "Listing $distPath contents:"
 Get-ChildItem -Path $distPath -Recurse | Format-Table Name, Length, LastWriteTime
 
 # Sync all files except index.html to the S3 bucket with long‑term caching
-aws s3 sync $distPath "s3://invmgmt-frontend" `
+aws s3 sync $distPath "s3://invmgmt-master" `
     --delete `
     --cache-control "public, max-age=31536000" `
     --exclude "index.html"
@@ -22,10 +22,10 @@ aws s3 sync $distPath "s3://invmgmt-frontend" `
 # Upload index.html separately with no‑cache headers
 $indexFile = Join-Path $distPath "index.html"
 if (Test-Path $indexFile) {
-    aws s3 cp $indexFile "s3://invmgmt-frontend/index.html" `
+    aws s3 cp $indexFile "s3://invmgmt-master/index.html" `
         --cache-control "no-cache, no-store, must-revalidate"
 } else {
     Write-Warning "index.html not found at $indexFile"
 }
 
-Write-Host "Deployment completed."
+aws cloudfront create-invalidation --distribution-id E2OWWBTAD00Z79 --paths "/*"
