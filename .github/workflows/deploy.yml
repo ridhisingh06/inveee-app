@@ -143,22 +143,21 @@ jobs:
         with:
           name: frontend-build
           path: frontend-dist
-      - name: List repository tree (debug)
-        run: |
-          echo "=== Repository tree after artifact download ==="
-          ls -R
 
-      - name: Detect Angular dist folder dynamically
+
+
+      - name: Detect Angular dist folder and index.html
         id: detect-dist-deploy
         run: |
-          echo "=== Detecting Angular dist folder dynamically ==="
-          # Find the first directory that matches */dist/*
-          DIST_DIR=$(find . -type d -path "*/dist/*" | head -n 1)
-          if [ -z "$DIST_DIR" ]; then
-            echo "⚠️ No dist folder found, failing the job"
+          echo "Searching for index.html in the artifact..."
+          INDEX_PATH=$(find . -type f -name index.html | head -n 1)
+          if [ -z "$INDEX_PATH" ]; then
+            echo "[ERROR] index.html not found in the downloaded artifact."
             exit 1
           fi
-          echo "Detected dist folder: $DIST_DIR"
+          DIST_DIR=$(dirname "$INDEX_PATH")
+          echo "✅ index.html found at $INDEX_PATH"
+          echo "index_path=$INDEX_PATH" >> $GITHUB_OUTPUT
           echo "dist_path=$DIST_DIR" >> $GITHUB_OUTPUT
 
       - name: List extracted dist folder contents (debug)
@@ -166,14 +165,7 @@ jobs:
           echo "=== Extracted dist folder contents ==="
           ls -R ${{ steps.detect-dist-deploy.outputs.dist_path }}
 
-      - name: Verify index.html exists
-        run: |
-          if [ -f "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" ]; then
-            echo "✅ index.html found."
-          else
-            echo "[ERROR] index.html is missing in the dist folder. Failing the job."
-            exit 1
-          fi
+
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -189,11 +181,12 @@ jobs:
 
       - name: Deploy index.html to S3 with no-cache headers
         run: |
-          aws s3 cp "${{ steps.detect-dist-deploy.outputs.dist_path }}/index.html" s3://${{ env.AWS_S3_BUCKET }}/index.html \
+          aws s3 cp "${{ steps.detect-dist-deploy.outputs.index_path }}" s3://${{ env.AWS_S3_BUCKET }}/index.html \
             --cache-control "max-age=0, no-cache, no-store, must-revalidate"
 
       - name: Sync assets to S3 with long cache headers
         run: |
+          # Sync all files except the index.html already uploaded
           aws s3 sync "${{ steps.detect-dist-deploy.outputs.dist_path }}/" s3://${{ env.AWS_S3_BUCKET }}/ \
             --exclude "index.html" \
             --delete \
