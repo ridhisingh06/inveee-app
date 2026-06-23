@@ -1,132 +1,79 @@
-# .github/workflows/deploy.yml
-# CI trigger comment added on 2026-06-23
 name: Deploy Full Stack
 
-# ------------------------------------------------------------
-# Triggers
-# ------------------------------------------------------------
 on:
-  workflow_dispatch:          # manual trigger from GitHub UI
+  workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - '**/*.yml'
   pull_request:
     branches: [main]
 
-# ------------------------------------------------------------
-# Permissions
-# ------------------------------------------------------------
 permissions:
   contents: read
   id-token: write
 
-# ============================================================
-# JOBS
-# ============================================================
 jobs:
-  # ------------------------------------------------------------
-  # DEBUG – repository layout (helps when paths go missing)
-  # ------------------------------------------------------------
+
+  # ---------------- DEBUG ----------------
   debug:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Show repository tree (root)
-        run: |
-          echo "=== Repository root ==="
-          ls -Rla
-      - name: Show frontend folder tree
-        run: |
-          if [ -d "frontend" ]; then
-            echo "=== frontend contents ==="
-            ls -Rla frontend | head -200
-          else
-            echo "frontend folder NOT found"
-          fi
+      - run: ls -Rla
 
-  # ------------------------------------------------------------
-  # BUILD BACKEND (.NET) – unchanged
-  # ------------------------------------------------------------
+  # ---------------- BACKEND ----------------
   build-backend:
     runs-on: ubuntu-latest
     needs: debug
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET 10 Preview
+
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-          dotnet-quality: 'preview'
-      - name: Restore dependencies
-        run: dotnet restore
-        working-directory: backend
-      - name: Build backend
-        run: dotnet build --configuration Release --no-restore
-        working-directory: backend
-      - name: Run tests (optional, continue on error)
-        run: dotnet test --configuration Release --no-build --verbosity normal
-        working-directory: backend
-        continue-on-error: true
+          dotnet-quality: preview
 
-  # ------------------------------------------------------------
-  # BUILD FRONTEND (Angular) – produces an artifact
-  # ------------------------------------------------------------
+      - run: dotnet restore
+        working-directory: backend
+
+      - run: dotnet build --configuration Release --no-restore
+        working-directory: backend
+
+  # ---------------- FRONTEND ----------------
   build-frontend:
     runs-on: ubuntu-latest
     needs: debug
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show frontend tree after checkout (debug)
-        run: |
-          echo "=== frontend contents ==="
-          ls -Rla frontend | head -200
-
-      - name: Setup Node.js (LTS 22)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install npm dependencies
+      - name: Install dependencies
         run: npm ci
         working-directory: frontend
 
-      - name: Build Angular for production
+      - name: Build Angular
         run: npm run build -- --configuration production
         working-directory: frontend
 
-      - name: Detect Angular dist folder dynamically
-        id: detect-dist
-        run: |
-          echo "=== Detecting Angular output path from angular.json ==="
-          OUTPUT_PATH=$(grep -Po "\"outputPath\"\s*:\s*\"\K[^\"]+" frontend/angular.json | head -1 || true) || true
-          if [ -n "$OUTPUT_PATH" ]; then
-            DIST_PATH="frontend/$OUTPUT_PATH"
-            echo "✅ outputPath found: $OUTPUT_PATH"
-          else
-            echo "⚠️ outputPath not defined, using fallback"
-            DIST_PATH=frontend/dist
-          fi
-          echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
-          echo "=== Using Angular dist folder: $DIST_PATH ==="
-
+      #  (no dynamic detection)
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: ${{ steps.detect-dist.outputs.dist_path }}
-          if-no-files-found: error
+          path: frontend/dist/frontend
 
-  # ------------------------------------------------------------
-  # DEPLOY – S3 (frontend) + ECS (backend)
-  # ------------------------------------------------------------
+  # ---------------- DEPLOY ----------------
   deploy:
     runs-on: ubuntu-latest
     needs: [build-backend, build-frontend]
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    if: github.ref == 'refs/heads/main'
+
     env:
       AWS_S3_BUCKET: invmgmt-master
       AWS_REGION: us-east-1
@@ -135,151 +82,75 @@ jobs:
       ECS_SERVICE: inveee-service
       ECS_CLUSTER: inveee-cluster
       CONTAINER_NAME: app
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download frontend build
+      # Download frontend build
+      - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: frontend-dist
 
+      # Debug (optional but useful)
+      - name: Check downloaded files
+        run: ls -R frontend-dist
 
-
-      - name: Detect Angular dist folder and index.html
-        id: detect-dist-deploy
-        run: |
-          echo "Searching for index.html in the artifact..."
-          INDEX_PATH=$(find . -type f -name index.html | head -n 1)
-          if [ -z "$INDEX_PATH" ]; then
-            echo "[ERROR] index.html not found in the downloaded artifact."
-            exit 1
-          fi
-          DIST_DIR=$(dirname "$INDEX_PATH")
-          echo "✅ index.html found at $INDEX_PATH"
-          echo "index_path=$INDEX_PATH" >> $GITHUB_OUTPUT
-          echo "dist_path=$DIST_DIR" >> $GITHUB_OUTPUT
-
-      - name: List extracted dist folder contents (debug)
-        run: |
-          echo "=== Extracted dist folder contents ==="
-          ls -R ${{ steps.detect-dist-deploy.outputs.dist_path }}
-
-
-
-      - name: Configure AWS Credentials
+      # AWS login
+      - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Verify AWS credentials
-        run: |
-          aws sts get-caller-identity
-          aws s3 ls s3://${{ env.AWS_S3_BUCKET }} --region ${{ env.AWS_REGION }}
+      # 🔥 FINAL FIX (correct path)
+      - name: Deploy frontend to S3
+        run: aws s3 sync frontend-dist s3://${{ env.AWS_S3_BUCKET }} --delete
 
-      - name: Deploy index.html to S3 with no-cache headers
-        run: |
-          aws s3 cp "${{ steps.detect-dist-deploy.outputs.index_path }}" s3://${{ env.AWS_S3_BUCKET }}/index.html \
-            --cache-control "max-age=0, no-cache, no-store, must-revalidate"
-
-      - name: Sync assets to S3 with long cache headers
-        run: |
-          # Sync all files except the index.html already uploaded
-          aws s3 sync "${{ steps.detect-dist-deploy.outputs.dist_path }}/" s3://${{ env.AWS_S3_BUCKET }}/ \
-            --exclude "index.html" \
-            --delete \
-            --cache-control "max-age=31536000, public"
-
-      - name: Enable S3 static website hosting
+      # S3 static hosting
+      - name: Enable static hosting
         run: |
           aws s3 website s3://${{ env.AWS_S3_BUCKET }} \
             --index-document index.html \
             --error-document index.html
 
-      - name: Apply public read bucket policy
+      # Public access
+      - name: Apply bucket policy
         run: |
-          cat <<'EOF' > bucket-policy.json
+          cat <<EOF > policy.json
           {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Sid": "PublicReadGetObject",
-                "Effect": "Allow",
-                "Principal": "*",
-                "Action": ["s3:GetObject"],
-                "Resource": ["arn:aws:s3:::${{ env.AWS_S3_BUCKET }}/*"]
-              }
-            ]
+            "Version":"2012-10-17",
+            "Statement":[{
+              "Effect":"Allow",
+              "Principal":"*",
+              "Action":"s3:GetObject",
+              "Resource":"arn:aws:s3:::${{ env.AWS_S3_BUCKET }}/*"
+            }]
           }
           EOF
-          aws s3api put-bucket-policy --bucket ${{ env.AWS_S3_BUCKET }} --policy file://bucket-policy.json
+          aws s3api put-bucket-policy \
+            --bucket ${{ env.AWS_S3_BUCKET }} \
+            --policy file://policy.json
 
-
-
-      - name: Login to Amazon ECR
+      # ---------------- BACKEND DEPLOY ----------------
+      - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registries: ${{ env.AWS_ACCOUNT_ID }}
 
-      - name: Build, tag, and push Docker image
+      - name: Build & Push Docker
         id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
         run: |
-          echo "=== Building Docker image ==="
-          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
-            -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
-            backend/
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          docker build -t $IMAGE backend/
+          docker push $IMAGE
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
-      - name: Render new ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-
-      - name: Deploy task definition to ECS
+      - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: task-definition.json
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
-
-      - name: Deployment Summary
-        run: |
-          echo "\n╔═══════════════════════════════════════════════════════╗"
-          echo "║         DEPLOYMENT COMPLETED SUCCESSFULLY          ║"
-          echo "╚═══════════════════════════════════════════════════════╝\n"
-          echo " Frontend (S3):"
-          echo "   URL: http://${{ env.AWS_S3_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com\n"
-          echo " Backend (ECS):"
-          echo "   Cluster: ${{ env.ECS_CLUSTER }}"
-          echo "   Service: ${{ env.ECS_SERVICE }}"
-          echo "   Image: ${{ steps.build-image.outputs.image }}\n"
-          echo " Resources:"
-          echo "   Region: ${{ env.AWS_REGION }}"
-          echo "   Account: ${{ env.AWS_ACCOUNT_ID }}\n"
-          echo "All systems operational!"
-
-      - name: Invalidate CloudFront cache
-        run: aws cloudfront create-invalidation --distribution-id E2OWWBTAD00Z79 --paths "/*"
-
-      - name: Clean up orphan processes
-        if: always()
-        run: |
-          echo "🧹 Cleaning up Docker resources and lingering processes"
-          # Remove stopped containers, unused networks, images, and build cache
-          docker system prune -af --volumes || true
-          # Kill any stray background processes that might linger (e.g., npm, node)
-          pkill -f node || true
-          pkill -f npm || true
-          echo "✅ Cleanup complete"
