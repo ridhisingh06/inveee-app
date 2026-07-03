@@ -344,29 +344,29 @@ app.UseSerilogRequestLogging();
 app.UseStaticFiles();   // serves /uploads/personnel/* photos
 app.UseRouting();
 app.UseCors();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/health", async (AppDbContext db, ILogger<Program> logger) =>
+app.MapGet("/health", () =>
+{
+    // Lightweight health check for ALB, no DB call
+    return Results.Ok(new
+    {
+        status = "ok",
+        service = "invmgmt.web"
+    });
+});
+
+app.MapGet("/health/db", async (AppDbContext db, ILogger<Program> logger) =>
 {
     try
     {
-        // Check database connectivity
         await db.Database.ExecuteSqlRawAsync("SELECT 1");
-        
-        return Results.Ok(new
-        {
-            status = "healthy",
-            timestamp = DateTime.UtcNow.ToString("o"),
-            database = "connected",
-            service = "invmgmt.web"
-        });
+        return Results.Ok(new { status = "db ok" });
     }
     catch (Exception ex)
     {
         logger.LogWarning($"[HEALTH] Database check failed: {ex.Message}");
-        // Return 503 Service Unavailable if database is down
         return Results.StatusCode(503);
     }
 });
