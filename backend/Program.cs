@@ -117,8 +117,8 @@ builder.Services.AddScoped<invmgmt.web.Services.IPersonnelService, invmgmt.web.S
 // =======================
 builder.Services.AddCors(options =>
 {
-    var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://invmgmt-master.s3-website-us-east-1.amazonaws.com";
-    
+    var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "https://inveee-app.vercel.app";
+    Console.WriteLine($"[STARTUP] FRONTEND_URL = {frontendUrl}");
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins(
