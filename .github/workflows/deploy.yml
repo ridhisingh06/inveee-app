@@ -12,48 +12,20 @@ permissions:
   id-token: write
 
 jobs:
-
   # ---------------- DEBUG ----------------
   debug:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: ls -Rla
 
-  # ---------------- BACKEND ----------------
-       # ---------------- BACKEND DEPLOY ----------------
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: Show repository structure
+        run: ls -Rla
 
-      - name: Build, tag and push Docker image
-        id: build-image
-        run: |
-          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-          docker build -t $IMAGE_URI backend/
-          docker push $IMAGE_URI
-          echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
-
-      - name: Render Amazon ECS task definition
-        id: render-task-definition
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-        with:
-          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-
-  # ---------------- FRONTEND ----------------
+  # ---------------- FRONTEND BUILD ----------------
   build-frontend:
     runs-on: ubuntu-latest
     needs: debug
+
     steps:
       - uses: actions/checkout@v4
 
@@ -65,14 +37,14 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
         working-directory: frontend
+        run: npm ci
 
       - name: Build Angular
-        run: npm run build -- --configuration production
         working-directory: frontend
+        run: npm run build -- --configuration production
 
-      - name: Upload frontend build
+      - name: Upload frontend artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
@@ -81,20 +53,26 @@ jobs:
   # ---------------- DEPLOY ----------------
   deploy:
     runs-on: ubuntu-latest
-    needs: [build-backend, build-frontend]
+    needs: [debug, build-frontend]
+
     if: github.ref == 'refs/heads/main'
 
     env:
-      AWS_S3_BUCKET: invmgmt-master
       AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: "396287094524"
+
+      AWS_S3_BUCKET: invmgmt-master
+
       ECR_REPOSITORY: inveee-app
-      ECS_SERVICE: inveee-service
+
       ECS_CLUSTER: inveee-cluster
+      ECS_SERVICE: inveee-service
       CONTAINER_NAME: app
 
     steps:
       - uses: actions/checkout@v4
+
+      # ---------------- Download Angular ----------------
 
       - name: Download frontend artifact
         uses: actions/download-artifact@v4
@@ -102,41 +80,51 @@ jobs:
           name: frontend-build
           path: frontend-dist
 
-      - name: Check downloaded files
+      - name: Verify frontend files
         run: ls -R frontend-dist
 
-      - name: Configure AWS
+      # ---------------- AWS ----------------
+
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1
 
-      - name: Deploy frontend to S3
-        run: aws s3 sync frontend-dist s3://${{ env.AWS_S3_BUCKET }} --delete
+      # ---------------- Deploy Frontend ----------------
 
-      - name: Enable static hosting
+      - name: Upload to S3
+        run: |
+          aws s3 sync frontend-dist s3://${{ env.AWS_S3_BUCKET }} --delete
+
+      - name: Configure Static Website
         run: |
           aws s3 website s3://${{ env.AWS_S3_BUCKET }} \
             --index-document index.html \
             --error-document index.html
 
-      - name: Apply bucket policy
+      - name: Apply Bucket Policy
         run: |
-          cat <<EOF > policy.json
+          cat > policy.json <<EOF
           {
             "Version":"2012-10-17",
-            "Statement":[{
-              "Effect":"Allow",
-              "Principal":"*",
-              "Action":"s3:GetObject",
-              "Resource":"arn:aws:s3:::${{ env.AWS_S3_BUCKET }}/*"
-            }]
+            "Statement":[
+              {
+                "Effect":"Allow",
+                "Principal":"*",
+                "Action":"s3:GetObject",
+                "Resource":"arn:aws:s3:::${{ env.AWS_S3_BUCKET }}/*"
+              }
+            ]
           }
           EOF
+
           aws s3api put-bucket-policy \
             --bucket ${{ env.AWS_S3_BUCKET }} \
             --policy file://policy.json
+
+      # ---------------- Docker ----------------
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -151,6 +139,7 @@ jobs:
           IMAGE_LATEST=$REGISTRY/${{ env.ECR_REPOSITORY }}:latest
 
           docker build -t $IMAGE_SHA backend/
+
           docker tag $IMAGE_SHA $IMAGE_LATEST
 
           docker push $IMAGE_SHA
@@ -158,18 +147,20 @@ jobs:
 
           echo "image=$IMAGE_SHA" >> $GITHUB_OUTPUT
 
+      # ---------------- ECS ----------------
+
       - name: Render ECS Task Definition
         id: render-task
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: ${{ env.CONTAINER_NAME }}
+          container-name: app
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.render-task.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
+          cluster: inveee-cluster
+          service: inveee-service
           wait-for-service-stability: true
