@@ -99,6 +99,9 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+      - name: Build backend
+        working-directory: backend
+        run: dotnet publish -c Release -o out
       - name: Build and Push Docker Image
         id: build-image
         run: |
