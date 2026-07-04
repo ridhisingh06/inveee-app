@@ -1,3 +1,4 @@
+# Updated workflow on 2026-07-04T06:05:00+05:30
 name: Deploy Full Stack
 
 on:
@@ -61,7 +62,6 @@ jobs:
         run: npm run build -- --configuration production
         working-directory: frontend
 
-      #  (no dynamic detection)
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:
@@ -77,7 +77,7 @@ jobs:
     env:
       AWS_S3_BUCKET: invmgmt-master
       AWS_REGION: us-east-1
-      AWS_ACCOUNT_ID: '396287094524'
+      AWS_ACCOUNT_ID: "396287094524"
       ECR_REPOSITORY: inveee-app
       ECS_SERVICE: inveee-service
       ECS_CLUSTER: inveee-cluster
@@ -86,18 +86,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Download frontend build
       - name: Download frontend artifact
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: frontend-dist
 
-      # Debug (optional but useful)
       - name: Check downloaded files
         run: ls -R frontend-dist
 
-      # AWS login
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -105,18 +102,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 🔥 FINAL FIX (correct path)
       - name: Deploy frontend to S3
         run: aws s3 sync frontend-dist s3://${{ env.AWS_S3_BUCKET }} --delete
 
-      # S3 static hosting
       - name: Enable static hosting
         run: |
           aws s3 website s3://${{ env.AWS_S3_BUCKET }} \
             --index-document index.html \
             --error-document index.html
 
-      # Public access
       - name: Apply bucket policy
         run: |
           cat <<EOF > policy.json
@@ -134,23 +128,38 @@ jobs:
             --bucket ${{ env.AWS_S3_BUCKET }} \
             --policy file://policy.json
 
-      # ---------------- BACKEND DEPLOY ----------------
-      - name: Login to ECR
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build & Push Docker
+      - name: Build and Push Docker Image
         id: build-image
         run: |
-          IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-          docker build -t $IMAGE backend/
-          docker push $IMAGE
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          REGISTRY=${{ steps.login-ecr.outputs.registry }}
+
+          IMAGE_SHA=$REGISTRY/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          IMAGE_LATEST=$REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+
+          docker build -t $IMAGE_SHA backend/
+          docker tag $IMAGE_SHA $IMAGE_LATEST
+
+          docker push $IMAGE_SHA
+          docker push $IMAGE_LATEST
+
+          echo "image=$IMAGE_SHA" >> $GITHUB_OUTPUT
+
+      - name: Render ECS Task Definition
+        id: render-task
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: task-definition.json
+          task-definition: ${{ steps.render-task.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
