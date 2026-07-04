@@ -1,7 +1,9 @@
 {
   "family": "inveee-app-task",
   "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
   "cpu": "256",
   "memory": "512",
   "executionRoleArn": "arn:aws:iam::396287094524:role/inveee-task-execution-role",
@@ -29,7 +31,7 @@
         },
         {
           "name": "FRONTEND_URL",
-          "value": "http://invmgmt-master.s3-website-us-east-1.amazonaws.com"
+          "value": "https://inveee-app.vercel.app"
         },
         {
           "name": "ConnectionStrings__DefaultConnection",
@@ -37,7 +39,10 @@
         }
       ],
       "healthCheck": {
-        "command": ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"],
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:5000/health || exit 1"
+        ],
         "interval": 30,
         "timeout": 10,
         "retries": 3,
