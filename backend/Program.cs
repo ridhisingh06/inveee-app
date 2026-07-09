@@ -172,62 +172,71 @@ try
         
         int maxRetries = 5;
         int delayMs = 2000;
+        bool dbConnected = false;
         
+        // STEP 0: Test database connection first
         for (int i = 0; i < maxRetries; i++)
         {
             try
             {
-                logger.LogInformation($"[DB Init] Attempting to connect to database (attempt {i + 1}/{maxRetries})...");
-                
-                // Check for pending model changes before migrating
-                var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
-                {
-                    logger.LogInformation($"[DB Init] Found {pendingMigrations.Count()} pending migrations. Applying them now...");
-                }
-                
-                // Run migrations
-                await db.Database.MigrateAsync();
-                logger.LogInformation("[DB Init] ✓ Database migrated successfully.");
-                break;
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("pending model changes"))
-            {
-                logger.LogWarning($"[DB Init] EF Core pending model changes detected. This is OK in development.");
-                // This is expected if model hasn't been scaffolded yet - continue anyway
+                logger.LogInformation($"[DB Init] Attempting database connection (attempt {i + 1}/{maxRetries})...");
+                await db.Database.ExecuteSqlRawAsync("SELECT 1");
+                dbConnected = true;
+                logger.LogInformation("[DB Init] ✓ Database connection successful!");
                 break;
             }
             catch (Exception ex)
             {
-                logger.LogWarning($"[DB Init] Database connection failed: {ex.Message}");
+                logger.LogWarning($"[DB Init] Connection failed: {ex.GetType().Name}: {ex.Message}");
                 if (i < maxRetries - 1)
                 {
                     logger.LogInformation($"[DB Init] Retrying in {delayMs}ms...");
                     await Task.Delay(delayMs);
-                    delayMs = Math.Min(delayMs * 2, 10000); // Exponential backoff, max 10s
+                    delayMs = Math.Min(delayMs * 2, 10000);
                 }
                 else
                 {
-                    logger.LogError($"[DB Init] Failed to connect after {maxRetries} attempts. Continuing anyway...");
+                    logger.LogError($"[DB Init] ✗ FAILED to connect after {maxRetries} attempts!");
                 }
             }
         }
 
-        // Step 1: Seed Roles
+        if (!dbConnected)
+        {
+            throw new InvalidOperationException("Database connection failed after multiple retries. Check connection string and RDS availability.");
+        }
+
+        // STEP 1: Apply migrations
+        logger.LogInformation("[DB Init] Checking for pending migrations...");
+        var pendingMigrations = await db.Database.GetPendingMigrationsAsync();
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation($"[DB Init] Found {pendingMigrations.Count()} pending migrations. Applying...");
+            await db.Database.MigrateAsync();
+            logger.LogInformation("[DB Init] ✓ Migrations applied successfully.");
+        }
+        else
+        {
+            logger.LogInformation("[DB Init] No pending migrations.");
+        }
+
+        // STEP 2: Seed Roles
         if (!await db.Roles.AnyAsync())
         {
+            logger.LogInformation("[DB Init] Seeding roles...");
             db.Roles.AddRange(
                 new Role { Id = 1, Name = "User" },
                 new Role { Id = 2, Name = "Issuer" },
                 new Role { Id = 3, Name = "Admin" }
             );
             await db.SaveChangesAsync();
-            logger.LogInformation("[DB Init] Roles seeded.");
+            logger.LogInformation("[DB Init] ✓ Roles seeded.");
         }
 
-        // Step 2: Seed Departments
+        // STEP 3: Seed Departments
         if (!await db.Departments.AnyAsync())
         {
+            logger.LogInformation("[DB Init] Seeding departments...");
             db.Departments.AddRange(
                 new Department { Id = 1, Name = "Admin" },
                 new Department { Id = 2, Name = "IT" },
@@ -235,28 +244,38 @@ try
                 new Department { Id = 4, Name = "Finance" }
             );
             await db.SaveChangesAsync();
-            logger.LogInformation("[DB Init] Departments seeded.");
+            logger.LogInformation("[DB Init] ✓ Departments seeded.");
         }
 
-        // Step 3: Seed Categories
+        // STEP 4: Seed Categories
         if (!await db.Categories.AnyAsync())
         {
+            logger.LogInformation("[DB Init] Seeding categories...");
             db.Categories.AddRange(
                 new Category { Name = "Stationary" },
                 new Category { Name = "IT Related" },
                 new Category { Name = "HouseKeeping" }
             );
             await db.SaveChangesAsync();
-            logger.LogInformation("[DB Init] Categories seeded.");
+            logger.LogInformation("[DB Init] ✓ Categories seeded.");
         }
 
-        // Step 4: Seed admin user from environment variables
+        // STEP 5: CRITICAL - Seed admin user
+        logger.LogInformation("[DB Init] ===== CRITICAL: Checking admin user =====");
         var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL") ?? "admin@gmail.com";
         var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? "admin@123";
 
+        logger.LogInformation($"[DB Init] Expected admin email: {adminEmail}");
+
         var existingAdmin = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+        
         if (existingAdmin == null)
         {
+            logger.LogWarning($"[DB Init] ⚠ Admin user NOT found in database! Creating new admin user...");
+            
+            var hashedPassword = PasswordUtils.HashPassword(adminPassword);
+            logger.LogInformation($"[DB Init] Generated password hash (first 30 chars): {hashedPassword.Substring(0, Math.Min(30, hashedPassword.Length))}...");
+            
             var adminUser = new User
             {
                 Username = "System Admin",
@@ -267,31 +286,53 @@ try
                 IsApproved = true,
                 Role = "ADMIN",
                 CreatedAt = DateTime.UtcNow,
-                PasswordHash = PasswordUtils.HashPassword(adminPassword)
+                PasswordHash = hashedPassword
             };
 
             db.Users.Add(adminUser);
             await db.SaveChangesAsync();
-            logger.LogInformation($"[DB Init] Admin user created: {adminEmail}");
+            logger.LogInformation($"[DB Init] ✓ ADMIN USER CREATED: ID={adminUser.Id}, Email={adminEmail}");
         }
         else
         {
-            logger.LogInformation($"[DB Init] Admin user already exists: {adminEmail}");
+            logger.LogInformation($"[DB Init] ✓ Admin user found: ID={existingAdmin.Id}, Email={existingAdmin.Email}");
+            logger.LogInformation($"[DB Init]   IsApproved={existingAdmin.IsApproved}, IsActive={existingAdmin.IsActive}, Role={existingAdmin.Role}");
+            logger.LogInformation($"[DB Init]   Password hash starts with: {existingAdmin.PasswordHash.Substring(0, Math.Min(20, existingAdmin.PasswordHash.Length))}...");
+            
+            // Verify password hash is valid BCrypt
             if (!PasswordUtils.LooksLikeBcryptHash(existingAdmin.PasswordHash))
             {
-                existingAdmin.PasswordHash = PasswordUtils.HashPassword(adminPassword);
+                logger.LogWarning($"[DB Init] ⚠ Admin password hash is NOT valid BCrypt format! Updating...");
+                var newHash = PasswordUtils.HashPassword(adminPassword);
+                existingAdmin.PasswordHash = newHash;
                 db.Users.Update(existingAdmin);
                 await db.SaveChangesAsync();
-                logger.LogInformation($"[DB Init] Admin user password hash migrated to BCrypt.");
+                logger.LogInformation($"[DB Init] ✓ Admin password hash updated to BCrypt.");
+            }
+            else
+            {
+                logger.LogInformation($"[DB Init] ✓ Admin password hash is valid BCrypt format.");
             }
         }
+
+        logger.LogInformation("[DB Init] ===== Database initialization COMPLETE =====");
     }
 }
 catch (Exception ex)
 {
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogError($"[DB Init] Critical error during database initialization: {ex}");
-    // Don't fail startup - the app can still serve requests
+    logger.LogError(ex, "[DB Init] ✗ ===== CRITICAL DATABASE INITIALIZATION ERROR =====");
+    logger.LogError("[DB Init] Exception Type: {ExceptionType}", ex.GetType().FullName);
+    logger.LogError("[DB Init] Exception Message: {Message}", ex.Message);
+    logger.LogError("[DB Init] Stack Trace: {StackTrace}", ex.StackTrace);
+    
+    if (ex.InnerException != null)
+    {
+        logger.LogError("[DB Init] Inner Exception: {InnerMessage}", ex.InnerException.Message);
+    }
+    
+    // FAIL FAST: Don't start the app if database init fails
+    throw;
 }
 
 
