@@ -321,7 +321,7 @@ resource "aws_ecs_service" "app" {
   depends_on      = [aws_db_instance.postgres]
 
   network_configuration {
-    subnets          = data.aws_subnets.default.ids
+    subnets          = ["subnet-021e42ebc310fde8f", "subnet-0a4a3b2d8b3e9f185"]
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
