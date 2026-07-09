@@ -7,6 +7,6 @@ variable "aws_region" {
 variable "db_password" {
   description = "Database password"
   type        = string
-  default     = "ridhi608Secure2024"
+  default     = "ridhisingh2003"
   sensitive   = true
 }
