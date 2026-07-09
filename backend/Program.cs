@@ -230,7 +230,7 @@ try
                 new Role { Id = 3, Name = "Admin" }
             );
             await db.SaveChangesAsync();
-            logger.LogInformation("[DB Init] ✓ Roles seeded.");
+            logger.LogInformation("[DB Init] Roles seeded.");
         }
 
         // STEP 3: Seed Departments
@@ -275,6 +275,7 @@ try
             
             var hashedPassword = PasswordUtils.HashPassword(adminPassword);
             logger.LogInformation($"[DB Init] Generated password hash (first 30 chars): {hashedPassword.Substring(0, Math.Min(30, hashedPassword.Length))}...");
+            logger.LogInformation($"[DB Init] FULL HASH FOR VERIFICATION: {hashedPassword}");
             
             var adminUser = new User
             {
@@ -292,12 +293,30 @@ try
             db.Users.Add(adminUser);
             await db.SaveChangesAsync();
             logger.LogInformation($"[DB Init] ✓ ADMIN USER CREATED: ID={adminUser.Id}, Email={adminEmail}");
+            
+            // Verify the hash was saved correctly
+            var verifyAdmin = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+            if (verifyAdmin != null)
+            {
+                logger.LogInformation($"[DB Init] ✓ VERIFICATION: Admin user persisted to database");
+                logger.LogInformation($"[DB Init] Stored hash (first 30): {verifyAdmin.PasswordHash.Substring(0, Math.Min(30, verifyAdmin.PasswordHash.Length))}...");
+                logger.LogInformation($"[DB Init] FULL STORED HASH: {verifyAdmin.PasswordHash}");
+                
+                // Test password verification immediately
+                bool hashWorks = PasswordUtils.VerifyPassword(adminPassword, verifyAdmin.PasswordHash);
+                logger.LogInformation($"[DB Init] Password verification test: {(hashWorks ? "✓ PASS" : "✗ FAIL")}");
+            }
         }
         else
         {
             logger.LogInformation($"[DB Init] ✓ Admin user found: ID={existingAdmin.Id}, Email={existingAdmin.Email}");
             logger.LogInformation($"[DB Init]   IsApproved={existingAdmin.IsApproved}, IsActive={existingAdmin.IsActive}, Role={existingAdmin.Role}");
             logger.LogInformation($"[DB Init]   Password hash starts with: {existingAdmin.PasswordHash.Substring(0, Math.Min(20, existingAdmin.PasswordHash.Length))}...");
+            logger.LogInformation($"[DB Init]   FULL HASH: {existingAdmin.PasswordHash}");
+            
+            // Test password verification
+            bool hashMatches = PasswordUtils.VerifyPassword(adminPassword, existingAdmin.PasswordHash);
+            logger.LogInformation($"[DB Init] Password verification test: {(hashMatches ? "✓ PASS" : "✗ FAIL")}");
             
             // Verify password hash is valid BCrypt
             if (!PasswordUtils.LooksLikeBcryptHash(existingAdmin.PasswordHash))
@@ -308,6 +327,7 @@ try
                 db.Users.Update(existingAdmin);
                 await db.SaveChangesAsync();
                 logger.LogInformation($"[DB Init] ✓ Admin password hash updated to BCrypt.");
+                logger.LogInformation($"[DB Init] New hash: {newHash}");
             }
             else
             {
