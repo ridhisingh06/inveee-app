@@ -94,7 +94,7 @@ namespace invmgmt.web.Services
                 
                 if (!isPasswordValid)
                 {
-                    _logger.LogWarning("[DEBUG] Login failed: Invalid password for user. UserId={UserId}, Email={Email}", user.Id, email);
+                    _logger.LogWarning("[DEBUG] Login failed: Invalid password for user. UserId={UserId}, Email={Email}", user.Id, user.Email);
                     return (false, "", "Incorrect password");
                 }
 
