@@ -1,0 +1,354 @@
+================================================================================
+                   BACKEND & DATABASE - QUICK REFERENCE CARD
+================================================================================
+
+YOUR APP ARCHITECTURE
+=====================
+
+         Frontend (Angular)
+              ↓ HTTP
+         Backend (.NET) ← Backend/Program.cs
+              ↓ SQL
+         Database (PostgreSQL) ← inventorydb
+
+================================================================================
+BACKEND 3 LAYERS
+================================================================================
+
+Layer 1: CONTROLLER (receives HTTP requests)
+  ├─ AuthController ← /api/auth/login
+  ├─ RequestController ← /api/requests
+  └─ ...
+
+Layer 2: SERVICE (business logic)
+  ├─ AuthService ← Login verification, JWT generation
+  ├─ RequestService ← Request creation logic
+  └─ ...
+
+Layer 3: REPOSITORY (database queries)
+  ├─ UserRepository ← Query User table
+  ├─ RequestRepository ← Query Request table
+  └─ ...
+
+FLOW: HTTP Request → Controller → Service → Repository → Database
+
+================================================================================
+DATABASE TABLES & RELATIONSHIPS
+================================================================================
+
+USER
+├─ Id (Primary Key)
+├─ Username, Email, PasswordHash
+├─ DepartmentId (Foreign Key → Department.Id)
+└─ IsActive, IsApproved, Role, CreatedAt
+
+DEPARTMENT
+├─ Id (Primary Key)
+└─ Name
+
+REQUEST
+├─ Id (Primary Key)
+├─ UserId (Foreign Key → User.Id)
+├─ CategoryId (Foreign Key → Category.Id)
+├─ Status, CreatedAt, UpdatedAt
+└─ Related: RequestItem (One Request has Many RequestItems)
+
+REQUESTITEM
+├─ Id (Primary Key)
+├─ RequestId (Foreign Key → Request.Id)
+├─ ItemId (Foreign Key → Item.Id)
+├─ QuantityRequested, QuantityApproved, QuantityIssued
+└─ Status
+
+CATEGORY
+├─ Id (Primary Key)
+└─ Name
+
+================================================================================
+KEY CONCEPTS
+================================================================================
+
+PRIMARY KEY (PK)
+  ├─ Unique identifier for each row
+  ├─ Example: User.Id = 1, 2, 3... (no duplicates)
+  └─ Every table must have one
+
+FOREIGN KEY (FK)
+  ├─ Column in one table pointing to Primary Key in another table
+  ├─ Example: Request.UserId = 1 → points to User.Id = 1
+  └─ Creates relationships between tables
+
+ONE-TO-MANY RELATIONSHIP
+  ├─ One Department has Many Users
+  ├─ One User creates Many Requests
+  ├─ One Request has Many RequestItems
+  └─ Shown as: Parent (1) ──▶ Child (Many)
+
+NULL / NULLABLE
+  ├─ Empty value (nothing)
+  ├─ Example: int? DepartmentId → can be null if user has no dept
+  └─ Opposite: NOT NULL → must have a value
+
+================================================================================
+COMMON DATA FLOW EXAMPLE
+================================================================================
+
+USER CREATES A REQUEST:
+
+1. Frontend sends:
+   POST /api/requests/create
+   { "items": [ { "itemId": 5, "quantity": 10 } ] }
+
+2. Controller receives:
+   RequestController.CreateAsync(dto)
+
+3. Service processes:
+   RequestService.CreateAsync(userId, dto)
+   - Get user from database (UserId = 1)
+   - Create Request record
+   - Create RequestItem records
+
+4. Repository queries:
+   RequestRepository.AddAsync(request)
+   INSERT INTO "Request" VALUES (UserId=1, Status='Pending')
+   Returns: RequestId = 42
+
+5. Database stores:
+   Request: Id=42, UserId=1, Status='Pending'
+   RequestItem: Id=100, RequestId=42, ItemId=5, Qty=10
+
+6. Frontend receives:
+   { "id": 42, "userId": 1, "items": [...] }
+
+================================================================================
+SQL BASICS FOR YOUR APP
+================================================================================
+
+SELECT (Get data)
+  SELECT * FROM "User" WHERE "Email" = 'admin@gmail.com';
+
+JOIN (Combine tables)
+  SELECT u."Username", d."Name"
+  FROM "User" u
+  LEFT JOIN "Department" d ON u."DepartmentId" = d."Id";
+
+INSERT (Add data)
+  INSERT INTO "User" ("Username", "Email") VALUES ('John', 'john@gmail.com');
+
+UPDATE (Modify data)
+  UPDATE "User" SET "IsApproved" = true WHERE "Id" = 1;
+
+DELETE (Remove data)
+  DELETE FROM "RequestItem" WHERE "RequestId" = 42;
+
+================================================================================
+C# TO SQL TRANSLATION (Entity Framework)
+================================================================================
+
+C# Code:
+  var user = await db.Users
+    .Include(u => u.Department)
+    .FirstOrDefaultAsync(u => u.Email == "admin@gmail.com");
+
+Translates to SQL:
+  SELECT u."Id", u."Username", u."Email", u."DepartmentId",
+         d."Id", d."Name"
+  FROM "User" u
+  LEFT JOIN "Department" d ON u."DepartmentId" = d."Id"
+  WHERE u."Email" = 'admin@gmail.com'
+  LIMIT 1;
+
+Returns C# Object:
+  User {
+    Id: 1,
+    Email: "admin@gmail.com",
+    DepartmentId: 1,
+    Department: { Id: 1, Name: "Admin" }
+  }
+
+================================================================================
+C# MODEL EXAMPLE
+================================================================================
+
+public class User
+{
+    // Primary Key
+    public int Id { get; set; }
+    
+    // Regular properties
+    public string Username { get; set; }
+    public string Email { get; set; }
+    public string PasswordHash { get; set; }
+    
+    // Foreign Key (nullable)
+    public int? DepartmentId { get; set; }
+    
+    // Navigation property (reference to related object)
+    public Department? Department { get; set; }
+    
+    // Regular properties
+    public bool IsActive { get; set; }
+    public bool IsApproved { get; set; }
+    public string Role { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+Maps to Database Table:
+  CREATE TABLE "User" (
+    "Id" INT PRIMARY KEY,
+    "Username" VARCHAR,
+    "Email" VARCHAR,
+    "PasswordHash" VARCHAR,
+    "DepartmentId" INT FOREIGN KEY REFERENCES "Department"("Id"),
+    "IsActive" BOOLEAN,
+    "IsApproved" BOOLEAN,
+    "Role" VARCHAR,
+    "CreatedAt" TIMESTAMP
+  );
+
+================================================================================
+PASSWORD SECURITY
+================================================================================
+
+User enters password: "admin@123"
+  ↓
+Backend hashes using BCrypt: 
+  $2a$11$RCleFC/6PGiMP8Wu5FGz5.FbQX4iFGI7JUrVncu9K73cWCp3M2nAO
+  ↓
+Store HASH in database (never store plain password!)
+  ↓
+On login, BCrypt verifies: Hash matches Password ✓
+
+Key: Each hash is unique because BCrypt adds random salt
+
+================================================================================
+JWT TOKEN (24 HOURS)
+================================================================================
+
+User logins:
+  POST /api/auth/login
+  Email + Password
+  ↓
+Backend generates JWT:
+  {
+    "sub": "1",
+    "email": "admin@gmail.com",
+    "role": "ADMIN",
+    "exp": 1234567890
+  }
+  ↓
+Encoded with secret key:
+  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWI...
+  ↓
+Frontend stores in localStorage
+  ↓
+Every future request includes:
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  ↓
+Backend verifies token is valid
+  ↓
+After 24 hours: Token expires
+  → Need to login again to get new token
+
+================================================================================
+FILE STRUCTURE
+================================================================================
+
+backend/
+  ├─ Program.cs                 ← App startup
+  ├─ Controllers/               ← HTTP endpoints
+  │  ├─ AuthController.cs       ← /api/auth/*
+  │  ├─ RequestController.cs    ← /api/requests/*
+  │  └─ ...
+  ├─ Services/                  ← Business logic
+  │  ├─ AuthService.cs          ← Login logic
+  │  ├─ RequestService.cs       ← Request logic
+  │  └─ ...
+  ├─ Repositories/              ← Database queries
+  │  ├─ UserRepository.cs       ← User queries
+  │  ├─ RequestRepository.cs    ← Request queries
+  │  └─ ...
+  ├─ Models/                    ← Database models
+  │  ├─ User.cs
+  │  ├─ Request.cs
+  │  ├─ RequestItem.cs
+  │  └─ ...
+  ├─ Data/
+  │  └─ AppDbContext.cs         ← Database config
+  └─ appsettings.json           ← Connection string
+
+================================================================================
+QUICK DEFINITIONS
+================================================================================
+
+Entity Framework    = Tool that converts C# code to SQL automatically
+ORM                 = Object-Relational Mapping (C# objects ↔ database tables)
+Repository Pattern  = Abstraction layer for database access
+Dependency Injection = Services are injected instead of created manually
+DTO                 = Data Transfer Object (what API sends/receives)
+Async/Await         = Non-blocking database operations
+LINQ                = C# syntax for database queries
+Nullable            = Can have null value (int? = nullable int)
+ToString()          = Convert object to string representation
+
+================================================================================
+YOUR SEEDED DATA (Created automatically on app startup)
+================================================================================
+
+Users:        1 (admin@gmail.com)
+Roles:        3 (User, Issuer, Admin)
+Departments:  4 (Admin, IT, HR, Finance)
+Categories:   3 (Stationary, IT Related, HouseKeeping)
+
+Login: admin@gmail.com / admin@123
+JWT expires: 24 hours
+
+================================================================================
+DATABASE CREDENTIALS
+================================================================================
+
+Local Database:
+  Host: localhost
+  Port: 5432
+  Database: inventorydb
+  Username: postgres
+  Password: Ridhisingh
+
+Production RDS:
+  Host: inveee-postgres.citg4maasb05.us-east-1.rds.amazonaws.com
+  Port: 5432
+  Database: inventorydb
+  Username: postgres
+  Master Password: ridhisingh2003
+
+================================================================================
+API ENDPOINTS
+================================================================================
+
+Login:
+  POST /api/auth/login
+  { "email": "...", "password": "..." }
+  Response: { "token": "...", "message": "..." }
+
+Create Request:
+  POST /api/requests
+  { "items": [ { "itemId": 5, "quantity": 10 } ] }
+  Response: { "id": 42, "status": "Pending" }
+
+Get User Requests:
+  GET /api/requests
+  Response: [ { "id": 42, ... }, ... ]
+
+================================================================================
+LEARNING RESOURCES IN YOUR REPO
+================================================================================
+
+Read these files for full understanding:
+
+1. LEARNING_GUIDE.md ← How to learn these concepts
+2. QUICK_BACKEND_EXPLANATION.md ← Simple overview
+3. BACKEND_DATABASE_EXPLAINED.md ← Detailed reference
+4. DATABASE_RELATIONSHIPS_VISUAL.md ← Visual diagrams
+5. This file (QUICK_REFERENCE_CARD.txt) ← Quick lookup
+
+================================================================================
