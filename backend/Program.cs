@@ -121,19 +121,26 @@ builder.Services.AddMemoryCache();
 // =======================
 builder.Services.AddCors(options =>
 {
-    // Support multiple comma-separated origins via FRONTEND_URL
-    // e.g. "https://inveee-app.vercel.app,https://inveee-9mbpjalln-invmgmt.vercel.app"
-    var rawFrontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL")
-        ?? "https://inveee-app.vercel.app";
+    // ── Hardcoded known-good origins ─────────────────────────────────────────
+    // These are always present regardless of the FRONTEND_URL env var so that
+    // a misconfigured or missing env var can never silently break production.
+    var hardcodedOrigins = new[]
+    {
+        "https://inveee-mzapjmpz9-invmgmt.vercel.app", // current production deployment
+        "https://inveee-app.vercel.app",                 // primary custom domain (if any)
+        "http://localhost:4200",                         // Angular dev server
+        "http://localhost:3000",                         // Alternative dev port
+        "https://localhost:4200",                        // HTTPS dev server
+    };
+
+    // ── Runtime origins from FRONTEND_URL env var ────────────────────────────
+    // Comma-separated list injected via ECS task-definition environment block.
+    // e.g. "https://inveee-mzapjmpz9-invmgmt.vercel.app,https://inveee-app.vercel.app"
+    var rawFrontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? string.Empty;
 
     var allowedOrigins = rawFrontendUrl
         .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-        .Concat(new[]
-        {
-            "http://localhost:4200",   // Angular dev server
-            "http://localhost:3000",   // Alternative dev port
-            "https://localhost:4200",  // HTTPS dev server
-        })
+        .Concat(hardcodedOrigins)
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .ToArray();
 
@@ -146,7 +153,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()      // GET, POST, PUT, DELETE, OPTIONS, PATCH
               .AllowAnyHeader()      // Content-Type, Authorization, etc.
-              .AllowCredentials();   // Required if using cookies or Authorization header
+              .AllowCredentials();   // Required for Authorization header / cookies
     });
 });
 
@@ -393,9 +400,10 @@ if (app.Environment.IsDevelopment())
 // ---------------------------------------------------------------
 
 // 1. Global exception handler — registered first so it wraps everything
-//    downstream. CORS headers are added later in the pipeline so error
-//    responses from the exception handler will carry them via UseRouting
-//    fallback behaviour.
+//    downstream. CORS headers must be written explicitly here because
+//    UseCors() sits later in the pipeline and its headers are not yet
+//    present when this handler runs. Without them the browser treats a
+//    500 as a network error and never surfaces the actual status code.
 app.UseExceptionHandler(errApp =>
 {
     errApp.Run(async ctx =>
@@ -403,6 +411,18 @@ app.UseExceptionHandler(errApp =>
         var logger = ctx.RequestServices.GetRequiredService<ILogger<Program>>();
         var feature = ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
         var ex = feature?.Error;
+
+        // ── Emit CORS headers on error responses ────────────────────────────
+        // The browser requires Access-Control-Allow-Origin on every response,
+        // including 5xx errors. We copy the Origin echo pattern that UseCors
+        // would normally apply.
+        var origin = ctx.Request.Headers.Origin.FirstOrDefault();
+        if (!string.IsNullOrEmpty(origin))
+        {
+            ctx.Response.Headers["Access-Control-Allow-Origin"] = origin;
+            ctx.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+            ctx.Response.Headers["Vary"] = "Origin";
+        }
 
         ctx.Response.StatusCode = 500;
         ctx.Response.ContentType = "application/json";
