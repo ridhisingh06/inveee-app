@@ -13,11 +13,13 @@ namespace invmgmt.web.Controllers
     public class RequestController : ControllerBase
     {
         private readonly IRequestService _requestService;
+        private readonly IOrderSummaryService _orderSummaryService;
         private readonly ILogger<RequestController> _logger;
 
-        public RequestController(IRequestService requestService, ILogger<RequestController> logger)
+        public RequestController(IRequestService requestService, IOrderSummaryService orderSummaryService, ILogger<RequestController> logger)
         {
             _requestService = requestService;
+            _orderSummaryService = orderSummaryService;
             _logger = logger;
         }
 
@@ -226,6 +228,173 @@ namespace invmgmt.web.Controllers
             {
                 _logger.LogError(ex, "Unexpected error in DeleteRequest");
                 return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+            }
+        }
+
+        // ====================================================================
+        // ENTERPRISE WORKFLOW - RECEIVING AND ORDER HISTORY ENDPOINTS (NEW)
+        // ====================================================================
+
+        /// <summary>
+        /// POST /api/request/receive-items/{id}
+        /// User receives approved items and generates immutable order summary
+        /// </summary>
+        [Authorize(Roles = "USER")]
+        [HttpPost("receive-items/{id:int}")]
+        public async Task<IActionResult> ReceiveItems(int id, [FromBody] ReceiveItemsDto? dto = null)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var notes = dto?.Notes;
+
+                _logger.LogInformation("User receiving items for RequestId={RequestId}, UserId={UserId}", id, userId);
+
+                var response = await _orderSummaryService.CreateOrderSummaryAsync(id, userId, notes);
+
+                if (!response.Success)
+                    return BadRequest(response);
+
+                _logger.LogInformation("Items received and order summary created: RequestId={RequestId}, OrderSummaryId={OrderSummaryId}",
+                    id, response.OrderSummaryId);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error receiving items: RequestId={RequestId}", id);
+                return StatusCode(500, new { message = "Error receiving items", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET /api/request/orders
+        /// Get user's order history (paginated)
+        /// </summary>
+        [Authorize(Roles = "USER")]
+        [HttpGet("orders")]
+        public async Task<IActionResult> GetOrderHistory(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+
+                _logger.LogInformation("Fetching order history for UserId={UserId}, Page={Page}, PageSize={PageSize}",
+                    userId, pageNumber, pageSize);
+
+                var result = await _orderSummaryService.GetUserOrdersAsync(userId, pageNumber, pageSize);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching order history");
+                return StatusCode(500, new { message = "Error fetching order history", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET /api/request/orders/{id}
+        /// Get complete order summary details (receipt-style)
+        /// </summary>
+        [Authorize(Roles = "USER")]
+        [HttpGet("orders/{id:int}")]
+        public async Task<IActionResult> GetOrderSummary(int id)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+
+                _logger.LogInformation("Fetching order summary: Id={Id}, UserId={UserId}", id, userId);
+
+                var orderSummary = await _orderSummaryService.GetOrderSummaryByIdAsync(id);
+
+                if (orderSummary == null)
+                {
+                    _logger.LogWarning("Order summary not found: Id={Id}", id);
+                    return NotFound(new { message = "Order summary not found" });
+                }
+
+                // Verify user owns this order
+                if (orderSummary.UserId != userId)
+                {
+                    _logger.LogWarning("Unauthorized access to order summary: Id={Id}, UserId={UserId}, ActualUserId={ActualUserId}",
+                        id, userId, orderSummary.UserId);
+                    return Forbid();
+                }
+
+                return Ok(orderSummary);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching order summary: Id={Id}", id);
+                return StatusCode(500, new { message = "Error fetching order summary", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET /api/request/orders/by-request/{requestId}
+        /// Get order summary by original request ID
+        /// </summary>
+        [Authorize(Roles = "USER")]
+        [HttpGet("orders/by-request/{requestId:int}")]
+        public async Task<IActionResult> GetOrderSummaryByRequest(int requestId)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+
+                _logger.LogInformation("Fetching order summary by RequestId={RequestId}, UserId={UserId}", requestId, userId);
+
+                var orderSummary = await _orderSummaryService.GetOrderSummaryByRequestAsync(requestId);
+
+                if (orderSummary == null)
+                {
+                    _logger.LogWarning("Order summary not found for RequestId={RequestId}", requestId);
+                    return NotFound(new { message = "Order summary not found for this request" });
+                }
+
+                // Verify user owns this order
+                if (orderSummary.UserId != userId)
+                {
+                    _logger.LogWarning("Unauthorized access to order summary: RequestId={RequestId}, UserId={UserId}, ActualUserId={ActualUserId}",
+                        requestId, userId, orderSummary.UserId);
+                    return Forbid();
+                }
+
+                return Ok(orderSummary);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching order summary by RequestId={RequestId}", requestId);
+                return StatusCode(500, new { message = "Error fetching order summary", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET /api/request/order-stats
+        /// Get user's order statistics (for dashboard)
+        /// </summary>
+        [Authorize(Roles = "USER")]
+        [HttpGet("order-stats")]
+        public async Task<IActionResult> GetOrderStatistics()
+        {
+            try
+            {
+                var userId = User.GetUserId();
+
+                _logger.LogInformation("Fetching order statistics for UserId={UserId}", userId);
+
+                var stats = await _orderSummaryService.GetUserStatisticsAsync(userId);
+
+                return Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching order statistics");
+                return StatusCode(500, new { message = "Error fetching order statistics", error = ex.Message });
             }
         }
     }

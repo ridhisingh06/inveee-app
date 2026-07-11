@@ -97,21 +97,25 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
+builder.Services.AddScoped<IRequestRepository, RequestRepository>();
+builder.Services.AddScoped<IRequestItemRepository, RequestItemRepository>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IOrderSummaryRepository, OrderSummaryRepository>();
+builder.Services.AddScoped<invmgmt.web.Repositories.IPersonnelRepository, invmgmt.web.Repositories.PersonnelRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
-builder.Services.AddScoped<IRequestRepository, RequestRepository>();
+builder.Services.AddScoped<IIssuerService, IssuerService>();
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
+builder.Services.AddScoped<IOrderSummaryService, OrderSummaryService>();
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<ISectionWiseQueryService, SectionWiseQueryService>();
+builder.Services.AddScoped<invmgmt.web.Services.IPersonnelService, invmgmt.web.Services.PersonnelService>();
 
 // Memory cache for lightweight server-side caching in production
 builder.Services.AddMemoryCache();
-
-// Personnel Management
-builder.Services.AddScoped<invmgmt.web.Repositories.IPersonnelRepository, invmgmt.web.Repositories.PersonnelRepository>();
-builder.Services.AddScoped<invmgmt.web.Services.IPersonnelService, invmgmt.web.Services.PersonnelService>();
 // =======================
 // CORS (PRODUCTION CONFIGURED)
 // =======================

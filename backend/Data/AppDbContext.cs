@@ -29,6 +29,10 @@ namespace invmgmt.web.Data
         public DbSet<IssueLog> IssueLogs { get; set; }
         public DbSet<ReceivedLog> ReceivedLogs { get; set; }
 
+        //  Order Summary (NEW - Enterprise Workflow)
+        public DbSet<OrderSummary> OrderSummaries { get; set; }
+        public DbSet<OrderSummaryItem> OrderSummaryItems { get; set; }
+
         //  Audit
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<RegistrationRequest> RegistrationRequests { get; set; }
@@ -123,6 +127,74 @@ namespace invmgmt.web.Data
 
             modelBuilder.Entity<BillItem>()
                 .HasIndex(bi => bi.BillId);
+
+            // ========== ORDER SUMMARY RELATIONSHIPS (NEW) ==========
+
+            // OrderSummary to Request (one-to-one: one order summary per request after receiving)
+            modelBuilder.Entity<OrderSummary>()
+                .HasOne(os => os.Request)
+                .WithMany()
+                .HasForeignKey(os => os.RequestId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // OrderSummary to User (many-to-one: user can have many order summaries)
+            modelBuilder.Entity<OrderSummary>()
+                .HasOne(os => os.User)
+                .WithMany()
+                .HasForeignKey(os => os.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // OrderSummary to Issuer User
+            modelBuilder.Entity<OrderSummary>()
+                .HasOne(os => os.IssuedByUser)
+                .WithMany()
+                .HasForeignKey(os => os.IssuedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // OrderSummary to Approver User
+            modelBuilder.Entity<OrderSummary>()
+                .HasOne(os => os.ApprovedByUser)
+                .WithMany()
+                .HasForeignKey(os => os.ApprovedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // OrderSummary to OrderSummaryItem (one-to-many)
+            modelBuilder.Entity<OrderSummary>()
+                .HasMany(os => os.Items)
+                .WithOne(osi => osi.OrderSummary)
+                .HasForeignKey(osi => osi.OrderSummaryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // OrderSummaryItem to Item
+            modelBuilder.Entity<OrderSummaryItem>()
+                .HasOne(osi => osi.Item)
+                .WithMany()
+                .HasForeignKey(osi => osi.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // OrderSummaryItem to RequestItem (reference to original request item)
+            modelBuilder.Entity<OrderSummaryItem>()
+                .HasOne(osi => osi.RequestItem)
+                .WithMany()
+                .HasForeignKey(osi => osi.RequestItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Indexes for OrderSummary for fast lookups
+            modelBuilder.Entity<OrderSummary>()
+                .HasIndex(os => os.UserId);
+            modelBuilder.Entity<OrderSummary>()
+                .HasIndex(os => os.RequestId)
+                .IsUnique();
+            modelBuilder.Entity<OrderSummary>()
+                .HasIndex(os => os.ReceivedDate);
+            modelBuilder.Entity<OrderSummary>()
+                .HasIndex(os => os.Status);
+
+            // Indexes for OrderSummaryItem
+            modelBuilder.Entity<OrderSummaryItem>()
+                .HasIndex(osi => osi.OrderSummaryId);
+            modelBuilder.Entity<OrderSummaryItem>()
+                .HasIndex(osi => osi.ItemId);
         }
     }
 }

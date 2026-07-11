@@ -5,6 +5,8 @@ using invmgmt.web.Data;
 using invmgmt.web.Models;
 using invmgmt.web.Models.Enums;
 using invmgmt.web.Utils;
+using invmgmt.web.DTOs;
+using invmgmt.web.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,11 +20,13 @@ namespace invmgmt.web.Controllers
     public class IssuerController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IIssuerService _issuerService;
         private readonly ILogger<IssuerController> _logger;
 
-        public IssuerController(AppDbContext context, ILogger<IssuerController> logger)
+        public IssuerController(AppDbContext context, IIssuerService issuerService, ILogger<IssuerController> logger)
         {
             _context = context;
+            _issuerService = issuerService;
             _logger = logger;
         }
 
@@ -232,6 +236,88 @@ namespace invmgmt.web.Controllers
             {
                 _logger.LogError(ex, "Error rejecting request: RequestId={Id}", id);
                 return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        // ====================================================================
+        // ENTERPRISE WORKFLOW - PARTIAL ISSUING ENDPOINTS (NEW)
+        // ====================================================================
+
+        /// <summary>
+        /// GET /api/issuer/pending
+        /// Get all pending items waiting for issuer to issue (with real-time inventory)
+        /// </summary>
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPendingItems(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching pending issuer items: Page={Page}, PageSize={PageSize}", pageNumber, pageSize);
+
+                var result = await _issuerService.GetPendingItemsAsync(pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching pending issuer items");
+                return StatusCode(500, new { message = "Error fetching pending items", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET /api/issuer/pending/count
+        /// Get count of pending items waiting for issuer
+        /// </summary>
+        [HttpGet("pending/count")]
+        public async Task<IActionResult> GetPendingCount()
+        {
+            try
+            {
+                var count = await _issuerService.GetPendingCountAsync();
+                return Ok(new { count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting pending count");
+                return StatusCode(500, new { message = "Error getting pending count", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// PUT /api/issuer/issue-partially
+        /// Issue items partially with inventory validation and real-time deduction
+        /// Issuer specifies: IssueQuantity + RejectQuantity = RequestedQuantity
+        /// </summary>
+        [HttpPut("issue-partially")]
+        public async Task<IActionResult> IssuePartially([FromBody] IssuePartiallyDto dto)
+        {
+            try
+            {
+                // Validate input
+                if (dto == null)
+                    return BadRequest(new { message = "Request body cannot be empty" });
+
+                if (dto.Items == null || dto.Items.Count == 0)
+                    return BadRequest(new { message = "At least one item must be issued" });
+
+                _logger.LogInformation("Issuer issuing partially: RequestId={RequestId}, ItemCount={ItemCount}",
+                    dto.RequestId, dto.Items.Count);
+
+                var issuerId = User.GetUserId();
+                var response = await _issuerService.IssuePartiallyAsync(dto, issuerId);
+
+                if (!response.Success)
+                    return BadRequest(response);
+
+                _logger.LogInformation("Partial issue successful: RequestId={RequestId}", dto.RequestId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during partial issue: RequestId={RequestId}", dto?.RequestId);
+                return StatusCode(500, new { message = "Error processing partial issue", error = ex.Message });
             }
         }
     }

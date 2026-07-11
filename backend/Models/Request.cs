@@ -24,6 +24,15 @@ namespace invmgmt.web.Models
 
         public DateTime? UpdatedAt { get; set; }
 
+        // NEW AUDIT FIELDS FOR ENTERPRISE WORKFLOW
+        public DateTime? IssuedDate { get; set; }
+        public int? IssuedBy { get; set; }
+
+        public DateTime? ApprovedDate { get; set; }
+        public int? ApprovedBy { get; set; }
+
+        public DateTime? ReceivedDate { get; set; }
+
         public ICollection<RequestItem> RequestItems { get; set; }
         public ICollection<ApprovalLog> ApprovalLogs { get; set; }
         public ICollection<IssueLog> IssueLogs { get; set; }

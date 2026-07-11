@@ -6,6 +6,7 @@ using invmgmt.web.DTOs;
 using invmgmt.web.Models;
 using invmgmt.web.Utils;
 using invmgmt.web.Models.Enums;
+using invmgmt.web.Services;
 using System.Linq;
 
 [Route("api/admin")]
@@ -14,11 +15,13 @@ using System.Linq;
 public class AdminController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IApprovalService _approvalService;
     private readonly ILogger<AdminController> _logger;
 
-    public AdminController(AppDbContext context, ILogger<AdminController> logger)
+    public AdminController(AppDbContext context, IApprovalService approvalService, ILogger<AdminController> logger)
     {
         _context = context;
+        _approvalService = approvalService;
         _logger = logger;
     }
 
@@ -648,6 +651,88 @@ public class AdminController : ControllerBase
         {
             _logger.LogError(ex, "Unexpected error in RejectRequest");
             return StatusCode(500, new { message = "An internal server error occurred.", error = ex.Message });
+        }
+    }
+
+    // ====================================================================
+    // ENTERPRISE WORKFLOW - PARTIAL APPROVAL ENDPOINTS (NEW)
+    // ====================================================================
+
+    /// <summary>
+    /// GET /api/admin/pending
+    /// Get all pending items waiting for admin to approve
+    /// </summary>
+    [HttpGet("pending")]
+    public async Task<IActionResult> GetPendingItems(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching pending admin approval items: Page={Page}, PageSize={PageSize}", pageNumber, pageSize);
+
+            var result = await _approvalService.GetPendingItemsAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching pending admin approval items");
+            return StatusCode(500, new { message = "Error fetching pending items", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// GET /api/admin/pending/count
+    /// Get count of pending items waiting for admin
+    /// </summary>
+    [HttpGet("pending/count")]
+    public async Task<IActionResult> GetPendingCount()
+    {
+        try
+        {
+            var count = await _approvalService.GetPendingCountAsync();
+            return Ok(new { count });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting pending count");
+            return StatusCode(500, new { message = "Error getting pending count", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// PUT /api/admin/approve-partially
+    /// Admin approves items partially with inventory restoration
+    /// Admin specifies: ApproveQuantity + RejectQuantity = IssuerIssuedQuantity
+    /// </summary>
+    [HttpPut("approve-partially")]
+    public async Task<IActionResult> ApprovePartially([FromBody] ApprovePartiallyDto dto)
+    {
+        try
+        {
+            // Validate input
+            if (dto == null)
+                return BadRequest(new { message = "Request body cannot be empty" });
+
+            if (dto.Items == null || dto.Items.Count == 0)
+                return BadRequest(new { message = "At least one item must be approved" });
+
+            _logger.LogInformation("Admin approving partially: RequestId={RequestId}, ItemCount={ItemCount}",
+                dto.RequestId, dto.Items.Count);
+
+            var adminId = User.GetUserId();
+            var response = await _approvalService.ApprovePartiallyAsync(dto, adminId);
+
+            if (!response.Success)
+                return BadRequest(response);
+
+            _logger.LogInformation("Partial approval successful: RequestId={RequestId}", dto.RequestId);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during partial approval: RequestId={RequestId}", dto?.RequestId);
+            return StatusCode(500, new { message = "Error processing partial approval", error = ex.Message });
         }
     }
 }
