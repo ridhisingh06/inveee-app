@@ -186,9 +186,15 @@ namespace invmgmt.web.Services
                     }
                 }
 
-                // STEP 5: Begin transaction and restore inventory
-                using (var transaction = await _context.Database.BeginTransactionAsync())
+                // STEP 5: Execute inside a retriable execution strategy so that
+                // NpgsqlRetryingExecutionStrategy can replay the entire unit of work
+                // on transient failures without throwing the "does not support
+                // user-initiated transactions" exception.
+                var strategy = _context.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
                 {
+                    await using var transaction = await _context.Database.BeginTransactionAsync();
                     try
                     {
                         _logger.LogInformation("Restoring inventory for {Count} items", restorationOps.Count);
@@ -203,7 +209,7 @@ namespace invmgmt.web.Services
                                 response.Success = false;
                                 response.Message = $"Failed to restore inventory for ItemId {itemId}.";
                                 await transaction.RollbackAsync();
-                                return response;
+                                return;
                             }
                         }
 
@@ -247,32 +253,30 @@ namespace invmgmt.web.Services
                             _logger.LogInformation("Request status updated to Approved: RequestId={RequestId}", dto.RequestId);
                         }
 
-                        // STEP 8: Save all changes
-                        await _requestItemRepo.SaveChangesAsync();
-                        await _inventoryRepo.SaveChangesAsync();
+                        // STEP 8: Single SaveChanges — covers inventory restoration,
+                        // request item updates, and request status in one round-trip.
+                        await _context.SaveChangesAsync();
 
-                        // Commit transaction
                         await transaction.CommitAsync();
 
                         _logger.LogInformation("Partial approval committed successfully: RequestId={RequestId}, ItemsApproved={ItemsApproved}",
                             dto.RequestId, approvedItems.Count);
 
-                        // STEP 9: Build success response
                         response.Success = true;
                         response.Message = $"Successfully approved {approvedItems.Count} item(s).";
                         response.RequestId = dto.RequestId;
                         response.ApprovedDate = approvedDate;
                         response.ApprovedItems = approvedItems;
-
-                        return response;
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Error during partial approval transaction: RequestId={RequestId}", dto.RequestId);
                         await transaction.RollbackAsync();
-                        throw;
+                        throw; // re-throw so the execution strategy can retry on transient faults
                     }
-                }
+                });
+
+                return response;
             }
             catch (Exception ex)
             {

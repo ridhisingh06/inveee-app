@@ -1,53 +1,68 @@
 <div class="issue-page">
 
-  <!-- ═══════════════════════════════════ HEADER ═══════════════════════════ -->
+  <!-- ═══════════════════════ HEADER ═══════════════════════════════════════ -->
   <header class="page-header">
-    <div>
-      <h1>Partial Issue Console</h1>
-      <p>Set issue &amp; reject quantities per item — inventory deducted on submit</p>
+    <div class="header-text">
+      <h1 class="page-title">Partial Issue Console</h1>
+      <p class="page-sub">Set issue &amp; reject quantities — inventory deducted on submit</p>
     </div>
     <div class="header-actions">
-      <input
-        class="search-input"
-        type="text"
-        [value]="searchText"
-        (input)="onSearchChange($any($event.target).value)"
-        placeholder="Search by user or item…"
-        [disabled]="loading"
-      />
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="9" cy="9" r="6"/><path d="m15 15-3.5-3.5"/>
+        </svg>
+        <input
+          class="search-input"
+          type="text"
+          [value]="searchText"
+          (input)="onSearchChange($any($event.target).value)"
+          placeholder="Search user or item…"
+          [disabled]="loading"
+        />
+      </div>
       <button class="refresh-btn" (click)="refresh()" [disabled]="loading">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"
+             [class.spin]="loading">
+          <path d="M17.5 10A7.5 7.5 0 1 1 15 4.5M17.5 2v4h-4"/>
         </svg>
         Refresh
       </button>
     </div>
   </header>
 
-  <!-- ═══════════════════════════════════ ALERTS ═══════════════════════════ -->
-  <div class="alert success-alert" *ngIf="successMsg">
-    <span class="alert-icon">✓</span> {{ successMsg }}
-  </div>
-  <div class="alert error-alert" *ngIf="errorMsg">
-    <span class="alert-icon">!</span> {{ errorMsg }}
+  <!-- ═══════════════════════ GLOBAL SUCCESS ═══════════════════════════════ -->
+  <div class="global-success" *ngIf="successMsg" role="status">
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/>
+    </svg>
+    {{ successMsg }}
   </div>
 
-  <!-- ═══════════════════════════════════ LOADING ══════════════════════════ -->
+  <!-- ═══════════════════════ LOADING ══════════════════════════════════════ -->
   <div class="loading-state" *ngIf="loading">
     <div class="spinner"></div>
-    <p>Loading pending items…</p>
+    <span>Loading pending items…</span>
   </div>
 
-  <!-- ═══════════════════════════════════ EMPTY ════════════════════════════ -->
+  <!-- ═══════════════════════ EMPTY ════════════════════════════════════════ -->
   <div class="empty-state" *ngIf="!loading && requestGroups.length === 0 && !errorMsg">
-    <svg viewBox="0 0 48 48" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="24" cy="24" r="20"/><path d="M16 24h16M24 16v16"/>
+    <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#c7d2fe" stroke-width="1.5">
+      <rect x="8" y="8" width="32" height="32" rx="4"/>
+      <path d="M16 24h16M24 16v16"/>
     </svg>
     <p>No items pending with issuer right now.</p>
   </div>
 
-  <!-- ═══════════════════════════════════ REQUEST GROUPS ═══════════════════ -->
+  <!-- ═══════════════════════ ERROR (global) ═══════════════════════════════ -->
+  <div class="compact-error" *ngIf="errorMsg" role="alert">
+    <span class="err-bar"></span>
+    <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor" class="err-icon">
+      <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/>
+    </svg>
+    <span class="err-text">{{ errorMsg }}</span>
+  </div>
+
+  <!-- ═══════════════════════ REQUEST CARDS ════════════════════════════════ -->
   <div
     class="request-card"
     *ngFor="let group of requestGroups; trackBy: trackByRequestId"
@@ -57,122 +72,144 @@
     <div class="card-header">
       <div class="card-meta">
         <span class="req-id">REQ-{{ group.requestId }}</span>
+        <span class="req-sep">·</span>
         <span class="req-user">{{ group.requesterName }}</span>
-        <span class="req-date">{{ group.requestedDate | date:'mediumDate' }}</span>
+        <span class="req-sep">·</span>
+        <span class="req-date">{{ group.requestedDate | date:'d MMM yyyy' }}</span>
       </div>
-      <div class="card-badge">
-        <span class="badge requested">Pending with Issuer</span>
-      </div>
+      <span class="status-pill pending">Pending with Issuer</span>
     </div>
 
-    <!-- Per-request submit error -->
-    <div class="alert error-alert sm" *ngIf="submitErrorMap[group.requestId]">
-      <span class="alert-icon">!</span> {{ submitErrorMap[group.requestId] }}
+    <!-- Per-card error -->
+    <div class="compact-error card-err" *ngIf="submitErrorMap[group.requestId]" role="alert">
+      <span class="err-bar"></span>
+      <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor" class="err-icon">
+        <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/>
+      </svg>
+      <span class="err-text">{{ submitErrorMap[group.requestId] }}</span>
     </div>
 
-    <!-- Items table -->
-    <div class="table-wrapper">
-      <table class="items-table" formArrayName="rows">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th class="col-center">Requested</th>
-            <th class="col-center">Available</th>
-            <th class="col-center">Issue Qty</th>
-            <th class="col-center">Reject Qty</th>
-            <th class="col-center">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            *ngFor="let item of group.items; let i = index; trackBy: trackByIdx"
-            [formGroupName]="i"
-            [class.row-valid]="rowValid(group.requestId, i)"
-            [class.row-invalid]="!rowValid(group.requestId, i)"
+    <!-- ── Column headers (grid row) ── -->
+    <div class="grid-header">
+      <span class="col-item">Item</span>
+      <span class="col-num">Requested</span>
+      <span class="col-num">Available</span>
+      <span class="col-input">Issue Qty</span>
+      <span class="col-input">Reject Qty</span>
+      <span class="col-status">Status</span>
+    </div>
+
+    <!-- ── Item rows ── -->
+    <div class="grid-body" formArrayName="rows">
+      <div
+        class="grid-row"
+        *ngFor="let item of group.items; let i = index; trackBy: trackByIdx"
+        [formGroupName]="i"
+        [class.row-ok]="rowValid(group.requestId, i)"
+        [class.row-err]="!rowValid(group.requestId, i)"
+      >
+        <!-- Item -->
+        <div class="col-item item-cell">
+          <span class="item-name">{{ item.itemName }}</span>
+          <span class="tag low-stock" *ngIf="isLowStock(group.requestId, i)">Low Stock</span>
+          <span class="tag cat">{{ item.categoryName }}</span>
+        </div>
+
+        <!-- Requested -->
+        <div class="col-num">
+          <span class="badge-green">{{ item.requestedQuantity }}</span>
+        </div>
+
+        <!-- Available -->
+        <div class="col-num">
+          <span
+            class="badge-purple"
+            [class.avl-low]="item.availableQuantity > 0 && item.availableQuantity < item.requestedQuantity"
+            [class.avl-zero]="item.availableQuantity === 0"
+          >{{ item.availableQuantity }}</span>
+        </div>
+
+        <!-- Issue Qty -->
+        <div class="col-input">
+          <input
+            class="qty-field"
+            type="number"
+            formControlName="issueQty"
+            [min]="0"
+            [max]="item.availableQuantity"
+            (change)="onIssueQtyChange(group.requestId, i, $any($event.target).value)"
+            aria-label="Issue quantity for {{ item.itemName }}"
+          />
+        </div>
+
+        <!-- Reject Qty -->
+        <div class="col-input">
+          <input
+            class="qty-field reject-field"
+            type="number"
+            formControlName="rejectQty"
+            readonly
+            aria-label="Reject quantity for {{ item.itemName }}"
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="col-status">
+          <span class="valid-pill" *ngIf="rowValid(group.requestId, i)">
+            <svg viewBox="0 0 14 14" width="12" height="12" fill="currentColor">
+              <path d="M12.154 3.346a.75.75 0 0 1 0 1.061l-6 6a.75.75 0 0 1-1.06 0l-2.75-2.75a.75.75 0 1 1 1.06-1.06L5.625 8.816l5.468-5.47a.75.75 0 0 1 1.061 0Z"/>
+            </svg>
+            Valid
+          </span>
+          <span
+            class="invalid-pill"
+            *ngIf="!rowValid(group.requestId, i)"
+            [title]="validationMessage(group.requestId, i)"
           >
-            <!-- Item name + low-stock chip -->
-            <td class="item-cell">
-              <span class="item-name">{{ item.itemName }}</span>
-              <span class="chip low-stock" *ngIf="isLowStock(group.requestId, i)">
-                Low Stock
-              </span>
-              <span class="chip category">{{ item.categoryName }}</span>
-            </td>
-
-            <!-- Requested -->
-            <td class="col-center qty-badge">{{ item.requestedQuantity }}</td>
-
-            <!-- Available — colour-coded -->
-            <td class="col-center">
-              <span
-                class="avl-badge"
-                [class.avl-ok]="item.availableQuantity >= item.requestedQuantity"
-                [class.avl-low]="item.availableQuantity > 0 && item.availableQuantity < item.requestedQuantity"
-                [class.avl-zero]="item.availableQuantity === 0"
-              >{{ item.availableQuantity }}</span>
-            </td>
-
-            <!-- Issue Qty (editable) -->
-            <td class="col-center">
-              <input
-                class="qty-input"
-                type="number"
-                formControlName="issueQty"
-                [min]="0"
-                [max]="item.availableQuantity"
-                (change)="onIssueQtyChange(group.requestId, i, $any($event.target).value)"
-              />
-            </td>
-
-            <!-- Reject Qty (read-only auto-calc) -->
-            <td class="col-center">
-              <span class="reject-qty" [class.reject-nonzero]="getRow(group.requestId, i).get('rejectQty')!.value > 0">
-                {{ getRow(group.requestId, i).get('rejectQty')!.value }}
-              </span>
-            </td>
-
-            <!-- Validation status -->
-            <td class="col-center">
-              <ng-container *ngIf="rowValid(group.requestId, i); else invalid">
-                <span class="valid-chip">✓ Valid</span>
-              </ng-container>
-              <ng-template #invalid>
-                <span class="invalid-chip" [title]="validationMessage(group.requestId, i)">
-                  ✕ {{ validationMessage(group.requestId, i) }}
-                </span>
-              </ng-template>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            ✕ Invalid
+          </span>
+        </div>
+      </div>
     </div>
 
-    <!-- Card footer — totals + submit -->
+    <!-- ── Card footer: summary badges + submit ── -->
     <div class="card-footer">
-      <div class="totals">
-        <span>Total Requested: <strong>{{ group.items | totalRequested }}</strong></span>
-        <span>Total Issue: <strong>{{ formMap[group.requestId] | totalIssue }}</strong></span>
-        <span>Total Reject: <strong>{{ formMap[group.requestId] | totalReject }}</strong></span>
+      <div class="summary-badges">
+        <div class="sum-badge grey">
+          <span class="sum-label">Requested</span>
+          <span class="sum-val">{{ group.items | totalRequested }}</span>
+        </div>
+        <div class="sum-badge green">
+          <span class="sum-label">Issue</span>
+          <span class="sum-val">{{ formMap[group.requestId] | totalIssue }}</span>
+        </div>
+        <div class="sum-badge red">
+          <span class="sum-label">Reject</span>
+          <span class="sum-val">{{ formMap[group.requestId] | totalReject }}</span>
+        </div>
       </div>
+
       <button
         class="submit-btn"
         [disabled]="!allRowsValid(group.requestId) || submittingMap[group.requestId]"
         (click)="submit(group.requestId)"
+        [attr.aria-label]="'Submit partial issue for request ' + group.requestId"
       >
-        <span *ngIf="submittingMap[group.requestId]">
-          <span class="btn-spinner"></span> Submitting…
+        <span class="btn-spinner-wrap" *ngIf="submittingMap[group.requestId]">
+          <span class="btn-spin"></span>
+          Submitting…
         </span>
         <span *ngIf="!submittingMap[group.requestId]">
-          Submit Issue for REQ-{{ group.requestId }}
+          Submit Issue · REQ-{{ group.requestId }}
         </span>
       </button>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════ PAGINATION ═══════════════════════ -->
-  <div class="pagination-footer" *ngIf="totalPages > 1">
+  <!-- ═══════════════════════ PAGINATION ═══════════════════════════════════ -->
+  <div class="pagination" *ngIf="totalPages > 1">
     <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">← Prev</button>
-    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} items)</span>
+    <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
     <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next →</button>
   </div>
 

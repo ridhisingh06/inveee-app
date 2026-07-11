@@ -174,15 +174,20 @@ namespace invmgmt.web.Services
                     }
                 }
 
-                // STEP 5: Begin transaction and lock inventory
-                using (var transaction = await _context.Database.BeginTransactionAsync())
+                // STEP 5: Execute inside a retriable execution strategy so that
+                // NpgsqlRetryingExecutionStrategy can replay the entire unit of work
+                // on transient failures without throwing the "does not support
+                // user-initiated transactions" exception.
+                var strategy = _context.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
                 {
+                    await using var transaction = await _context.Database.BeginTransactionAsync();
                     try
                     {
                         _logger.LogInformation("Acquiring inventory locks for {Count} items", inventoryOps.Count);
 
                         // Lock and validate inventory availability
-                        var lockedInventories = new Dictionary<int, InventoryStock>();
                         foreach (var (itemId, deductQty, _) in inventoryOps)
                         {
                             var inventory = await _inventoryRepo.LockAndGetAsync(itemId);
@@ -192,7 +197,7 @@ namespace invmgmt.web.Services
                                 response.Success = false;
                                 response.Message = $"Inventory not found for ItemId {itemId}.";
                                 await transaction.RollbackAsync();
-                                return response;
+                                return;
                             }
 
                             if (inventory.AvailableQuantity < deductQty)
@@ -203,10 +208,8 @@ namespace invmgmt.web.Services
                                 response.Success = false;
                                 response.Message = $"Insufficient inventory for ItemId {itemId}. Available: {inventory.AvailableQuantity}, Requested: {deductQty}";
                                 await transaction.RollbackAsync();
-                                return response;
+                                return;
                             }
-
-                            lockedInventories[itemId] = inventory;
                         }
 
                         _logger.LogInformation("Inventory locks acquired successfully");
@@ -221,7 +224,7 @@ namespace invmgmt.web.Services
                                 response.Success = false;
                                 response.Message = $"Failed to deduct inventory for ItemId {itemId}.";
                                 await transaction.RollbackAsync();
-                                return response;
+                                return;
                             }
                         }
 
@@ -265,32 +268,33 @@ namespace invmgmt.web.Services
                             _logger.LogInformation("Request status updated to PendingAdminApproval: RequestId={RequestId}", dto.RequestId);
                         }
 
-                        // STEP 9: Save all changes
-                        await _requestItemRepo.SaveChangesAsync();
-                        await _inventoryRepo.SaveChangesAsync();
+                        // STEP 9: Single SaveChanges — flushes inventory deductions,
+                        // request item updates, and request status in one round-trip.
+                        // Do NOT call SaveChangesAsync on individual repositories here;
+                        // they share the same DbContext instance, so one call covers all.
+                        await _context.SaveChangesAsync();
 
-                        // Commit transaction
                         await transaction.CommitAsync();
 
                         _logger.LogInformation("Partial issue committed successfully: RequestId={RequestId}, ItemsIssued={ItemsIssued}",
                             dto.RequestId, issuedItems.Count);
 
-                        // STEP 10: Build success response
+                        // Populate response inside the closure so it is available after ExecuteAsync returns.
                         response.Success = true;
                         response.Message = $"Successfully issued {issuedItems.Count} item(s).";
                         response.RequestId = dto.RequestId;
                         response.IssuedDate = issuedDate;
                         response.IssuedItems = issuedItems;
-
-                        return response;
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Error during partial issue transaction: RequestId={RequestId}", dto.RequestId);
                         await transaction.RollbackAsync();
-                        throw;
+                        throw; // re-throw so the execution strategy can retry on transient faults
                     }
-                }
+                });
+
+                return response;
             }
             catch (Exception ex)
             {
