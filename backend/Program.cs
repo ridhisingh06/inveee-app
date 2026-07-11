@@ -121,18 +121,32 @@ builder.Services.AddMemoryCache();
 // =======================
 builder.Services.AddCors(options =>
 {
-    var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "https://inveee-app.vercel.app";
-    Console.WriteLine($"[STARTUP] FRONTEND_URL = {frontendUrl}");
-    options.AddDefaultPolicy(policy =>
+    // Support multiple comma-separated origins via FRONTEND_URL
+    // e.g. "https://inveee-app.vercel.app,https://inveee-9mbpjalln-invmgmt.vercel.app"
+    var rawFrontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL")
+        ?? "https://inveee-app.vercel.app";
+
+    var allowedOrigins = rawFrontendUrl
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Concat(new[]
+        {
+            "http://localhost:4200",   // Angular dev server
+            "http://localhost:3000",   // Alternative dev port
+            "https://localhost:4200",  // HTTPS dev server
+        })
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    Console.WriteLine($"[STARTUP] Allowed CORS Origins ({allowedOrigins.Length}):");
+    foreach (var origin in allowedOrigins)
+        Console.WriteLine($"[STARTUP]   -> {origin}");
+
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-            frontendUrl,
-            "http://localhost:4200",  // Local development
-            "http://localhost:3000"   // Alternative local port
-        )
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()      // GET, POST, PUT, DELETE, OPTIONS, PATCH
+              .AllowAnyHeader()      // Content-Type, Authorization, etc.
+              .AllowCredentials();   // Required if using cookies or Authorization header
     });
 });
 
@@ -366,7 +380,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Global exception handler — prevents unhandled exceptions from causing empty 500 responses
+// ---------------------------------------------------------------
+// MIDDLEWARE PIPELINE — ORDER IS CRITICAL FOR CORS + PREFLIGHT
+// CORS must execute FIRST so that:
+//   1. OPTIONS preflight always gets Access-Control-Allow-* headers
+//   2. Exception handler cannot strip CORS headers from error responses
+// ---------------------------------------------------------------
+
+// 1. CORS — must be before everything else so preflight (OPTIONS) returns
+//    the correct headers even when downstream middleware throws.
+app.UseCors("AllowFrontend");
+
+// 2. Global exception handler — after CORS so error responses still include
+//    CORS headers (browser must read the error body for proper UX).
 app.UseExceptionHandler(errApp =>
 {
     errApp.Run(async ctx =>
@@ -374,10 +400,10 @@ app.UseExceptionHandler(errApp =>
         var logger = ctx.RequestServices.GetRequiredService<ILogger<Program>>();
         var feature = ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
         var ex = feature?.Error;
-        
+
         ctx.Response.StatusCode = 500;
         ctx.Response.ContentType = "application/json";
-        
+
         logger.LogError(ex, "[EXCEPTION] Unhandled exception on path {Path}", feature?.Path);
 
         var response = new ApiResponse
@@ -386,7 +412,7 @@ app.UseExceptionHandler(errApp =>
             TraceId = ctx.TraceIdentifier,
             Timestamp = DateTime.UtcNow.ToString("o")
         };
-        
+
         // Include details in development only
         if (app.Environment.IsDevelopment())
         {
@@ -400,15 +426,17 @@ app.UseExceptionHandler(errApp =>
     });
 });
 
+// 3. HTTPS redirection disabled — API sits behind CloudFront/ALB which
+//    handles TLS termination and forwards plain HTTP to ECS on port 5000.
 //app.UseHttpsRedirection();
 
+// 4. Diagnostics / logging
 app.UseMiddleware<TraceIdEnricherMiddleware>();
 app.UseSerilogRequestLogging();
 
-//  IMPORTANT ORDER
+// 5. Static files, routing, auth
 app.UseStaticFiles();   // serves /uploads/personnel/* photos
 app.UseRouting();
-app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -446,7 +474,7 @@ app.MapGet("/", (IHostEnvironment env) =>
     return Results.Ok(new { service = "invmgmt.web", status = "running" });
 });
 
-app.MapControllers();
+app.MapControllers().RequireCors("AllowFrontend");
 
 app.Run();
 
