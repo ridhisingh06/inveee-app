@@ -1,110 +1,179 @@
 <div class="issue-page">
+
+  <!-- ═══════════════════════════════════ HEADER ═══════════════════════════ -->
   <header class="page-header">
     <div>
-      <h1>Issuer Dashboard</h1>
-      <p>Review pending items and issue or mark them not issued</p>
+      <h1>Partial Issue Console</h1>
+      <p>Set issue &amp; reject quantities per item — inventory deducted on submit</p>
     </div>
-
     <div class="header-actions">
       <input
         class="search-input"
         type="text"
-        [ngModel]="searchText"
-        (ngModelChange)="onSearchChange($event)"
-        placeholder="Search by user/email/item..."
+        [value]="searchText"
+        (input)="onSearchChange($any($event.target).value)"
+        placeholder="Search by user or item…"
         [disabled]="loading"
       />
-
-      <button class="refresh-btn" (click)="loadRequests(currentPage)" [disabled]="loading">
-        <svg
-          viewBox="0 0 24 24"
-          width="18"
-          height="18"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          [class.animate-spin]="loading"
-        >
-          <path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      <button class="refresh-btn" (click)="refresh()" [disabled]="loading">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
         </svg>
         Refresh
       </button>
     </div>
   </header>
 
-  <div class="success-msg" *ngIf="successMsg">{{ successMsg }}</div>
-  <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <!-- ═══════════════════════════════════ ALERTS ═══════════════════════════ -->
+  <div class="alert success-alert" *ngIf="successMsg">
+    <span class="alert-icon">✓</span> {{ successMsg }}
+  </div>
+  <div class="alert error-alert" *ngIf="errorMsg">
+    <span class="alert-icon">!</span> {{ errorMsg }}
+  </div>
 
+  <!-- ═══════════════════════════════════ LOADING ══════════════════════════ -->
   <div class="loading-state" *ngIf="loading">
     <div class="spinner"></div>
-    <p>Loading requests pending with issuer...</p>
+    <p>Loading pending items…</p>
   </div>
 
-  <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
-    <p>No pending issuer items right now.</p>
+  <!-- ═══════════════════════════════════ EMPTY ════════════════════════════ -->
+  <div class="empty-state" *ngIf="!loading && requestGroups.length === 0 && !errorMsg">
+    <svg viewBox="0 0 48 48" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="24" cy="24" r="20"/><path d="M16 24h16M24 16v16"/>
+    </svg>
+    <p>No items pending with issuer right now.</p>
   </div>
 
-  <div class="table-shell" *ngIf="!loading && requests.length > 0">
-    <table class="requests-table">
-      <thead>
-        <tr>
-          <th>User Name</th>
-          <th>Pending Items</th>
-          <th class="qty-col">Total Qty</th>
-          <th class="date-col">Request Date</th>
-          <th class="status-col">Status</th>
-          <th class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let req of requests">
-          <td>
-            <div class="user-cell">
-              <div class="user-name">{{ req.username || ('User #' + req.userId) }}</div>
-              <div class="user-email" *ngIf="req.email">{{ req.email }}</div>
-            </div>
-          </td>
+  <!-- ═══════════════════════════════════ REQUEST GROUPS ═══════════════════ -->
+  <div
+    class="request-card"
+    *ngFor="let group of requestGroups; trackBy: trackByRequestId"
+    [formGroup]="formMap[group.requestId]"
+  >
+    <!-- Card header -->
+    <div class="card-header">
+      <div class="card-meta">
+        <span class="req-id">REQ-{{ group.requestId }}</span>
+        <span class="req-user">{{ group.requesterName }}</span>
+        <span class="req-date">{{ group.requestedDate | date:'mediumDate' }}</span>
+      </div>
+      <div class="card-badge">
+        <span class="badge requested">Pending with Issuer</span>
+      </div>
+    </div>
 
-          <td>
-            <ul class="items-list" *ngIf="req.items?.length">
-              <li *ngFor="let item of req.items">
-                <span class="item-name">{{ item.itemName }}</span>
-                <span class="item-qty">x {{ item.quantityRequested }}</span>
-                <span class="item-actions">
-                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) === 'pendingadminapproval'">
-                    <button class="issue-btn small-btn" disabled>Issued ✓</button>
-                  </ng-container>
-                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) === 'notissued'">
-                    <button class="reject-btn small-btn" disabled>Not Issued</button>
-                  </ng-container>
-                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) !== 'pendingadminapproval' && normalizeStatus(statusMap[item.id] || item.status) !== 'notissued'">
-                    <button class="issue-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="issue(req.id, item.id)">
-                      <ng-container *ngIf="processingMap[item.id] === 'issuing'">Issuing...</ng-container>
-                      <ng-container *ngIf="processingMap[item.id] !== 'issuing'">Issue</ng-container>
-                    </button>
-                    <button class="reject-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="reject(req.id, item.id)">
-                      <ng-container *ngIf="processingMap[item.id] === 'rejecting'">Saving...</ng-container>
-                      <ng-container *ngIf="processingMap[item.id] !== 'rejecting'">Not Issue</ng-container>
-                    </button>
-                  </ng-container>
+    <!-- Per-request submit error -->
+    <div class="alert error-alert sm" *ngIf="submitErrorMap[group.requestId]">
+      <span class="alert-icon">!</span> {{ submitErrorMap[group.requestId] }}
+    </div>
+
+    <!-- Items table -->
+    <div class="table-wrapper">
+      <table class="items-table" formArrayName="rows">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="col-center">Requested</th>
+            <th class="col-center">Available</th>
+            <th class="col-center">Issue Qty</th>
+            <th class="col-center">Reject Qty</th>
+            <th class="col-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let item of group.items; let i = index; trackBy: trackByIdx"
+            [formGroupName]="i"
+            [class.row-valid]="rowValid(group.requestId, i)"
+            [class.row-invalid]="!rowValid(group.requestId, i)"
+          >
+            <!-- Item name + low-stock chip -->
+            <td class="item-cell">
+              <span class="item-name">{{ item.itemName }}</span>
+              <span class="chip low-stock" *ngIf="isLowStock(group.requestId, i)">
+                Low Stock
+              </span>
+              <span class="chip category">{{ item.categoryName }}</span>
+            </td>
+
+            <!-- Requested -->
+            <td class="col-center qty-badge">{{ item.requestedQuantity }}</td>
+
+            <!-- Available — colour-coded -->
+            <td class="col-center">
+              <span
+                class="avl-badge"
+                [class.avl-ok]="item.availableQuantity >= item.requestedQuantity"
+                [class.avl-low]="item.availableQuantity > 0 && item.availableQuantity < item.requestedQuantity"
+                [class.avl-zero]="item.availableQuantity === 0"
+              >{{ item.availableQuantity }}</span>
+            </td>
+
+            <!-- Issue Qty (editable) -->
+            <td class="col-center">
+              <input
+                class="qty-input"
+                type="number"
+                formControlName="issueQty"
+                [min]="0"
+                [max]="item.availableQuantity"
+                (change)="onIssueQtyChange(group.requestId, i, $any($event.target).value)"
+              />
+            </td>
+
+            <!-- Reject Qty (read-only auto-calc) -->
+            <td class="col-center">
+              <span class="reject-qty" [class.reject-nonzero]="getRow(group.requestId, i).get('rejectQty')!.value > 0">
+                {{ getRow(group.requestId, i).get('rejectQty')!.value }}
+              </span>
+            </td>
+
+            <!-- Validation status -->
+            <td class="col-center">
+              <ng-container *ngIf="rowValid(group.requestId, i); else invalid">
+                <span class="valid-chip">✓ Valid</span>
+              </ng-container>
+              <ng-template #invalid>
+                <span class="invalid-chip" [title]="validationMessage(group.requestId, i)">
+                  ✕ {{ validationMessage(group.requestId, i) }}
                 </span>
-              </li>
-            </ul>
-          </td>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-          <td class="qty-col">{{ getTotalQty(req) }}</td>
-          <td class="date-col">{{ req.createdAt | date:'mediumDate' }}</td>
-          <td class="status-col"><span [class]="getStatusClass(req.status)">{{ getStatusLabel(req.status) }}</span></td>
-          <td class="actions-col">Per item</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Card footer — totals + submit -->
+    <div class="card-footer">
+      <div class="totals">
+        <span>Total Requested: <strong>{{ group.items | totalRequested }}</strong></span>
+        <span>Total Issue: <strong>{{ formMap[group.requestId] | totalIssue }}</strong></span>
+        <span>Total Reject: <strong>{{ formMap[group.requestId] | totalReject }}</strong></span>
+      </div>
+      <button
+        class="submit-btn"
+        [disabled]="!allRowsValid(group.requestId) || submittingMap[group.requestId]"
+        (click)="submit(group.requestId)"
+      >
+        <span *ngIf="submittingMap[group.requestId]">
+          <span class="btn-spinner"></span> Submitting…
+        </span>
+        <span *ngIf="!submittingMap[group.requestId]">
+          Submit Issue for REQ-{{ group.requestId }}
+        </span>
+      </button>
+    </div>
   </div>
 
+  <!-- ═══════════════════════════════════ PAGINATION ═══════════════════════ -->
   <div class="pagination-footer" *ngIf="totalPages > 1">
-    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">Prev</button>
-    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ total }} requests)</span>
-    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">← Prev</button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} items)</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next →</button>
   </div>
+
 </div>

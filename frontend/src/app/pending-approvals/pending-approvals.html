@@ -1,102 +1,202 @@
 <div class="approvals-page">
+
+  <!-- ═══════════════════════════════════ HEADER ═══════════════════════════ -->
   <header class="page-header">
     <div>
-      <h1>Admin Dashboard</h1>
-      <p>Approve or reject items sent by issuer</p>
+      <h1>Admin Approval Console</h1>
+      <p>Review issuer-submitted quantities and approve or reject per item</p>
     </div>
-
     <div class="header-actions">
       <input
         class="search-input"
         type="text"
-        [ngModel]="searchText"
-        (ngModelChange)="onSearchChange($event)"
-        placeholder="Search by user/email/item..."
+        [value]="searchText"
+        (input)="onSearchChange($any($event.target).value)"
+        placeholder="Search by user, issuer, or item…"
         [disabled]="loading"
       />
-      <button class="refresh-btn" (click)="fetchRequests(currentPage)" [disabled]="loading">Refresh</button>
+      <button class="refresh-btn" (click)="refresh()" [disabled]="loading">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
     </div>
   </header>
 
+  <!-- ═══════════════════════════════════ ALERTS ═══════════════════════════ -->
   <div class="alert success-alert" *ngIf="successMsg">
-    <span class="alert-icon">OK</span>
-    <span>{{ successMsg }}</span>
+    <span class="alert-icon">✓</span> {{ successMsg }}
   </div>
-
   <div class="alert error-alert" *ngIf="errorMsg">
-    <span class="alert-icon">!</span>
-    <span>{{ errorMsg }}</span>
+    <span class="alert-icon">!</span> {{ errorMsg }}
   </div>
 
+  <!-- ═══════════════════════════════════ LOADING ══════════════════════════ -->
   <div class="loading-state" *ngIf="loading">
     <div class="spinner"></div>
-    <p>Loading items pending admin approval...</p>
+    <p>Loading items pending admin approval…</p>
   </div>
 
-  <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
+  <!-- ═══════════════════════════════════ EMPTY ════════════════════════════ -->
+  <div class="empty-state" *ngIf="!loading && requestGroups.length === 0 && !errorMsg">
+    <svg viewBox="0 0 48 48" width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M40 14H8a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h32a2 2 0 0 0 2-2V16a2 2 0 0 0-2-2Z"/>
+      <path d="M16 14V10a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/>
+      <path d="M24 24v4m0-4v-4"/>
+    </svg>
     <p>No items waiting for admin approval.</p>
   </div>
 
-  <div class="table-shell" *ngIf="!loading && requests.length > 0">
-    <table class="requests-table">
-      <thead>
-        <tr>
-          <th>User Name</th>
-          <th>Items</th>
-          <th class="qty-col">Total Qty</th>
-          <th class="date-col">Updated Date</th>
-          <th class="status-col">Status</th>
-          <th class="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let req of requests">
-          <td>
-            <div class="user-cell">
-              <div class="user-name">{{ req.username }}</div>
-              <div class="user-email" *ngIf="req.email">{{ req.email }}</div>
-            </div>
-          </td>
+  <!-- ═══════════════════════════════════ REQUEST GROUPS ═══════════════════ -->
+  <div
+    class="request-card"
+    *ngFor="let group of requestGroups; trackBy: trackByRequestId"
+    [formGroup]="formMap[group.requestId]"
+  >
+    <!-- Card header -->
+    <div class="card-header">
+      <div class="card-meta">
+        <span class="req-id">REQ-{{ group.requestId }}</span>
+        <span class="meta-item">
+          <svg viewBox="0 0 20 20" width="13" height="13" fill="currentColor">
+            <path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-7 9a7 7 0 1 1 14 0H3Z"/>
+          </svg>
+          {{ group.requesterName }}
+        </span>
+        <span class="meta-item">
+          <svg viewBox="0 0 20 20" width="13" height="13" fill="currentColor">
+            <path d="M9 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm8 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-4.07 5A6.97 6.97 0 0 1 17 17H3c0-2.67 1.5-5 3.93-6.28A4.99 4.99 0 0 0 9 12a5 5 0 0 0 3.93-1Z"/>
+          </svg>
+          Issued by: {{ group.issuedByName }}
+        </span>
+        <span class="req-date">{{ group.issuedDate | date:'mediumDate' }}</span>
+      </div>
+      <span class="badge pending-admin">Pending Admin Approval</span>
+    </div>
 
-          <td>
-            <ul class="items-list" *ngIf="req.items.length">
-              <li *ngFor="let item of req.items">
-                <span class="item-name">{{ item.itemName }}</span>
-                <span class="item-qty">x {{ item.quantityRequested || item.quantityIssued }}</span>
-                <span class="item-actions">
-                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) === 'approved'">
-                    <button class="approve-btn small-btn" disabled>Approved ✓</button>
-                  </ng-container>
-                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) === 'rejected'">
-                    <button class="reject-btn small-btn" disabled>Rejected</button>
-                  </ng-container>
-                  <ng-container *ngIf="normalizeStatus(statusMap[item.id] || item.status) !== 'approved' && normalizeStatus(statusMap[item.id] || item.status) !== 'rejected'">
-                    <button class="approve-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="approve(req.id, item.id)">
-                      <ng-container *ngIf="processingMap[item.id] === 'approving'">Approving...</ng-container>
-                      <ng-container *ngIf="processingMap[item.id] !== 'approving'">Approve</ng-container>
-                    </button>
-                    <button class="reject-btn small-btn" [disabled]="processingMap[item.id] !== undefined" (click)="reject(req.id, item.id)">
-                      <ng-container *ngIf="processingMap[item.id] === 'rejecting'">Rejecting...</ng-container>
-                      <ng-container *ngIf="processingMap[item.id] !== 'rejecting'">Reject</ng-container>
-                    </button>
-                  </ng-container>
+    <!-- Per-request submit error -->
+    <div class="alert error-alert sm" *ngIf="submitErrorMap[group.requestId]">
+      <span class="alert-icon">!</span> {{ submitErrorMap[group.requestId] }}
+    </div>
+
+    <!-- Items table -->
+    <div class="table-wrapper">
+      <table class="items-table" formArrayName="rows">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="col-center">Requested</th>
+            <th class="col-center">Issuer Issued</th>
+            <th class="col-center">Issuer Rejected</th>
+            <th class="col-center">Approve Qty</th>
+            <th class="col-center">Reject Qty</th>
+            <th class="col-center">Validation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let item of group.items; let i = index; trackBy: trackByIdx"
+            [formGroupName]="i"
+            [class.row-valid]="rowValid(group.requestId, i)"
+            [class.row-invalid]="!rowValid(group.requestId, i)"
+          >
+            <!-- Item name -->
+            <td class="item-cell">
+              <span class="item-name">{{ item.itemName }}</span>
+            </td>
+
+            <!-- Requested -->
+            <td class="col-center">
+              <span class="qty-badge">{{ item.requestedQuantity }}</span>
+            </td>
+
+            <!-- Issuer Issued -->
+            <td class="col-center">
+              <span class="issued-badge">{{ item.issuerIssuedQuantity }}</span>
+            </td>
+
+            <!-- Issuer Rejected -->
+            <td class="col-center">
+              <span
+                class="rej-badge"
+                [class.rej-nonzero]="item.issuerRejectedQuantity > 0"
+              >{{ item.issuerRejectedQuantity }}</span>
+            </td>
+
+            <!-- Approve Qty (editable) -->
+            <td class="col-center">
+              <input
+                class="qty-input approve-input"
+                type="number"
+                formControlName="approveQty"
+                [min]="0"
+                [max]="item.issuerIssuedQuantity"
+                (change)="onApproveQtyChange(group.requestId, i, $any($event.target).value)"
+              />
+            </td>
+
+            <!-- Reject Qty (auto) -->
+            <td class="col-center">
+              <span
+                class="reject-qty"
+                [class.reject-nonzero]="getRow(group.requestId, i).get('rejectQty')!.value > 0"
+              >{{ getRow(group.requestId, i).get('rejectQty')!.value }}</span>
+            </td>
+
+            <!-- Validation -->
+            <td class="col-center">
+              <ng-container *ngIf="rowValid(group.requestId, i); else invalid">
+                <span class="valid-chip">✓ Valid</span>
+              </ng-container>
+              <ng-template #invalid>
+                <span class="invalid-chip" [title]="validationMessage(group.requestId, i)">
+                  ✕ {{ validationMessage(group.requestId, i) }}
                 </span>
-              </li>
-            </ul>
-          </td>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-          <td class="qty-col">{{ getTotalQty(req) }}</td>
-          <td class="date-col">{{ req.updatedAt | date:'mediumDate' }}</td>
-          <td class="status-col"><span class="badge" [ngClass]="'badge-' + normalizeStatus(req.status)">{{ getStatusLabel(req.status) }}</span></td>
-          <td class="actions-col">Per item</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Card footer — totals + inventory restore note + submit -->
+    <div class="card-footer">
+      <div class="footer-left">
+        <div class="totals">
+          <span>Total Issued: <strong>{{ group.items | totalIssued }}</strong></span>
+          <span>Total Approve: <strong>{{ formMap[group.requestId] | totalApprove }}</strong></span>
+          <span>Total Reject: <strong>{{ formMap[group.requestId] | totalReject }}</strong></span>
+        </div>
+        <div class="restore-note" *ngIf="(formMap[group.requestId] | totalReject) > 0">
+          <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a1 1 0 0 0 0 2v3a1 1 0 0 0 1 1h1a1 1 0 1 0 0-2v-3a1 1 0 0 0-1-1H9Z" clip-rule="evenodd"/>
+          </svg>
+          {{ formMap[group.requestId] | totalReject }} unit(s) will be restored to inventory
+        </div>
+      </div>
+
+      <button
+        class="submit-btn"
+        [disabled]="!allRowsValid(group.requestId) || submittingMap[group.requestId]"
+        (click)="submit(group.requestId)"
+      >
+        <span *ngIf="submittingMap[group.requestId]">
+          <span class="btn-spinner"></span> Submitting…
+        </span>
+        <span *ngIf="!submittingMap[group.requestId]">
+          Submit Approval for REQ-{{ group.requestId }}
+        </span>
+      </button>
+    </div>
   </div>
 
+  <!-- ═══════════════════════════════════ PAGINATION ═══════════════════════ -->
   <div class="pagination-footer" *ngIf="totalPages > 1">
-    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">Prev</button>
-    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ total }} requests)</span>
-    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">← Prev</button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} items)</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next →</button>
   </div>
+
 </div>

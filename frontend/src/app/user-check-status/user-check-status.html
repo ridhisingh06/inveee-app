@@ -1,4 +1,6 @@
 <div class="status-page">
+
+  <!-- ════════════════════ HEADER ════════════════════ -->
   <header class="status-header">
     <div>
       <h1>Request Tracker</h1>
@@ -13,18 +15,19 @@
     </button>
   </header>
 
+  <!-- ════════════════════ STATS ════════════════════ -->
   <div class="mini-stats" *ngIf="!loading && requests.length > 0">
     <div class="mini-stat amber">
       <span class="ms-value">{{ pendingCount }}</span>
       <span class="ms-label">Pending</span>
     </div>
-    <div class="mini-stat green">
-      <span class="ms-value">{{ issuedCount }}</span>
-      <span class="ms-label">Admin Review</span>
-    </div>
     <div class="mini-stat blue">
       <span class="ms-value">{{ approvedCount }}</span>
-      <span class="ms-label">Approved</span>
+      <span class="ms-label">Ready to Receive</span>
+    </div>
+    <div class="mini-stat green">
+      <span class="ms-value">{{ receivedCount }}</span>
+      <span class="ms-label">Received</span>
     </div>
     <div class="mini-stat total">
       <span class="ms-value">{{ requests.length }}</span>
@@ -32,65 +35,121 @@
     </div>
   </div>
 
+  <!-- ════════════════════ MESSAGES ════════════════════ -->
   <div class="loading-state" *ngIf="loading">
     <div class="spinner"></div>
-    <p>Fetching your requests...</p>
+    <p>Fetching your requests…</p>
   </div>
-
-  <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="error-msg"   *ngIf="errorMsg">{{ errorMsg }}</div>
   <div class="success-msg" *ngIf="successMsg">{{ successMsg }}</div>
 
+  <!-- ════════════════════ EMPTY ════════════════════ -->
   <div class="empty-state" *ngIf="!loading && requests.length === 0 && !errorMsg">
-    <div class="empty-icon">--</div>
+    <div class="empty-icon">📋</div>
     <h3>No requests yet</h3>
     <p>Head to the Item List to add items and submit your first request.</p>
   </div>
 
+  <!-- ════════════════════ TIMELINE ════════════════════ -->
   <div class="timeline" *ngIf="!loading && requests.length > 0">
+
     <div class="timeline-item fade-in" *ngFor="let req of requests">
       <div class="timeline-dot" [ngClass]="getStatusClass(req.status)">
         {{ getStatusIcon(req.status) }}
       </div>
+
       <div class="timeline-card" [ngClass]="getStatusClass(req.status)">
+
+        <!-- Card top: request ID + status badge -->
         <div class="tc-top">
           <span class="tc-id">REQ-{{ req.id }}</span>
-          <span class="tc-badge" [ngClass]="getStatusClass(req.status)">{{ getStatusLabel(req.status) }}</span>
+          <span class="tc-badge" [ngClass]="getStatusClass(req.status)">
+            {{ getStatusLabel(req.status) }}
+          </span>
         </div>
+
+        <!-- Dates -->
         <div class="tc-meta">
           <span>Submitted {{ req.createdAt | date:'mediumDate' }}</span>
           <span *ngIf="req.updatedAt && req.updatedAt !== req.createdAt">
             Updated {{ req.updatedAt | date:'mediumDate' }}
           </span>
         </div>
+
+        <!-- Item rows with partial-qty breakdown -->
         <ul class="request-items" *ngIf="req.items?.length">
           <li *ngFor="let item of req.items">
-            <span>{{ item.itemName }}</span>
-            <span>x {{ item.quantityRequested }}</span>
-            <span class="tc-badge" [ngClass]="getItemStatusClass(item.status)">{{ getItemStatusLabel(item.status) }}</span>
+            <div class="item-row-top">
+              <span class="item-name">{{ item.itemName }}</span>
+              <span class="tc-badge" [ngClass]="getItemStatusClass(item.status)">
+                {{ getItemStatusLabel(item.status) }}
+              </span>
+            </div>
 
-            <!-- Receive checkbox — only for Approved items -->
-            <span class="receive-action" *ngIf="isItemApproved(item.status)">
-              <label class="receive-label">
-                <input
-                  type="checkbox"
-                  class="receive-checkbox"
-                  [disabled]="receivingMap[item.id]"
-                  (change)="receiveItem(req.id, item.id)"
-                />
-                <span class="receive-text">{{ receivingMap[item.id] ? 'Saving…' : 'Mark Received' }}</span>
-              </label>
-            </span>
-
-            <!-- Received badge -->
-            <span class="receive-done" *ngIf="isItemReceived(item.status)">
-              <svg viewBox="0 0 20 20" width="13" height="13" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-              </svg>
-              Received
-            </span>
+            <!-- Quantity breakdown -->
+            <div class="qty-breakdown">
+              <span class="qty-chip requested">
+                Requested: <strong>{{ item.quantityRequested }}</strong>
+              </span>
+              <ng-container *ngIf="item.issuerIssuedQuantity != null">
+                <span class="qty-chip issued">
+                  Issued: <strong>{{ item.issuerIssuedQuantity }}</strong>
+                </span>
+                <span class="qty-chip rejected" *ngIf="item.issuerRejectedQuantity > 0">
+                  Issuer Rejected: <strong>{{ item.issuerRejectedQuantity }}</strong>
+                </span>
+              </ng-container>
+              <ng-container *ngIf="item.adminApprovedQuantity != null">
+                <span class="qty-chip approved">
+                  Approved: <strong>{{ item.adminApprovedQuantity }}</strong>
+                </span>
+                <span class="qty-chip admin-rej" *ngIf="item.adminRejectedQuantity > 0">
+                  Admin Rejected: <strong>{{ item.adminRejectedQuantity }}</strong>
+                </span>
+              </ng-container>
+              <span class="qty-chip received-chip" *ngIf="isItemReceived(item.status)">
+                Received: <strong>{{ item.adminApprovedQuantity ?? item.quantityRequested }}</strong>
+              </span>
+            </div>
           </li>
         </ul>
+
+        <!-- ── APPROVED: Receive All button ── -->
+        <div class="receive-section" *ngIf="isRequestApproved(req)">
+          <div class="receive-prompt">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" class="receive-icon">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/>
+            </svg>
+            Your items are ready for collection!
+          </div>
+          <button
+            class="receive-btn"
+            [disabled]="receivingMap[req.id]"
+            (click)="receiveAll(req.id)"
+          >
+            <span *ngIf="receivingMap[req.id]">
+              <span class="btn-spinner"></span> Confirming…
+            </span>
+            <span *ngIf="!receivingMap[req.id]">
+              ✓ Confirm Receipt of REQ-{{ req.id }}
+            </span>
+          </button>
+        </div>
+
+        <!-- ── RECEIVED: View Receipt link ── -->
+        <div class="receipt-section" *ngIf="isRequestReceived(req)">
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 0 1 0 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 1.414-1.414L8 12.586l7.293-7.293a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"/>
+          </svg>
+          Items received
+          <button class="view-receipt-btn" (click)="viewReceipt(req.id)">
+            View Order Receipt →
+          </button>
+        </div>
+
       </div>
     </div>
+
   </div>
+
 </div>

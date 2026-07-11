@@ -21,6 +21,8 @@ import { AdminLayoutComponent } from './admin-layout/admin-layout';
 import { DeliveryChallanBillEntryComponent } from './delivery-challan-bill-entry/delivery-challan-bill-entry';
 import { MonthlyRegisterComponent } from './monthly-register/monthly-register';
 import { SectionWiseQueryComponent } from './section-wise-query/section-wise-query';
+import { OrderHistoryComponent } from './order-history/order-history';
+import { OrderSummaryComponent } from './order-summary/order-summary';
 
 export const routes: Routes = [
   // register page
@@ -108,7 +110,9 @@ export const routes: Routes = [
       { path: 'item-list', component: UserItemListComponent },
       { path: 'my-requests', component: UserCheckStatusComponent },
       { path: 'cart', component: UserCartComponent },
-      // Legacy redirect for old links
+      { path: 'order-history', component: OrderHistoryComponent },
+      { path: 'order-summary/:id', component: OrderSummaryComponent },
+      // Legacy redirects for old links
       { path: 'request-items', redirectTo: 'item-list', pathMatch: 'full' },
       { path: 'check-status', redirectTo: 'my-requests', pathMatch: 'full' }
     ]

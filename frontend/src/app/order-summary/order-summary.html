@@ -1,0 +1,207 @@
+<!-- Loading -->
+<div class="loading-state" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Loading order summary…</p>
+</div>
+
+<!-- Error -->
+<div class="error-state" *ngIf="!loading && errorMsg">
+  <div class="alert error-alert">
+    <span class="alert-icon">!</span> {{ errorMsg }}
+  </div>
+  <button class="back-btn" (click)="goBack()">← Back to Orders</button>
+</div>
+
+<!-- Receipt -->
+<div class="receipt-page" *ngIf="!loading && order && !errorMsg" id="receipt-print-area">
+
+  <!-- ══════════════════════ PRINT-ONLY TOOLBAR (hidden on screen) ══════════ -->
+  <div class="no-print action-bar">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+        <path fill-rule="evenodd" d="M17 10a.75.75 0 0 1-.75.75H5.612l4.158 3.96a.75.75 0 1 1-1.04 1.08l-5.5-5.25a.75.75 0 0 1 0-1.08l5.5-5.25a.75.75 0 1 1 1.04 1.08L4.863 9.25H16.25A.75.75 0 0 1 17 10Z" clip-rule="evenodd"/>
+      </svg>
+      Back to Orders
+    </button>
+    <div class="action-buttons">
+      <button class="print-btn" (click)="print()">
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+          <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2h1a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-1V4a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1Zm2 0h6v3H7V4Zm-1 9v-1h8v1H6Zm9-6H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h1v-1a1 1 0 0 0-1-1H4V9h12v2h-1a1 1 0 0 0-1 1v1h1a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1Z" clip-rule="evenodd"/>
+        </svg>
+        Print
+      </button>
+      <button class="pdf-btn" (click)="downloadPdf()">
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a.75.75 0 0 1 .75.75v8.69l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V3.75A.75.75 0 0 1 10 3Zm-4.5 12.25a.75.75 0 0 0 0 1.5h9a.75.75 0 0 0 0-1.5h-9Z" clip-rule="evenodd"/>
+        </svg>
+        Download PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ RECEIPT DOCUMENT ══════════════════════════ -->
+  <div class="receipt-document">
+
+    <!-- Company Header -->
+    <div class="receipt-header">
+      <div class="company-logo">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <path d="M3 6h18"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <div>
+          <div class="company-name">Inventory Hub</div>
+          <div class="company-sub">Enterprise Inventory Management</div>
+        </div>
+      </div>
+      <div class="receipt-title">
+        <div class="receipt-label">ORDER RECEIPT</div>
+        <div class="receipt-number">Order #{{ order.id }}</div>
+      </div>
+    </div>
+
+    <!-- ── Request Metadata ── -->
+    <div class="meta-grid">
+      <div class="meta-section">
+        <h3>Request Details</h3>
+        <div class="meta-row">
+          <span class="meta-key">Request ID:</span>
+          <span class="meta-val">REQ-{{ order.requestId }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Requested By:</span>
+          <span class="meta-val">{{ order.userName }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Email:</span>
+          <span class="meta-val">{{ order.userEmail }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Status:</span>
+          <span class="meta-val status-badge received">{{ order.status }}</span>
+        </div>
+      </div>
+
+      <div class="meta-section">
+        <h3>Workflow Dates</h3>
+        <div class="meta-row">
+          <span class="meta-key">Requested:</span>
+          <span class="meta-val">{{ order.requestedDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Issued:</span>
+          <span class="meta-val">{{ order.issuedDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Approved:</span>
+          <span class="meta-val">{{ order.approvedDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Received:</span>
+          <span class="meta-val received-date">{{ order.receivedDate | date:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      <div class="meta-section">
+        <h3>Processed By</h3>
+        <div class="meta-row">
+          <span class="meta-key">Issuer:</span>
+          <span class="meta-val">{{ order.issuedByUserName || '—' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-key">Admin:</span>
+          <span class="meta-val">{{ order.approvedByUserName || '—' }}</span>
+        </div>
+        <div class="meta-row" *ngIf="order.notes">
+          <span class="meta-key">Notes:</span>
+          <span class="meta-val">{{ order.notes }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Divider ── -->
+    <div class="section-divider"></div>
+
+    <!-- ── Items Table ── -->
+    <h3 class="section-title">Order Items</h3>
+    <div class="items-table-wrapper">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Item</th>
+            <th>Category</th>
+            <th class="qty-col">Requested</th>
+            <th class="qty-col">Issuer Issued</th>
+            <th class="qty-col">Issuer Rejected</th>
+            <th class="qty-col">Admin Approved</th>
+            <th class="qty-col">Admin Rejected</th>
+            <th class="qty-col final-col">Received</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of order.items; let i = index">
+            <td class="row-num">{{ i + 1 }}</td>
+            <td class="item-name-cell">{{ item.itemName }}</td>
+            <td class="category-cell">{{ item.categoryName }}</td>
+            <td class="qty-col">{{ item.requestedQuantity }}</td>
+            <td class="qty-col">{{ item.issuedQuantity }}</td>
+            <td class="qty-col" [class.rejected-qty]="item.issuerRejectedQuantity > 0">
+              {{ item.issuerRejectedQuantity }}
+            </td>
+            <td class="qty-col">{{ item.approvedQuantity }}</td>
+            <td class="qty-col" [class.rejected-qty]="item.adminRejectedQuantity > 0">
+              {{ item.adminRejectedQuantity }}
+            </td>
+            <td class="qty-col final-col received-qty">{{ item.receivedQuantity }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td colspan="3" class="totals-label">TOTALS</td>
+            <td class="qty-col">{{ order.totalRequestedQuantity }}</td>
+            <td class="qty-col">{{ order.totalIssuedQuantity }}</td>
+            <td class="qty-col" [class.rejected-qty]="totalIssuerRejected > 0">
+              {{ totalIssuerRejected }}
+            </td>
+            <td class="qty-col">{{ order.totalApprovedQuantity }}</td>
+            <td class="qty-col" [class.rejected-qty]="totalAdminRejected > 0">
+              {{ totalAdminRejected }}
+            </td>
+            <td class="qty-col final-col received-qty">{{ order.totalReceivedQuantity }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- ── Summary Boxes ── -->
+    <div class="summary-boxes">
+      <div class="summary-box green">
+        <div class="sb-value">{{ order.totalReceivedQuantity }}</div>
+        <div class="sb-label">Total Received</div>
+      </div>
+      <div class="summary-box blue">
+        <div class="sb-value">{{ order.totalApprovedQuantity }}</div>
+        <div class="sb-label">Total Approved</div>
+      </div>
+      <div class="summary-box red">
+        <div class="sb-value">{{ order.totalRejectedQuantity }}</div>
+        <div class="sb-label">Total Rejected</div>
+      </div>
+      <div class="summary-box gray">
+        <div class="sb-value">{{ order.totalRequestedQuantity }}</div>
+        <div class="sb-label">Total Requested</div>
+      </div>
+    </div>
+
+    <!-- ── Receipt Footer ── -->
+    <div class="receipt-footer">
+      <div>Generated on {{ order.createdAt | date:'medium' }}</div>
+      <div>Order #{{ order.id }} · REQ-{{ order.requestId }}</div>
+    </div>
+
+  </div>
+  <!-- END receipt-document -->
+
+</div>

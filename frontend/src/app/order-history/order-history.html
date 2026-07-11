@@ -1,0 +1,130 @@
+<div class="order-history-page">
+
+  <!-- ═══════════════════════════════════ HEADER ═══════════════════════════ -->
+  <header class="page-header">
+    <div>
+      <h1>My Order History</h1>
+      <p>Complete records of all received orders</p>
+    </div>
+    <button class="refresh-btn" (click)="refresh()" [disabled]="loading">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      Refresh
+    </button>
+  </header>
+
+  <!-- ═══════════════════════════════════ FILTERS ══════════════════════════ -->
+  <div class="filters-bar">
+    <input
+      class="search-input"
+      type="text"
+      [ngModel]="searchText"
+      (ngModelChange)="onSearchChange($event)"
+      placeholder="Search by request ID or status…"
+      [disabled]="loading"
+    />
+
+    <div class="filter-chips">
+      <button
+        class="filter-chip"
+        [class.active]="statusFilter === null"
+        (click)="setStatusFilter(null)"
+      >All Orders</button>
+      <button
+        class="filter-chip"
+        [class.active]="statusFilter === 'Received'"
+        (click)="setStatusFilter('Received')"
+      >Received</button>
+      <button
+        class="filter-chip"
+        [class.active]="statusFilter === 'Approved'"
+        (click)="setStatusFilter('Approved')"
+      >Approved</button>
+    </div>
+
+    <div class="sort-dropdown">
+      <label>Sort by:</label>
+      <select [(ngModel)]="sortBy" (change)="setSortBy(sortBy)">
+        <option value="date">Date (Newest)</option>
+        <option value="status">Status</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ ALERTS ═══════════════════════════ -->
+  <div class="alert error-alert" *ngIf="errorMsg">
+    <span class="alert-icon">!</span> {{ errorMsg }}
+  </div>
+
+  <!-- ═══════════════════════════════════ LOADING ══════════════════════════ -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading your order history…</p>
+  </div>
+
+  <!-- ═══════════════════════════════════ EMPTY ════════════════════════════ -->
+  <div class="empty-state" *ngIf="!loading && orders.length === 0 && !errorMsg">
+    <svg viewBox="0 0 48 48" width="60" height="60" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="10" y="12" width="28" height="28" rx="2"/><path d="M10 20h28M18 16v-4M30 16v-4"/>
+    </svg>
+    <h3>No orders yet</h3>
+    <p>Your received orders will appear here.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════ ORDER CARDS ══════════════════════ -->
+  <div class="orders-grid" *ngIf="!loading && orders.length > 0">
+    <div
+      class="order-card"
+      *ngFor="let order of orders"
+      (click)="viewSummary(order.id)"
+    >
+      <div class="card-header">
+        <span class="order-id">Order #{{ order.id }}</span>
+        <span class="badge" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
+      </div>
+
+      <div class="card-body">
+        <div class="info-row">
+          <span class="label">Request ID:</span>
+          <span class="value">REQ-{{ order.requestId }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Received:</span>
+          <span class="value">{{ order.receivedDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Items:</span>
+          <span class="value">{{ order.itemCount }}</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="qty-summary">
+          <span class="qty-item requested">
+            <span class="qty-dot"></span> Requested: {{ order.totalRequestedQuantity }}
+          </span>
+          <span class="qty-item approved">
+            <span class="qty-dot"></span> Approved: {{ order.totalApprovedQuantity }}
+          </span>
+          <span class="qty-item rejected" *ngIf="order.totalRejectedQuantity > 0">
+            <span class="qty-dot"></span> Rejected: {{ order.totalRejectedQuantity }}
+          </span>
+        </div>
+
+        <button class="view-btn">
+          View Receipt →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ PAGINATION ═══════════════════════ -->
+  <div class="pagination-footer" *ngIf="totalPages > 1">
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">← Prev</button>
+    <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next →</button>
+  </div>
+
+</div>
