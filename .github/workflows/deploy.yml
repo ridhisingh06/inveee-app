@@ -54,7 +54,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '7.0'
+          dotnet-version: '10.0.x'
       - name: Build backend
         working-directory: backend
         run: dotnet publish invmgmt.web.csproj -c Release -o out
