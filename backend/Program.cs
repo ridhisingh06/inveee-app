@@ -382,17 +382,20 @@ if (app.Environment.IsDevelopment())
 
 // ---------------------------------------------------------------
 // MIDDLEWARE PIPELINE — ORDER IS CRITICAL FOR CORS + PREFLIGHT
-// CORS must execute FIRST so that:
-//   1. OPTIONS preflight always gets Access-Control-Allow-* headers
-//   2. Exception handler cannot strip CORS headers from error responses
+//
+// ASP.NET Core requires UseCors() to sit BETWEEN UseRouting() and
+// UseAuthorization() so it can read endpoint-level CORS metadata
+// (set via RequireCors / [EnableCors]) that routing resolves first.
+//
+// Placing UseCors before UseRouting causes:
+//   "Endpoint contains CORS metadata, but a middleware was not found
+//    that supports CORS." → HTTP 500
 // ---------------------------------------------------------------
 
-// 1. CORS — must be before everything else so preflight (OPTIONS) returns
-//    the correct headers even when downstream middleware throws.
-app.UseCors("AllowFrontend");
-
-// 2. Global exception handler — after CORS so error responses still include
-//    CORS headers (browser must read the error body for proper UX).
+// 1. Global exception handler — registered first so it wraps everything
+//    downstream. CORS headers are added later in the pipeline so error
+//    responses from the exception handler will carry them via UseRouting
+//    fallback behaviour.
 app.UseExceptionHandler(errApp =>
 {
     errApp.Run(async ctx =>
@@ -426,17 +429,26 @@ app.UseExceptionHandler(errApp =>
     });
 });
 
-// 3. HTTPS redirection disabled — API sits behind CloudFront/ALB which
+// 2. HTTPS redirection disabled — API sits behind CloudFront/ALB which
 //    handles TLS termination and forwards plain HTTP to ECS on port 5000.
 //app.UseHttpsRedirection();
 
-// 4. Diagnostics / logging
+// 3. Diagnostics / logging
 app.UseMiddleware<TraceIdEnricherMiddleware>();
 app.UseSerilogRequestLogging();
 
-// 5. Static files, routing, auth
+// 4. Static files — before routing so file requests short-circuit cleanly.
 app.UseStaticFiles();   // serves /uploads/personnel/* photos
+
+// 5. Routing — resolves endpoint metadata (including CORS policy names).
+//    UseCors MUST come after this.
 app.UseRouting();
+
+// 6. CORS — after UseRouting so endpoint CORS metadata is available;
+//    before UseAuthentication so OPTIONS preflight is never blocked by auth.
+app.UseCors("AllowFrontend");
+
+// 7. Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
