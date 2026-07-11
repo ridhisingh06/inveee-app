@@ -141,8 +141,8 @@ resource "aws_iam_role" "rds_monitoring_role" {
 }
 
 resource "aws_iam_role_policy" "rds_monitoring_policy" {
-  name   = "inveee-rds-monitoring-policy"
-  role   = aws_iam_role.rds_monitoring_role.id
+  name = "inveee-rds-monitoring-policy"
+  role = aws_iam_role.rds_monitoring_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -169,19 +169,19 @@ resource "aws_iam_role_policy" "rds_monitoring_policy" {
 
 # RDS Instance
 resource "aws_db_instance" "postgres" {
-  identifier             = "inveee-postgres"
-  engine                 = "postgres"
-  engine_version         = "18.3"
-  instance_class         = "db.t3.micro"
-  allocated_storage      = 20
-  db_name                = "inventorydb"
-  username               = "postgres"
-  password               = var.db_password
-  publicly_accessible    = true
-  skip_final_snapshot    = false
+  identifier                = "inveee-postgres"
+  engine                    = "postgres"
+  engine_version            = "18.3"
+  instance_class            = "db.t3.micro"
+  allocated_storage         = 20
+  db_name                   = "inventorydb"
+  username                  = "postgres"
+  password                  = var.db_password
+  publicly_accessible       = true
+  skip_final_snapshot       = false
   final_snapshot_identifier = "inveee-postgres-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
-  db_subnet_group_name   = aws_db_subnet_group.default.name
+  vpc_security_group_ids    = [aws_security_group.rds_sg.id]
+  db_subnet_group_name      = aws_db_subnet_group.default.name
 
   # Backup Configuration
   backup_retention_period = 30
@@ -198,7 +198,7 @@ resource "aws_db_instance" "postgres" {
   kms_key_id        = aws_kms_key.rds_key.arn
 
   # Performance Insights
-  performance_insights_enabled    = true
+  performance_insights_enabled          = true
   performance_insights_retention_period = 7
 
   tags = {
@@ -238,8 +238,8 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 
 # Add CloudWatch Logs policy for ECS tasks
 resource "aws_iam_role_policy" "ecs_task_execution_role_logs" {
-  name   = "ecs-task-execution-logs"
-  role   = aws_iam_role.ecs_task_execution_role.id
+  name = "ecs-task-execution-logs"
+  role = aws_iam_role.ecs_task_execution_role.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

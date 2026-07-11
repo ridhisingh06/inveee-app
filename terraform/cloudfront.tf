@@ -42,11 +42,11 @@ resource "aws_cloudfront_distribution" "api_cdn" {
     origin_id   = "inveee-alb-503765841.us-east-1.elb.amazonaws.com-mr5btjrvaws"
 
     custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "http-only" # ALB terminates TLS, forwards HTTP to ECS:5000
-      origin_ssl_protocols   = ["TLSv1.2"]
-      origin_read_timeout    = 30
+      http_port                = 80
+      https_port               = 443
+      origin_protocol_policy   = "http-only" # ALB terminates TLS, forwards HTTP to ECS:5000
+      origin_ssl_protocols     = ["TLSv1.2"]
+      origin_read_timeout      = 30
       origin_keepalive_timeout = 5
     }
   }
