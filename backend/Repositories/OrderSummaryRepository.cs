@@ -1,4 +1,5 @@
 using invmgmt.web.Data;
+using invmgmt.web.DTOs;
 using invmgmt.web.Models;
 using invmgmt.web.Models.Enums;
 using Microsoft.EntityFrameworkCore;

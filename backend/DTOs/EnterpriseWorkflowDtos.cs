@@ -472,3 +472,31 @@ public sealed class FieldErrorDto
     public string Field { get; set; } = string.Empty;
     public string Error { get; set; } = string.Empty;
 }
+
+// ============================================================================
+// ORDER STATISTICS DTO
+// ============================================================================
+
+/// <summary>
+/// Order summary statistics for reporting and dashboard analytics
+/// </summary>
+public sealed class OrderSummaryStatisticsDto
+{
+    /// <summary>Total number of orders</summary>
+    public int TotalOrders { get; set; }
+
+    /// <summary>Total quantity received across all orders</summary>
+    public int TotalQuantityReceived { get; set; }
+
+    /// <summary>Total quantity rejected across all orders</summary>
+    public int TotalQuantityRejected { get; set; }
+
+    /// <summary>Date of the oldest order</summary>
+    public DateTime? OldestOrder { get; set; }
+
+    /// <summary>Date of the latest order</summary>
+    public DateTime? LatestOrder { get; set; }
+
+    /// <summary>Average quantity per order</summary>
+    public decimal? AverageQuantityPerOrder { get; set; }
+}

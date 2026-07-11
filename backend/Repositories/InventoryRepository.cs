@@ -43,13 +43,12 @@ namespace invmgmt.web.Repositories
         public async Task<InventoryStock?> LockAndGetAsync(int itemId)
         {
             var inventory = await _context.InventoryStocks
-                .Include(s => s.Item)
-                .Where(s => s.ItemId == itemId)
-                .FromSqlInterpolated($@"
+                .FromSqlInterpolated<InventoryStock>($@"
                     SELECT * FROM ""InventoryStocks"" 
                     WHERE ""ItemId"" = {itemId}
                     FOR UPDATE
                 ")
+                .Include(s => s.Item)
                 .FirstOrDefaultAsync();
 
             if (inventory != null)

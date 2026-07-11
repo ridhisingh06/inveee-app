@@ -1,3 +1,4 @@
+using invmgmt.web.DTOs;
 using invmgmt.web.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -52,16 +53,5 @@ namespace invmgmt.web.Repositories
 
         /// <summary>Save all changes to database</summary>
         Task SaveChangesAsync();
-    }
-
-    /// <summary>DTO for order summary statistics</summary>
-    public class OrderSummaryStatisticsDto
-    {
-        public int TotalOrders { get; set; }
-        public int TotalQuantityReceived { get; set; }
-        public int TotalQuantityRejected { get; set; }
-        public DateTime? OldestOrder { get; set; }
-        public DateTime? LatestOrder { get; set; }
-        public decimal? AverageQuantityPerOrder { get; set; }
     }
 }
