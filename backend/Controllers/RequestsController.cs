@@ -145,10 +145,26 @@ public sealed class RequestsController : ControllerBase
 
             if (isIssuerRole)
             {
-                if (statusFilter.HasValue && statusFilter.Value != RequestStatus.PendingWithIssuer)
-                    return BadRequest(new { message = "ISSUER can only query status=PendingWithIssuer." });
+                // ISSUERs may query PendingWithIssuer (items waiting for them)
+                // OR Approved (items already admin-approved, for dispatch tracking).
+                // Any other status is outside their workflow scope.
+                var issuerAllowedStatuses = new[]
+                {
+                    RequestStatus.PendingWithIssuer,
+                    RequestStatus.Approved
+                };
 
-                query = query.Where(r => r.RequestItems.Any(ri => ri.Status == RequestItemStatus.PendingWithIssuer));
+                if (statusFilter.HasValue && !issuerAllowedStatuses.Contains(statusFilter.Value))
+                    return BadRequest(new { message = $"ISSUER can only query status=PendingWithIssuer or status=Approved. Got: '{status}'." });
+
+                if (!statusFilter.HasValue || statusFilter.Value == RequestStatus.PendingWithIssuer)
+                {
+                    query = query.Where(r => r.RequestItems.Any(ri => ri.Status == RequestItemStatus.PendingWithIssuer));
+                }
+                else // Approved
+                {
+                    query = query.Where(r => r.Status == RequestStatus.Approved);
+                }
             }
             else // ADMIN
             {

@@ -353,7 +353,7 @@ namespace invmgmt.web.Controllers
                 if (orderSummary == null)
                 {
                     _logger.LogWarning("Order summary not found for RequestId={RequestId}", requestId);
-                    return NotFound(new { message = "Order summary not found for this request" });
+                    return NotFound(new { message = $"No order summary found for request {requestId}. The user may not have confirmed receipt yet." });
                 }
 
                 // Verify user owns this order
