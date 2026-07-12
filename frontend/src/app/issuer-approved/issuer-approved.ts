@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { normalizeStatus, getStatusLabel } from '../utils/status.util';
+import { normalizeStatus, getStatusLabel, getStatusClass } from '../utils/status.util';
 
 @Component({
   standalone: true,
@@ -16,6 +16,9 @@ export class IssuerApprovedComponent implements OnInit {
   loading = true;
   errorMsg   = '';
   successMsg = '';
+  normalizeStatus = normalizeStatus;
+  getStatusLabel = getStatusLabel;
+  getStatusClass = getStatusClass;
 
   constructor(private http: HttpClient) {}
 
@@ -49,13 +52,5 @@ export class IssuerApprovedComponent implements OnInit {
     this.loadApproved();
   }
 
-  // ── Template helpers (delegates to shared util) ─────────────────────────
-
-  normalizeStatus(status: string | null | undefined): string {
-    return normalizeStatus(status);
-  }
-
-  getItemStatusLabel(status: string | null | undefined): string {
-    return getStatusLabel(status);
-  }
+  // Template helpers delegated to shared util via bound properties
 }

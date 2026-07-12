@@ -135,16 +135,6 @@ export class UserCheckStatusComponent implements OnInit {
   isItemApproved(status: string):  boolean { return this.normalizeStatus(status) === 'approved'; }
   isItemReceived(status: string):  boolean { return this.normalizeStatus(status) === 'received'; }
 
-  getStatusClass(status: string): string {
-    const s = this.normalizeStatus(status);
-    if (s === 'pendingwithissuer')    return 'status-requested';
-    if (s === 'pendingadminapproval') return 'status-issued';
-    if (s === 'notissued')            return 'status-not-issued';
-    if (s === 'approved')             return 'status-approved';
-    if (s === 'rejected')             return 'status-rejected';
-    if (s === 'received')             return 'status-received';
-    return 'status-pending';
-  }
 
   getStatusIcon(status: string): string {
     const s = this.normalizeStatus(status);
@@ -157,16 +147,7 @@ export class UserCheckStatusComponent implements OnInit {
     return '-';
   }
 
-  getStatusLabel(status: string): string {
-    const s = this.normalizeStatus(status);
-    if (s === 'pendingwithissuer')    return 'Pending with Issuer';
-    if (s === 'notissued')            return 'Not Issued';
-    if (s === 'pendingadminapproval') return 'Pending Admin Approval';
-    if (s === 'approved')             return 'Approved — Ready to Receive';
-    if (s === 'rejected')             return 'Rejected';
-    if (s === 'received')             return 'Received';
-    return status || 'Pending';
-  }
+  // getStatusClass and getStatusLabel are provided by imported utilities
 
   getItemStatusClass  = (s: string) => this.getStatusClass(s);
   getItemStatusLabel  = (s: string) => this.getStatusLabel(s);
@@ -185,10 +166,5 @@ export class UserCheckStatusComponent implements OnInit {
     }).length;
   }
 
-  normalizeStatus(status: string): string {
-    const s = (status || '').toLowerCase();
-    if (s === 'requested') return 'pendingwithissuer';
-    if (s === 'issued')    return 'pendingadminapproval';
-    return s;
-  }
+  // normalizeStatus is provided by imported utility
 }

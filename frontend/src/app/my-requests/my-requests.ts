@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { normalizeStatus } from '../utils/status.util';
+import { normalizeStatus, getStatusClass, getStatusLabel } from '../utils/status.util';
 
 @Component({
   standalone: true,
@@ -20,6 +20,8 @@ export class MyRequestsComponent implements OnInit {
   loading = false;
   errorMsg = '';
   normalizeStatus = normalizeStatus;
+  getStatusClass = getStatusClass;
+  getStatusLabel = getStatusLabel;
   
   private destroy$ = new Subject<void>();
 
@@ -70,30 +72,5 @@ export class MyRequestsComponent implements OnInit {
     }
   }
 
-  getStatusClass(status: string): string {
-    switch(this.normalizeStatus(status)) {
-      case 'pendingwithissuer': return 'status-requested';
-      case 'pendingadminapproval': return 'status-issued';
-      case 'notissued': return 'status-not-issued';
-      case 'requested': return 'status-requested';
-      case 'pending': return 'status-pending';
-      case 'approved': return 'status-approved';
-      case 'issued': return 'status-issued';
-      case 'rejected': return 'status-rejected';
-      case 'received': return 'status-received';
-      default: return '';
-    }
-  }
-
-  getStatusLabel(status: string): string {
-    switch (this.normalizeStatus(status)) {
-      case 'pendingwithissuer': return 'Pending with Issuer';
-      case 'pendingadminapproval': return 'Pending Admin Approval';
-      case 'notissued': return 'Not Issued';
-      case 'approved': return 'Approved';
-      case 'rejected': return 'Rejected';
-      case 'received': return 'Received';
-      default: return status;
-    }
-  }
+  // getStatusClass and getStatusLabel provided by shared util
 }

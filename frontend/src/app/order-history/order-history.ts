@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { WorkflowService } from '../services/workflow.service';
+import { getStatusClass } from '../utils/status.util';
 import { OrderHistoryList, OrderHistoryItem } from '../models/request.model';
 
 /**
@@ -41,6 +42,7 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
 
   private readonly search$  = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
+  getStatusClass = getStatusClass;
 
   constructor(
     private readonly workflow: WorkflowService,
@@ -143,10 +145,5 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
-  getStatusClass(status: string | null | undefined): string {
-    const s = (status ?? '').toLowerCase();
-    if (s === 'received') return 'status-received';
-    if (s === 'approved') return 'status-approved';
-    return 'status-default';
-  }
+  // getStatusClass provided by shared util
 }
