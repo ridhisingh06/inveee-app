@@ -135,7 +135,7 @@ export class RequestService {
     return data.filter(item => {
       if (filters.status && item.status !== filters.status) return false;
       if (filters.searchText) {
-        const searchLower = filters.searchText.toLowerCase();
+        const searchLower = (filters.searchText ?? '').toLowerCase();
         // Add more search criteria as needed
       }
       return true;

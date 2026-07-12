@@ -136,6 +136,11 @@ public sealed class RequestsController : ControllerBase
                                 itemName = ri.Item != null ? (ri.Item.Name ?? string.Empty) : string.Empty,
                                 quantityRequested = ri.QuantityRequested,
                                 quantityIssued = ri.QuantityIssued,
+                                issuerIssuedQuantity = ri.IssuerIssuedQuantity != 0 ? ri.IssuerIssuedQuantity : ri.QuantityIssued,
+                                issuerRejectedQuantity = ri.IssuerRejectedQuantity,
+                                adminApprovedQuantity = ri.AdminApprovedQuantity != 0 ? ri.AdminApprovedQuantity : ri.QuantityApproved,
+                                adminRejectedQuantity = ri.AdminRejectedQuantity,
+                                receivedQuantity = ri.ReceivedQuantity,
                                 status = ri.Status.ToString()
                             })
                             .ToList()

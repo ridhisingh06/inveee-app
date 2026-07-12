@@ -118,11 +118,12 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
   // ── Group + Form building ─────────────────────────────────────────────────
 
   private buildGroups(items: AdminPendingItem[]): void {
-    const filtered = this.searchText.trim()
+    const normalizedSearch = this.searchText.trim().toLowerCase();
+    const filtered = normalizedSearch
       ? items.filter(i =>
-          i.itemName.toLowerCase().includes(this.searchText.toLowerCase()) ||
-          i.requestedByUserName.toLowerCase().includes(this.searchText.toLowerCase()) ||
-          i.issuedByUserName.toLowerCase().includes(this.searchText.toLowerCase())
+          (i.itemName ?? '').toLowerCase().includes(normalizedSearch) ||
+          (i.requestedByUserName ?? '').toLowerCase().includes(normalizedSearch) ||
+          (i.issuedByUserName ?? '').toLowerCase().includes(normalizedSearch)
         )
       : items;
 

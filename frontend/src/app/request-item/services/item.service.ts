@@ -149,8 +149,8 @@ export class ItemService {
     if (searchText) {
       const searchLower = searchText.toLowerCase();
       result = result.filter(item =>
-        item.name.toLowerCase().includes(searchLower) ||
-        item.category.toLowerCase().includes(searchLower)
+        (item.name ?? '').toLowerCase().includes(searchLower) ||
+        (item.category ?? '').toLowerCase().includes(searchLower)
       );
     }
 

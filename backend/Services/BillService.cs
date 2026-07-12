@@ -190,8 +190,8 @@ namespace invmgmt.web.Services
                 .Include(i => i.InventoryStock)
                 .Where(i => i.IsActive && 
                     (q == string.Empty || 
-                     i.Name.ToLower().Contains(q) || 
-                     i.Description.ToLower().Contains(q)))
+                     (i.Name != null && i.Name.ToLower().Contains(q)) || 
+                     (i.Description != null && i.Description.ToLower().Contains(q))))
                 .OrderBy(i => i.Name)
                 .Take(50)
                 .Select(i => new ItemSearchDto

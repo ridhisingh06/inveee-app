@@ -60,15 +60,15 @@ namespace invmgmt.web.Services
 
         public async Task<List<SectionWiseQueryItemDto>> SearchItemsAsync(string query)
         {
-            var q = (query ?? string.Empty).Trim();
+            var q = (query ?? string.Empty).Trim().ToLower();
             return await _context.Items
                 .AsNoTracking()
                 .Include(i => i.Category)
                 .Include(i => i.InventoryStock)
                 .Where(i => i.IsActive &&
                     (string.IsNullOrEmpty(q)
-                        || i.Name.ToLower().Contains(q.ToLower())
-                        || i.Description.ToLower().Contains(q.ToLower())))
+                        || (i.Name != null && i.Name.ToLower().Contains(q))
+                        || (i.Description != null && i.Description.ToLower().Contains(q))))
                 .OrderBy(i => i.Name)
                 .Take(50)
                 .Select(i => new SectionWiseQueryItemDto
@@ -156,7 +156,7 @@ namespace invmgmt.web.Services
             if (!string.IsNullOrWhiteSpace(filter.ItemName))
             {
                 var itemName = filter.ItemName.Trim().ToLower();
-                query = query.Where(ri => ri.Item.Name.ToLower().Contains(itemName));
+                query = query.Where(ri => ri.Item.Name != null && ri.Item.Name.ToLower().Contains(itemName));
             }
 
             filter.PageNumber = Math.Max(1, filter.PageNumber);

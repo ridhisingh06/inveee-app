@@ -497,8 +497,9 @@ public class AdminController : ControllerBase
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var normalizedSearch = search.Trim().ToLower();
-                query = query.Where(ri => ri.Request.User.Username.ToLower().Contains(normalizedSearch)
-                    || ri.Item.Name.ToLower().Contains(normalizedSearch));
+                query = query.Where(ri =>
+                    (ri.Request.User.Username != null && ri.Request.User.Username.ToLower().Contains(normalizedSearch))
+                    || (ri.Item.Name != null && ri.Item.Name.ToLower().Contains(normalizedSearch)));
             }
 
             var totalCount = await query.CountAsync();

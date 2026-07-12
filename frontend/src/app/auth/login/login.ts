@@ -179,13 +179,14 @@ export class LoginComponent implements OnInit {
     // Validation/Auth errors (400, 401)
     if (err?.status === 401 || err?.status === 400) {
       const msg = err?.error?.message || err?.error || '';
+      const normalizedMsg = String(msg).toLowerCase();
       
-      if (msg.toLowerCase().includes('pending') || 
-          msg.toLowerCase().includes('approval') ||
-          msg.toLowerCase().includes('not approved')) {
+      if (normalizedMsg.includes('pending') || 
+          normalizedMsg.includes('approval') ||
+          normalizedMsg.includes('not approved')) {
         this.errorMsg = 'Your account is not approved yet.';
         console.info('[INFO] Login blocked: Account not approved');
-      } else if (msg.toLowerCase().includes('invalid credentials')) {
+      } else if (normalizedMsg.includes('invalid credentials')) {
         this.errorMsg = 'Invalid email or password. Please try again.';
         console.info('[INFO] Login failed: Invalid credentials');
       } else {

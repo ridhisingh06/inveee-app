@@ -68,12 +68,12 @@ export class UserItemListComponent implements OnInit {
       result = result.filter(i => i.category === this.selectedCategory);
     }
 
-    if (this.searchText.trim()) {
-      const q = this.searchText.toLowerCase().trim();
+    const normalizedSearchText = (this.searchText ?? '').trim().toLowerCase();
+    if (normalizedSearchText) {
       result = result.filter(i =>
-        i.name.toLowerCase().includes(q) ||
-        (i.description?.toLowerCase().includes(q)) ||
-        i.category.toLowerCase().includes(q)
+        (i.name ?? '').toLowerCase().includes(normalizedSearchText) ||
+        (i.description ?? '').toLowerCase().includes(normalizedSearchText) ||
+        (i.category ?? '').toLowerCase().includes(normalizedSearchText)
       );
     }
 

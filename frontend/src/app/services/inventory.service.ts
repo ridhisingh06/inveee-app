@@ -339,8 +339,12 @@ export class InventoryService {
    * @param excludeId - ID to exclude from check (for updates)
    * @returns Error message or empty string
    */
+  private normalizeText(value?: string): string {
+    return (value ?? '').trim().toLowerCase();
+  }
+
   private validateNoDuplicate(itemName: string, excludeId: number | string | null): string {
-    const trimmedName = itemName.trim().toLowerCase();
+    const trimmedName = this.normalizeText(itemName);
     
     const currentItems = this.inventorySubject.value;
     
@@ -351,7 +355,7 @@ export class InventoryService {
       }
       
       // Check if name matches (case-insensitive)
-      return item.name.toLowerCase() === trimmedName;
+      return this.normalizeText(item.name) === trimmedName;
     });
     
     if (isDuplicate) {
@@ -412,9 +416,9 @@ export class InventoryService {
    * @returns boolean
    */
   itemNameExists(itemName: string): boolean {
-    const trimmedName = itemName.trim().toLowerCase();
+    const trimmedName = this.normalizeText(itemName);
     return this.inventorySubject.value.some(
-      item => item.name.toLowerCase() === trimmedName
+      item => this.normalizeText(item.name) === trimmedName
     );
   }
   
@@ -424,11 +428,11 @@ export class InventoryService {
    * @returns Filtered InventoryItem[]
    */
   searchItems(searchTerm: string): InventoryItem[] {
-    const term = searchTerm.toLowerCase().trim();
+    const term = this.normalizeText(searchTerm);
     if (!term) return this.inventorySubject.value;
     
     return this.inventorySubject.value.filter(item =>
-      item.name.toLowerCase().includes(term) ||
+      this.normalizeText(item.name).includes(term) ||
       item.id.toString().includes(term)
     );
   }

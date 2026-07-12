@@ -178,9 +178,9 @@ export class InventoryComponent implements OnInit, DoCheck {
     if (!this.validateForm()) return;
 
     // ✅ Check for duplicates (case-insensitive)
-    const normalizedName = this.itemName.trim().toLowerCase();
+    const normalizedName = this.normalizeItemName(this.itemName);
     const duplicateExists = this.items.some(item => 
-      item.name.toLowerCase() === normalizedName
+      this.normalizeItemName(item.name) === normalizedName
     );
     
     if (duplicateExists) {
@@ -240,10 +240,10 @@ export class InventoryComponent implements OnInit, DoCheck {
     if (!this.validateForm()) return;
 
     // ✅ Check for duplicate on name change (excluding self)
-    const normalizedName = this.itemName.trim().toLowerCase();
+    const normalizedName = this.normalizeItemName(this.itemName);
     const duplicateExists = this.items.some(item => 
       item.id !== this.editingItemId && 
-      item.name.toLowerCase() === normalizedName
+      this.normalizeItemName(item.name) === normalizedName
     );
     
     if (duplicateExists) {
@@ -458,7 +458,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns true if valid, false otherwise
    */
   private validateForm(): boolean {
-    if (!this.itemName.trim()) {
+    if (!this.normalizeItemName(this.itemName)) {
       this.errorMsg = 'Please enter an item name';
       setTimeout(() => this.errorMsg = '', 5000);
       return false;
@@ -514,10 +514,13 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @param excludeItemId - Item ID to exclude from check (for updates)
    * @returns true if duplicate exists
    */
+  private normalizeItemName(value?: string): string {
+    return (value ?? '').trim().toLowerCase();
+  }
+
   isDuplicateItemName(itemName: string, excludeItemId?: number | string | null): boolean {
-    if (!itemName.trim()) return false;
-    
-    const normalizedName = itemName.trim().toLowerCase();
+    const normalizedName = this.normalizeItemName(itemName);
+    if (!normalizedName) return false;
     
     return this.items.some(item => {
       // Exclude the item being edited
@@ -525,7 +528,7 @@ export class InventoryComponent implements OnInit, DoCheck {
         return false;
       }
       
-      return item.name.toLowerCase() === normalizedName;
+      return this.normalizeItemName(item.name) === normalizedName;
     });
   }
 
@@ -534,7 +537,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns Error message if duplicate exists, empty string otherwise
    */
   getDuplicateItemWarning(): string {
-    if (!this.itemName.trim()) return '';
+    if (!this.normalizeItemName(this.itemName)) return '';
     
     const isDuplicate = this.isDuplicateItemName(this.itemName, this.editingItemId);
     
@@ -550,7 +553,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns true if submit should be disabled
    */
   isSubmitDisabledByDuplicate(): boolean {
-    if (!this.itemName.trim()) return false;
+    if (!this.normalizeItemName(this.itemName)) return false;
     
     return this.isDuplicateItemName(this.itemName, this.editingItemId);
   }

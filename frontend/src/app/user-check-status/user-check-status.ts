@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { WorkflowService } from '../services/workflow.service';
+import { normalizeStatus, getStatusClass, getStatusLabel } from '../utils/status.util';
 
 @Component({
   selector: 'app-user-check-status',
@@ -13,6 +14,9 @@ import { WorkflowService } from '../services/workflow.service';
   styleUrls: ['./user-check-status.css']
 })
 export class UserCheckStatusComponent implements OnInit {
+  normalizeStatus = normalizeStatus;
+  getStatusClass = getStatusClass;
+  getStatusLabel = getStatusLabel;
   requests: any[] = [];
   loading  = true;
   errorMsg = '';

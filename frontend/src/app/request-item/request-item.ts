@@ -142,12 +142,12 @@ export class RequestItemComponent implements OnInit, OnDestroy {
     const category = this.searchForm.get('category')?.value || '';
 
     // Search filter
-    if (searchText) {
-      const searchLower = searchText.toLowerCase();
+    const normalizedSearchText = (searchText ?? '').trim().toLowerCase();
+    if (normalizedSearchText) {
       result = result.filter(
         item =>
-          item.name.toLowerCase().includes(searchLower) ||
-          item.category.toLowerCase().includes(searchLower)
+          (item.name ?? '').toLowerCase().includes(normalizedSearchText) ||
+          (item.category ?? '').toLowerCase().includes(normalizedSearchText)
       );
     }
 

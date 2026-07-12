@@ -98,7 +98,7 @@ export class DeliveryChallanBillEntryComponent implements OnInit {
       },
       error: () => {
         const q = trimmed.toLowerCase();
-        this.filteredItems = this.items.filter(item => item.name.toLowerCase().includes(q));
+        this.filteredItems = this.items.filter(item => (item.name ?? '').toLowerCase().includes(q));
       }
     });
   }

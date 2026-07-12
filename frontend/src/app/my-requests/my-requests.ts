@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { normalizeStatus } from '../utils/status.util';
 
 @Component({
   standalone: true,
@@ -18,6 +19,7 @@ export class MyRequestsComponent implements OnInit {
   pageSize = 10;
   loading = false;
   errorMsg = '';
+  normalizeStatus = normalizeStatus;
   
   private destroy$ = new Subject<void>();
 
@@ -88,16 +90,10 @@ export class MyRequestsComponent implements OnInit {
       case 'pendingwithissuer': return 'Pending with Issuer';
       case 'pendingadminapproval': return 'Pending Admin Approval';
       case 'notissued': return 'Not Issued';
-      case 'requested': return 'Pending with Issuer';
-      case 'issued': return 'Pending Admin Approval';
       case 'approved': return 'Approved';
       case 'rejected': return 'Rejected';
       case 'received': return 'Received';
       default: return status;
     }
-  }
-
-  private normalizeStatus(status: string): string {
-    return (status || '').toLowerCase();
   }
 }

@@ -95,16 +95,17 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
     let filtered = [...orders];
 
     // Status filter
-    if (this.statusFilter) {
-      filtered = filtered.filter(o => o.status.toLowerCase() === this.statusFilter!.toLowerCase());
+    const normalizedStatusFilter = (this.statusFilter ?? '').toLowerCase();
+    if (normalizedStatusFilter) {
+      filtered = filtered.filter(o => (o.status ?? '').toLowerCase() === normalizedStatusFilter);
     }
 
     // Search
-    if (this.searchText.trim()) {
-      const term = this.searchText.toLowerCase();
+    const normalizedSearchText = (this.searchText ?? '').trim().toLowerCase();
+    if (normalizedSearchText) {
       filtered = filtered.filter(o =>
-        o.requestId.toString().includes(term) ||
-        o.status.toLowerCase().includes(term)
+        o.requestId.toString().includes(normalizedSearchText) ||
+        (o.status ?? '').toLowerCase().includes(normalizedSearchText)
       );
     }
 
@@ -142,8 +143,8 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
-  getStatusClass(status: string): string {
-    const s = status.toLowerCase();
+  getStatusClass(status: string | null | undefined): string {
+    const s = (status ?? '').toLowerCase();
     if (s === 'received') return 'status-received';
     if (s === 'approved') return 'status-approved';
     return 'status-default';

@@ -56,10 +56,15 @@ public class InventoryController : ControllerBase
         
         _logger.LogInformation("Add item requested: {Name} (CategoryId={CategoryId}, Qty={Qty})", dto.Name, dto.CategoryId, dto.TotalQuantity);
         
-        // ✅ Check for duplicate item name (case-insensitive)
+        // ✅ Validate name and check for duplicate item name (case-insensitive)
+        if (string.IsNullOrWhiteSpace(dto.Name))
+        {
+            return BadRequest(new { message = "Item name is required." });
+        }
+
         var normalizedName = dto.Name.Trim().ToLower();
         var existingItem = await _context.Items
-            .FirstOrDefaultAsync(i => i.Name.ToLower() == normalizedName);
+            .FirstOrDefaultAsync(i => i.Name != null && i.Name.ToLower() == normalizedName);
         
         if (existingItem != null)
         {
@@ -109,10 +114,15 @@ public class InventoryController : ControllerBase
         if (item == null)
             return NotFound("Item not found");
 
-        // ✅ Check for duplicate item name (case-insensitive), excluding current item
+        // ✅ Validate name and check for duplicate item name (case-insensitive), excluding current item
+        if (string.IsNullOrWhiteSpace(dto.Name))
+        {
+            return BadRequest(new { message = "Item name is required." });
+        }
+
         var normalizedName = dto.Name.Trim().ToLower();
         var existingItem = await _context.Items
-            .FirstOrDefaultAsync(i => i.Id != id && i.Name.ToLower() == normalizedName);
+            .FirstOrDefaultAsync(i => i.Id != id && i.Name != null && i.Name.ToLower() == normalizedName);
         
         if (existingItem != null)
         {

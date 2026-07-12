@@ -68,7 +68,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   get filteredGroups() {
-    const q = this.search.trim().toLowerCase();
+    const q = (this.search ?? '').trim().toLowerCase();
     if (!q) return this.navGroups;
 
     return this.navGroups

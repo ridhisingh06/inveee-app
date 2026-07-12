@@ -106,10 +106,11 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
 
   private buildGroups(items: IssuerPendingItem[]): void {
     // Filter by search text client-side (search is over item names / requester)
-    const filtered = this.searchText.trim()
+    const normalizedSearch = this.searchText.trim().toLowerCase();
+    const filtered = normalizedSearch
       ? items.filter(i =>
-          i.itemName.toLowerCase().includes(this.searchText.toLowerCase()) ||
-          i.requestedByUserName.toLowerCase().includes(this.searchText.toLowerCase())
+          (i.itemName ?? '').toLowerCase().includes(normalizedSearch) ||
+          (i.requestedByUserName ?? '').toLowerCase().includes(normalizedSearch)
         )
       : items;
 
