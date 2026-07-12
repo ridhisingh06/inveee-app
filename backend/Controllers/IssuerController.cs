@@ -46,7 +46,7 @@ namespace invmgmt.web.Controllers
 
                 var query = _context.Requests
                     .AsNoTracking()
-                    .Where(r => r.Status == RequestStatus.PendingWithIssuer);
+                    .Where(r => r.RequestItems.Any(ri => ri.Status == RequestItemStatus.PendingWithIssuer));
 
                 var total = await query.CountAsync();
                 var totalPages = (int)Math.Ceiling(total / (double)pageSize);
@@ -92,8 +92,9 @@ namespace invmgmt.web.Controllers
         {
             try
             {
-                var requestedCount  = await _context.Requests.CountAsync(r => r.Status == RequestStatus.PendingWithIssuer);
-                var issuedCount     = await _context.Requests.CountAsync(r => r.Status == RequestStatus.PendingAdminApproval);
+                // Count at item-level so partial issues are reflected accurately.
+                var requestedCount  = await _context.Requests.CountAsync(r => r.RequestItems.Any(ri => ri.Status == RequestItemStatus.PendingWithIssuer));
+                var issuedCount     = await _context.Requests.CountAsync(r => r.RequestItems.Any(ri => ri.Status == RequestItemStatus.PendingAdminApproval));
                 var totalStockItems = await _context.Items.CountAsync(i => i.IsActive);
                 return Ok(new { requestedCount, issuedCount, totalStockItems });
             }
@@ -154,6 +155,8 @@ namespace invmgmt.web.Controllers
                     stock.AvailableQuantity -= qty;
                     item.QuantityIssued   = qty;
                     item.QuantityApproved = qty;
+                    // BUG FIX: Mark each item as issued so item-level queries are correct.
+                    item.Status = RequestItemStatus.PendingAdminApproval;
                 }
 
                 request.Status    = RequestStatus.PendingAdminApproval;
@@ -216,6 +219,14 @@ namespace invmgmt.web.Controllers
                     return BadRequest(new { message = $"Only requests pending with issuer can be marked not issued. Current status: {request.Status}" });
 
                 var oldStatus = request.Status;
+                // Reload items so we can update their statuses
+                var itemsToReject = await _context.RequestItems
+                    .Where(ri => ri.RequestId == id && ri.Status == RequestItemStatus.PendingWithIssuer)
+                    .ToListAsync();
+                foreach (var ri in itemsToReject)
+                {
+                    ri.Status = RequestItemStatus.NotIssued;
+                }
                 request.Status    = RequestStatus.NotIssued;
                 request.UpdatedAt = DateTime.UtcNow;
                 _context.ApprovalLogs.Add(new ApprovalLog
