@@ -48,6 +48,6 @@ namespace invmgmt.web.Models
 
         // Metadata
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
 }

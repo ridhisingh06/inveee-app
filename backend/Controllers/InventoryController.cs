@@ -165,7 +165,7 @@ public class InventoryController : ControllerBase
     [HttpPatch("{id}/increase-stock")]
     public async Task<IActionResult> IncreaseStock(int id, [FromBody] StockChangeDto dto)
     {
-        if (dto?.Quantity <= 0)
+        if (dto == null || dto.Quantity <= 0)
             return BadRequest("Quantity must be greater than 0");
 
         _logger.LogInformation("Increase stock requested: ItemId={ItemId}, Quantity={Qty}", id, dto.Quantity);
@@ -204,7 +204,7 @@ public class InventoryController : ControllerBase
     [HttpPatch("{id}/decrease-stock")]
     public async Task<IActionResult> DecreaseStock(int id, [FromBody] StockChangeDto dto)
     {
-        if (dto?.Quantity <= 0)
+        if (dto == null || dto.Quantity <= 0)
             return BadRequest("Quantity must be greater than 0");
 
         _logger.LogInformation("Decrease stock requested: ItemId={ItemId}, Quantity={Qty}", id, dto.Quantity);

@@ -109,7 +109,7 @@ namespace invmgmt.web.Repositories
         /// </summary>
         public async Task<bool> RestoreAsync(int itemId, int quantity)
         {
-            var inventory = await _context.InventoryStocks.FirstOrDefaultAsync(s => s.ItemId == itemId);
+            var inventory = await LockAndGetAsync(itemId);
             if (inventory == null)
             {
                 _logger.LogWarning("Inventory not found for restoration: ItemId={ItemId}", itemId);

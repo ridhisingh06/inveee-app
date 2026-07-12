@@ -186,7 +186,7 @@ namespace invmgmt.web.Services
                     }
                 }
 
-                // STEP 5: Execute inside a retriable execution strategy so that
+                // STEP 5: Sort ops to prevent deadlocks, then execute inside a retriable execution strategy so that
                 // NpgsqlRetryingExecutionStrategy can replay the entire unit of work
                 // on transient failures without throwing the "does not support
                 // user-initiated transactions" exception.
@@ -194,6 +194,7 @@ namespace invmgmt.web.Services
                 // IMPORTANT: Do NOT set response fields and `return` inside the lambda —
                 // `return` only exits the lambda, not this method. Any failure inside the
                 // transaction must throw so the outer catch can handle it correctly.
+                restorationOps = restorationOps.OrderBy(op => op.itemId).ToList();
                 var strategy = _context.Database.CreateExecutionStrategy();
 
                 await strategy.ExecuteAsync(async () =>
