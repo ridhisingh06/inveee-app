@@ -121,22 +121,24 @@ builder.Services.AddMemoryCache();
 // =======================
 builder.Services.AddCors(options =>
 {
-    // ── Hardcoded known-good origins ─────────────────────────────────────────
-    // These are always present regardless of the FRONTEND_URL env var so that
-    // a misconfigured or missing env var can never silently break production.
+    // ── Stable production origin (custom domain — never changes) ─────────────
+    // https://inveee-app.vercel.app is the project's permanent Vercel URL.
+    // It is aliased to every deployment, so no slug churn, no config updates
+    // needed when Vercel creates a new preview build.
+    //
+    // Additional origins can still be supplied at runtime via FRONTEND_URL
+    // (comma-separated) for local overrides or staging environments.
     var hardcodedOrigins = new[]
     {
-        "https://inveee-oi5c6me9t-invmgmt.vercel.app", // current production deployment
-        "https://inveee-mzapjmpz9-invmgmt.vercel.app", // previous deployment
-        "https://inveee-app.vercel.app",                 // primary custom domain (if any)
-        "http://localhost:4200",                         // Angular dev server
-        "http://localhost:3000",                         // Alternative dev port
-        "https://localhost:4200",                        // HTTPS dev server
+        "https://inveee-app.vercel.app", // stable production domain — never changes
+        "http://localhost:4200",         // Angular dev server
+        "http://localhost:3000",         // alternative dev port
+        "https://localhost:4200",        // HTTPS dev
     };
 
     // ── Runtime origins from FRONTEND_URL env var ────────────────────────────
-    // Comma-separated list injected via ECS task-definition environment block.
-    // e.g. "https://inveee-mzapjmpz9-invmgmt.vercel.app,https://inveee-app.vercel.app"
+    // Optional: comma-separated extra origins injected via ECS task-definition.
+    // The hardcoded set above is always present regardless of this value.
     var rawFrontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? string.Empty;
 
     var allowedOrigins = rawFrontendUrl
