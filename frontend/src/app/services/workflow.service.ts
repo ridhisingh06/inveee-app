@@ -31,7 +31,7 @@ import {
 export class WorkflowService {
   private readonly issuerBase  = `${environment.apiUrl}/issuer`;
   private readonly adminBase   = `${environment.apiUrl}/admin`;
-  private readonly requestBase = `${environment.apiUrl}/request`;
+  private readonly requestBase = `${environment.apiUrl}/requests`;
 
   constructor(private http: HttpClient) {}
 
