@@ -53,4 +53,15 @@ export class IssuerApprovedComponent implements OnInit {
   }
 
   // Template helpers delegated to shared util via bound properties
+
+  getItemStatusLabel(status: any): string {
+    return this.getStatusLabel ? this.getStatusLabel(status) : getStatusLabel(status);
+  }
 }
+
+// Backwards-compatible helper used by some templates
+// Keeps the public API stable for templates that expect `getItemStatusLabel`.
+export function __issuerApproved_getItemStatusLabel_fallback(status: any) {
+  return getStatusLabel(status);
+}
+
