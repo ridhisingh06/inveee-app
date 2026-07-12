@@ -113,3 +113,6 @@ nul
 # ===========================
 coverage/
 test-results/
+
+.vercel
+.env*
