@@ -126,7 +126,8 @@ builder.Services.AddCors(options =>
     // a misconfigured or missing env var can never silently break production.
     var hardcodedOrigins = new[]
     {
-        "https://inveee-mzapjmpz9-invmgmt.vercel.app", // current production deployment
+        "https://inveee-oi5c6me9t-invmgmt.vercel.app", // current production deployment
+        "https://inveee-mzapjmpz9-invmgmt.vercel.app", // previous deployment
         "https://inveee-app.vercel.app",                 // primary custom domain (if any)
         "http://localhost:4200",                         // Angular dev server
         "http://localhost:3000",                         // Alternative dev port
