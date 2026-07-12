@@ -155,6 +155,43 @@ namespace invmgmt.web.Repositories
             _logger.LogInformation(
                 "RequestItem received: Id={Id}, ReceivedQuantity={ReceivedQuantity}, Status={Status}",
                 requestItemId, receivedQuantity, requestItem.Status);
+
+            // After marking an item received, ensure the parent Request.Status is consistent.
+            try
+            {
+                var requestId = requestItem.RequestId;
+                var itemStatuses = await _context.RequestItems
+                    .Where(ri => ri.RequestId == requestId)
+                    .Select(ri => ri.Status)
+                    .ToListAsync();
+
+                // Recalculate request-level status mirroring RequestsController.RecalculateRequestStatus
+                RequestStatus newStatus;
+                if (itemStatuses.Count == 0) newStatus = RequestStatus.PendingWithIssuer;
+                else if (itemStatuses.Any(s => s == RequestItemStatus.PendingWithIssuer)) newStatus = RequestStatus.PendingWithIssuer;
+                else if (itemStatuses.Any(s => s == RequestItemStatus.PendingAdminApproval)) newStatus = RequestStatus.PendingAdminApproval;
+                else if (itemStatuses.All(s => s == RequestItemStatus.NotIssued)) newStatus = RequestStatus.NotIssued;
+                else if (itemStatuses.All(s => s == RequestItemStatus.Received || s == RequestItemStatus.NotIssued || s == RequestItemStatus.Rejected))
+                {
+                    if (itemStatuses.All(s => s == RequestItemStatus.Received || s == RequestItemStatus.NotIssued)) newStatus = RequestStatus.Received;
+                    else newStatus = RequestStatus.Rejected;
+                }
+                else if (itemStatuses.All(s => s == RequestItemStatus.Approved || s == RequestItemStatus.NotIssued || s == RequestItemStatus.Received)) newStatus = RequestStatus.Approved;
+                else newStatus = RequestStatus.Rejected;
+
+                var request = await _context.Requests.FindAsync(requestId);
+                if (request != null && request.Status != newStatus)
+                {
+                    _logger.LogInformation("Updating request status after receive: RequestId={RequestId} {OldStatus} -> {NewStatus}", request.Id, request.Status, newStatus);
+                    request.Status = newStatus;
+                    request.UpdatedAt = DateTime.UtcNow;
+                    _context.Requests.Update(request);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while recalculating request status after marking item received: RequestItemId={RequestItemId}", requestItemId);
+            }
         }
 
         public async Task<IEnumerable<RequestItem>> GetPendingWithIssuerAsync(int pageNumber, int pageSize)

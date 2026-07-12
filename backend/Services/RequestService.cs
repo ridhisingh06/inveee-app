@@ -124,6 +124,8 @@ namespace invmgmt.web.Services
             request.Status = RequestStatus.Received;
             request.UpdatedAt = DateTime.UtcNow;
 
+            _logger.LogInformation("Request marked as received: RequestId={RequestId}, UserId={UserId}", requestId, userId);
+
             await _requestRepo.UpdateRequestAsync(request);
             await _requestRepo.SaveChangesAsync();
 
