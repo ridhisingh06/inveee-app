@@ -190,6 +190,10 @@ namespace invmgmt.web.Services
                 // NpgsqlRetryingExecutionStrategy can replay the entire unit of work
                 // on transient failures without throwing the "does not support
                 // user-initiated transactions" exception.
+                //
+                // IMPORTANT: Do NOT set response fields and `return` inside the lambda —
+                // `return` only exits the lambda, not this method. Any failure inside the
+                // transaction must throw so the outer catch can handle it correctly.
                 var strategy = _context.Database.CreateExecutionStrategy();
 
                 await strategy.ExecuteAsync(async () =>
@@ -205,11 +209,11 @@ namespace invmgmt.web.Services
                             var success = await _inventoryRepo.RestoreAsync(itemId, restoreQty);
                             if (!success)
                             {
-                                _logger.LogError("Failed to restore inventory for ItemId={ItemId}", itemId);
-                                response.Success = false;
-                                response.Message = $"Failed to restore inventory for ItemId {itemId}.";
-                                await transaction.RollbackAsync();
-                                return;
+                                // Throw — not return — so the catch below rolls back and
+                                // the outer catch sets response.Success = false correctly.
+                                throw new InvalidOperationException(
+                                    $"Failed to restore inventory for ItemId {itemId}. " +
+                                    "Inventory record not found.");
                             }
                         }
 

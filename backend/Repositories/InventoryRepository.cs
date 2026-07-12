@@ -97,7 +97,15 @@ namespace invmgmt.web.Repositories
         }
 
         /// <summary>
-        /// Restore quantity back to inventory (when admin rejects issued items)
+        /// Restore quantity back to inventory (when admin rejects issued items).
+        ///
+        /// The only valid failure is "inventory record not found". A previously
+        /// issued quantity was already deducted from AvailableQuantity, so
+        /// adding it back can never logically exceed TotalQuantity. The old
+        /// guard (AvailableQuantity + quantity > TotalQuantity) was incorrect:
+        /// it compared against the already-debited AvailableQuantity and
+        /// always fired true for any non-zero rejection, blocking every restore
+        /// and causing HTTP 400 on approve-partially.
         /// </summary>
         public async Task<bool> RestoreAsync(int itemId, int quantity)
         {
@@ -108,24 +116,27 @@ namespace invmgmt.web.Repositories
                 return false;
             }
 
-            // Validate restoration doesn't exceed total quantity
-            if (inventory.AvailableQuantity + quantity > inventory.TotalQuantity)
+            // Restore the previously-deducted quantity.
+            // Cap at TotalQuantity as a safety net against double-restore bugs,
+            // but log a warning rather than silently rejecting the operation.
+            var restored = Math.Min(quantity, inventory.TotalQuantity - inventory.AvailableQuantity);
+            if (restored != quantity)
             {
                 _logger.LogWarning(
-                    "Restoration would exceed total quantity: ItemId={ItemId}, Current={Current}, Restore={Restore}, Total={Total}",
-                    itemId, inventory.AvailableQuantity, quantity, inventory.TotalQuantity);
-                return false;
+                    "RestoreAsync capped: ItemId={ItemId}, Requested={Requested}, Actual={Actual}, " +
+                    "Available={Available}, Total={Total}. Possible double-restore.",
+                    itemId, quantity, restored,
+                    inventory.AvailableQuantity, inventory.TotalQuantity);
             }
 
-            // Restore quantity
-            inventory.AvailableQuantity += quantity;
+            inventory.AvailableQuantity += restored;
             inventory.UpdatedAt = DateTime.UtcNow;
 
             _context.InventoryStocks.Update(inventory);
 
             _logger.LogInformation(
-                "Inventory restored: ItemId={ItemId}, Quantity={Quantity}, NewAvailable={NewAvailable}",
-                itemId, quantity, inventory.AvailableQuantity);
+                "Inventory restored: ItemId={ItemId}, RestoredQuantity={Restored}, NewAvailable={NewAvailable}",
+                itemId, restored, inventory.AvailableQuantity);
 
             return true;
         }
