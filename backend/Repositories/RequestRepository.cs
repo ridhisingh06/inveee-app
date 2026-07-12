@@ -61,11 +61,11 @@ namespace invmgmt.web.Repositories
         public async Task<bool> HasActiveRequestAsync(int userId)
         {
             // Business rule:
-            // - Block new requests while any existing request is waiting with issuer/admin or approved.
-            // - Allow new requests only after NOT_ISSUED, REJECTED, or RECEIVED.
-            // Note: keep Pending in the block list for backwards compatibility with older records.
-            var activeStatuses = new[] { RequestStatus.PendingWithIssuer, RequestStatus.PendingAdminApproval, RequestStatus.Approved, RequestStatus.Pending };
-            var activeItemStatuses = new[] { Models.Enums.RequestItemStatus.PendingWithIssuer, Models.Enums.RequestItemStatus.PendingAdminApproval, Models.Enums.RequestItemStatus.Approved };
+            // - Block new requests while any existing request is waiting with issuer/admin or is in an approved state that still requires user action.
+            // - Allow new requests after a request reaches terminal states like Received, Rejected, or NotIssued.
+            // Note: "Approved" in the enum corresponds to "Ready to Receive" which should *not* block new requests.
+            var activeStatuses = new[] { RequestStatus.PendingWithIssuer, RequestStatus.PendingAdminApproval, RequestStatus.Pending };
+            var activeItemStatuses = new[] { Models.Enums.RequestItemStatus.PendingWithIssuer, Models.Enums.RequestItemStatus.PendingAdminApproval };
 
             // First: detect and correct any requests whose recorded Request.Status is stale
             // (e.g. still PendingWithIssuer while all underlying items are terminal). This
