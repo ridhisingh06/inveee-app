@@ -35,5 +35,8 @@ namespace invmgmt.web.Services
 
         /// <summary>Get global order summary statistics</summary>
         Task<OrderSummaryStatisticsDto> GetGlobalStatisticsAsync();
+
+        /// <summary>Get list of reorderable items based on issuer rejected quantity</summary>
+        Task<List<ReorderSuggestion>> GetReorderableItemsAsync(int requestId);
     }
 }

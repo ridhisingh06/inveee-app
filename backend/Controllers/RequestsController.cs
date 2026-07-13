@@ -20,13 +20,15 @@ public sealed class RequestsController : ControllerBase
     private readonly IRequestService _requestService;
     private readonly IOrderSummaryService _orderSummaryService;
     private readonly ILogger<RequestsController> _logger;
+    private readonly IConfiguration _configuration;
 
-    public RequestsController(AppDbContext context, IRequestService requestService, IOrderSummaryService orderSummaryService, ILogger<RequestsController> logger)
+    public RequestsController(AppDbContext context, IRequestService requestService, IOrderSummaryService orderSummaryService, ILogger<RequestsController> logger, IConfiguration configuration)
     {
         _context = context;
         _requestService = requestService;
         _orderSummaryService = orderSummaryService;
         _logger = logger;
+        _configuration = configuration;
     }
 
     // ==========================================
@@ -311,6 +313,7 @@ public sealed class RequestsController : ControllerBase
             if (!result.Success)
             {
                 if (result.Message == "Request not found") return NotFound(new { message = result.Message });
+                if (result.Message == "Request already received") return Conflict(new { message = result.Message });
                 return BadRequest(new { message = result.Message });
             }
 
@@ -1014,6 +1017,56 @@ public sealed class RequestsController : ControllerBase
     }
 
 
+
+    /// <summary>
+    /// GET /api/requests/{id}/reorderable-items
+    /// Get list of items that can be reordered due to issuer rejection
+    /// </summary>
+    [Authorize(Roles = "USER,ISSUER,ADMIN")]
+    [HttpGet("{id:int}/reorderable-items")]
+    public async Task<IActionResult> GetReorderableItems(int id)
+    {
+        try
+        {
+            var isFeatureEnabled = _configuration.GetValue<bool>("FeatureFlags:Reorder");
+            if (!isFeatureEnabled)
+            {
+                return NotFound(new { message = "Reorder feature is currently disabled." });
+            }
+
+            var userId = User.GetUserId();
+            var role = User.IsInRole("ADMIN") ? "ADMIN" : (User.IsInRole("ISSUER") ? "ISSUER" : "USER");
+
+            _logger.LogInformation("Fetching reorderable items for RequestId={RequestId} by UserId={UserId}", id, userId);
+
+            // Verify access
+            var request = await _requestService.GetRequestByIdAsync(id, userId, role);
+            if (request == null)
+            {
+                return NotFound(new { message = "Request not found or access denied." });
+            }
+
+            var suggestions = await _orderSummaryService.GetReorderableItemsAsync(id);
+            if (suggestions == null || !suggestions.Any())
+            {
+                return Ok(new List<ReorderSuggestion>());
+            }
+
+            return Ok(suggestions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching reorderable items for RequestId={RequestId}", id);
+            return StatusCode(500, new { message = "Error fetching reorderable items", error = ex.Message });
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpOptions("{id:int}/reorderable-items")]
+    public IActionResult OptionsReorderableItems()
+    {
+        return Ok();
+    }
 
     /// <summary>
     /// GET /api/requests/order-stats

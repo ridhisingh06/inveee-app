@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using invmgmt.web.Models;
 
 namespace invmgmt.web.Data
@@ -81,9 +81,7 @@ namespace invmgmt.web.Data
             modelBuilder.Entity<RequestItem>()
                 .HasIndex(ri => ri.ItemId);
             modelBuilder.Entity<RequestItem>()
-                .HasIndex(ri => ri.RequestId);
-            modelBuilder.Entity<RequestItem>()
-                .HasIndex(ri => ri.Status);
+                .HasIndex(ri => new { ri.RequestId, ri.Status });
 
             modelBuilder.Entity<RequestItem>()
                 .HasOne(ri => ri.Request)

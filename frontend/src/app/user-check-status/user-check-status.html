@@ -147,9 +147,28 @@
           </button>
         </div>
 
+        <!-- ── REORDER: Rejected Items ── -->
+        <div class="reorder-section" *ngIf="hasRejectedItems(req)">
+          <div class="reorder-prompt">
+            <span class="warning-icon">⚠️</span>
+            Some items could not be fully issued due to stock limits.
+          </div>
+          <button class="reorder-btn" (click)="openReorderModal(req.id)">
+            View Reorder Options
+          </button>
+        </div>
+
       </div>
     </div>
 
   </div>
+
+  <app-reorder-modal
+    [isOpen]="isReorderModalOpen"
+    [loading]="reorderLoading"
+    [suggestions]="reorderSuggestions"
+    (close)="isReorderModalOpen = false"
+    (reorder)="handleReorder($event)">
+  </app-reorder-modal>
 
 </div>

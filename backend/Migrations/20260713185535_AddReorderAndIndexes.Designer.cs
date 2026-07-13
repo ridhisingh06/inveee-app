@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using invmgmt.web.Data;
@@ -11,9 +12,11 @@ using invmgmt.web.Data;
 namespace invmgmt.web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260713185535_AddReorderAndIndexes")]
+    partial class AddReorderAndIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -736,7 +739,9 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.HasIndex("RequestId", "Status");
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("RequestItems");
                 });

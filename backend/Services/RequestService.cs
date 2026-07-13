@@ -114,6 +114,9 @@ namespace invmgmt.web.Services
             if (request == null || request.UserId != userId)
                 return (false, "Request not found");
 
+            if (request.Status == RequestStatus.Received)
+                return (false, "Request already received");
+
             if (request.Status != RequestStatus.Approved)
                 return (false, "Only approved requests can be marked as received");
 

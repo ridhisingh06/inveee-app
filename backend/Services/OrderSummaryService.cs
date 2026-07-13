@@ -298,6 +298,24 @@ namespace invmgmt.web.Services
             return await _orderSummaryRepo.GetStatisticsAsync();
         }
 
+        public async Task<List<ReorderSuggestion>> GetReorderableItemsAsync(int requestId)
+        {
+            _logger.LogInformation("Fetching reorderable items for RequestId={RequestId}", requestId);
+
+            var items = await _context.RequestItems
+                .Include(ri => ri.Item)
+                .Where(ri => ri.RequestId == requestId && ri.IssuerRejectedQuantity > 0)
+                .Select(ri => new ReorderSuggestion
+                {
+                    ItemId = ri.ItemId,
+                    ItemName = ri.Item != null ? ri.Item.Name : "Unknown",
+                    SuggestedQuantity = ri.IssuerRejectedQuantity
+                })
+                .ToListAsync();
+
+            return items;
+        }
+
         // ============================================================================
         // PRIVATE HELPER METHODS
         // ============================================================================

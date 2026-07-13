@@ -4,12 +4,14 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { WorkflowService } from '../services/workflow.service';
+import { CartService } from '../services/cart.service';
 import { normalizeStatus, getStatusClass, getStatusLabel } from '../utils/status.util';
+import { ReorderModalComponent } from './reorder-modal.component';
 
 @Component({
   selector: 'app-user-check-status',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ReorderModalComponent],
   templateUrl: './user-check-status.html',
   styleUrls: ['./user-check-status.css']
 })
@@ -28,9 +30,15 @@ export class UserCheckStatusComponent implements OnInit {
   /** requestId → orderSummaryId once received */
   orderSummaryMap: { [requestId: number]: number } = {};
 
+  // Reorder Modal State
+  isReorderModalOpen = false;
+  reorderSuggestions: any[] = [];
+  reorderLoading = false;
+
   constructor(
     private http: HttpClient,
     private workflow: WorkflowService,
+    private cart: CartService,
     private router: Router
   ) {}
 
@@ -97,6 +105,44 @@ export class UserCheckStatusComponent implements OnInit {
     }
   }
 
+  // ── Reorder logic ────────────────────────────────────────────────────────
+
+  openReorderModal(requestId: number): void {
+    this.isReorderModalOpen = true;
+    this.reorderLoading = true;
+    this.reorderSuggestions = [];
+    
+    this.http.get<any[]>(`${environment.apiUrl}/requests/${requestId}/reorderable-items`)
+      .subscribe({
+        next: (res) => {
+          this.reorderSuggestions = res || [];
+          this.reorderLoading = false;
+        },
+        error: (err) => {
+          console.error('[ReorderModal] Error fetching reorderable items', err);
+          this.errorMsg = err?.error?.message || 'Failed to fetch reorderable items.';
+          this.isReorderModalOpen = false;
+          this.reorderLoading = false;
+        }
+      });
+  }
+
+  handleReorder(items: any[]): void {
+    this.isReorderModalOpen = false;
+    items.forEach(item => {
+      // Create a mock item object that matches what CartService expects.
+      // CartService expects an Item model, which should at least have id and name.
+      const mockItem = { id: item.itemId, name: item.itemName, stockLimit: 999, availableQuantity: 999, categoryId: 0, reorderLevel: 0 } as any;
+      this.cart.addItem(mockItem, item.suggestedQuantity);
+    });
+    
+    this.successMsg = 'Reorder items added to cart! Redirecting...';
+    setTimeout(() => { 
+      this.successMsg = ''; 
+      this.router.navigate(['/user-dashboard/cart']);
+    }, 1500);
+  }
+
   // ── Per-item receive (legacy — kept for backward compat) ─────────────────
 
   receiveItem(requestId: number, itemId: number) {
@@ -134,6 +180,10 @@ export class UserCheckStatusComponent implements OnInit {
 
   isItemApproved(status: string):  boolean { return this.normalizeStatus(status) === 'approved'; }
   isItemReceived(status: string):  boolean { return this.normalizeStatus(status) === 'received'; }
+
+  hasRejectedItems(req: any): boolean {
+    return req.items?.some((i: any) => i.issuerRejectedQuantity > 0) ?? false;
+  }
 
 
   getStatusIcon(status: string): string {
