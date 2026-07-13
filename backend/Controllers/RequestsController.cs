@@ -374,14 +374,7 @@ public sealed class RequestsController : ControllerBase
     /// DELETE /api/requests/{id}
     /// User can cancel/delete only PendingWithIssuer (and legacy PENDING) requests.
     /// </summary>
-    [Authorize(Roles = "USER")]
-    [HttpGet("orders/by-request/{requestId:int}")]
-    public async Task<IActionResult> GetOrderByRequestId([FromRoute] int requestId)
-    {
-        var result = await _orderSummaryService.GetOrderSummaryByRequestAsync(requestId);
-        if (result == null) return NotFound(new { message = "Order not found" });
-        return Ok(result);
-    }
+
 
     [Authorize(Roles = "USER")]
     [HttpDelete("{id:int}")]
@@ -1011,6 +1004,16 @@ public sealed class RequestsController : ControllerBase
             return StatusCode(500, new { message = "Error fetching order summary", error = ex.Message });
         }
     }
+
+    [AllowAnonymous]
+    [HttpOptions("orders/by-request/{requestId:int}")]
+    public IActionResult OptionsOrderByRequest()
+    {
+        // Respond to preflight OPTIONS request with appropriate CORS headers (handled by middleware)
+        return Ok();
+    }
+
+
 
     /// <summary>
     /// GET /api/requests/order-stats
