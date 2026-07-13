@@ -42,3 +42,13 @@ public sealed class RequestDetailDto
     public DateTime? UpdatedAt { get; set; }
     public List<RequestItemDetailDto> Items { get; set; } = new();
 }
+public sealed class UpdateRequestDto
+{
+    public List<UpdateRequestLineDto> Items { get; set; } = new();
+}
+
+public sealed class UpdateRequestLineDto
+{
+    public int ItemId { get; set; }
+    public int Quantity { get; set; }
+}

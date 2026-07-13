@@ -21,7 +21,18 @@ namespace invmgmt.web.Repositories
 
         public async Task<Request?> GetByIdAsync(int id)
         {
-            return await _context.Requests.FindAsync(id);
+            return await _context.Requests
+                .Include(r => r.RequestItems)
+                .Include(r => r.IssueLogs)
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task<bool> IsEditableAsync(int requestId)
+        {
+            return await _context.Requests
+                .Where(r => r.Id == requestId)
+                .AnyAsync(r => r.Status == RequestStatus.PendingWithIssuer && !r.IssueLogs.Any());
         }
 
         public async Task<Request?> GetByIdWithItemsAsync(int id)

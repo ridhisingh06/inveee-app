@@ -375,6 +375,16 @@ public sealed class RequestsController : ControllerBase
     /// User can cancel/delete only PendingWithIssuer (and legacy PENDING) requests.
     /// </summary>
     [Authorize(Roles = "USER")]
+    [HttpGet("orders/by-request/{requestId:int}")]
+    public async Task<IActionResult> GetOrderByRequestId([FromRoute] int requestId)
+    {
+        var userId = User.GetUserId();
+        var result = await _orderSummaryService.GetOrderSummaryByRequestIdAsync(requestId, userId);
+        if (result == null) return NotFound(new { message = "Order not found" });
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "USER")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
