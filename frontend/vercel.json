@@ -1,5 +1,8 @@
 {
   "version": 2,
+  "framework": "angular",
+  "outputDirectory": "dist/frontend",
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/(.*)",
