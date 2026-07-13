@@ -98,14 +98,14 @@ export class WorkflowService {
   // ──────────────────────────────────────────────────────────
 
   /**
-   * POST /api/request/receive-items/{id}
-   * User confirms receipt of approved items.
-   * Creates an immutable OrderSummary record.
-   */
+    * PATCH /api/requests/{id}/receive
+    * User confirms receipt of approved items.
+    * Creates an immutable OrderSummary record.
+    */
   receiveItems(requestId: number, notes?: string): Observable<ReceiveItemsResponse> {
     return this.http
-      .post<ReceiveItemsResponse>(
-        `${this.requestBase}/receive-items/${requestId}`,
+      .patch<ReceiveItemsResponse>(
+        `${this.requestBase}/${requestId}/receive`,
         notes ? { notes } : {}
       )
       .pipe(catchError(this.handleError));
