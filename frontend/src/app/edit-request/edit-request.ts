@@ -3,12 +3,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, forkJoin } from 'rxjs';
+import { switchMap, takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RequestService } from '../services/request.service';
 import { RefreshService } from '../services/refresh.service';
-import { RequestDetailEnhanced } from '../models/request.model';
 import { Item } from '../models/item';
 
 interface EditLine {
@@ -50,14 +49,18 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      const idStr = params.get('id');
-      if (idStr) {
-        this.requestId = Number(idStr);
-        this.loadRequest();
-        this.loadInventory();
-      }
-    });
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const idStr = params.get('id');
+        if (idStr) {
+          this.requestId = Number(idStr);
+          this.loadAll();
+        } else {
+          this.errorMsg = 'No request ID provided.';
+          this.loading = false;
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -65,74 +68,89 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadRequest() {
+  /**
+   * Load the editable check AND the full request details in a single
+   * sequential chain (switchMap), plus the inventory list in parallel via
+   * forkJoin so both arrive at the same time.
+   *
+   * This replaces the old two-subscription nested pattern which was fragile
+   * and doubled the perceived latency.
+   */
+  loadAll() {
     if (!this.requestId) return;
     this.loading = true;
+    this.inventoryLoading = true;
     this.errorMsg = '';
 
-    // First check if editable
-    this.requestService.isRequestEditable(this.requestId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (editableRes) => {
-          if (!editableRes.editable) {
-            this.errorMsg = editableRes.reason || 'This request can no longer be edited.';
-            this.loading = false;
-            return;
-          }
+    // ── Parallel: editable-check + inventory ──────────────────────────────
+    forkJoin({
+      editable: this.requestService.isRequestEditable(this.requestId),
+      inventory: this.http.get<any[]>(`${environment.apiUrl}/inventory`)
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: ({ editable, inventory }) => {
+        // ── Populate inventory list (used by Add New Item panel) ──────────
+        this.allItems = (inventory || []).map((i: any) => ({
+          id: i.id,
+          name: i.name,
+          category: i.category || 'Uncategorized'
+        }));
+        this.inventoryLoading = false;
 
-          // Fetch full details
-          this.requestService.getRequestById(this.requestId!)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-              next: (req) => {
-                const r = req as any;
-                this.lines = (r.items || []).map((ri: any) => ({
-                  item: { id: ri.itemId, name: ri.itemName, category: 'Unknown' },
-                  qty: ri.quantityRequested
-                }));
-                this.loading = false;
-              },
-              error: (err) => {
-                this.errorMsg = err.message || 'Failed to load request.';
-                this.loading = false;
-              }
-            });
-        },
-        error: (err) => {
-          this.errorMsg = err.message || 'Failed to check if request is editable.';
+        // ── Guard: property may arrive as "editable" OR "Editable" ────────
+        // The backend now emits camelCase via PropertyNamingPolicy, but this
+        // defensive check keeps things working even against older cached builds.
+        const isEditable: boolean =
+          (editable as any)['editable'] ?? (editable as any)['Editable'] ?? false;
+        const reason: string =
+          (editable as any)['reason'] ?? (editable as any)['Reason'] ?? '';
+
+        if (!isEditable) {
+          this.errorMsg = reason || 'This request can no longer be edited.';
           this.loading = false;
+          return;
         }
-      });
+
+        // ── Load request details only if editable ─────────────────────────
+        this.requestService.getRequestById(this.requestId!)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (req) => {
+              const r = req as any;
+              this.lines = (r.items || []).map((ri: any) => ({
+                item: {
+                  id: ri.itemId ?? ri.ItemId,
+                  name: ri.itemName ?? ri.ItemName ?? 'Unknown',
+                  category: 'Unknown'
+                },
+                qty: ri.quantityRequested ?? ri.QuantityRequested ?? 1
+              }));
+              this.loading = false;
+            },
+            error: (err) => {
+              this.errorMsg = err.message || 'Failed to load request details.';
+              this.loading = false;
+            }
+          });
+      },
+      error: (err) => {
+        // If either parallel call fails, surface the error immediately.
+        this.errorMsg = err?.message || 'Failed to load request. Please try again.';
+        this.loading = false;
+        this.inventoryLoading = false;
+      }
+    });
   }
 
-  loadInventory() {
-    this.inventoryLoading = true;
-    this.http.get<any[]>(`${environment.apiUrl}/inventory`)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (items) => {
-          this.allItems = items.map(i => ({
-            id: i.id,
-            name: i.name,
-            category: i.category || 'Uncategorized'
-          }));
-          this.inventoryLoading = false;
-        },
-        error: (err) => {
-          console.error('[EditRequest] Failed to load inventory', err);
-          this.inventoryLoading = false;
-        }
-      });
-  }
+  // ── Kept for explicit manual refresh (not currently called by template) ──
+  loadRequest() { this.loadAll(); }
 
   changeQty(itemId: string | number, currentQty: number, delta: 1 | -1) {
     const next = currentQty + delta;
     if (next < 1) return;
     const line = this.lines.find(l => l.item.id === itemId);
-    if (line) {
-      line.qty = next;
-    }
+    if (line) line.qty = next;
   }
 
   removeLine(itemId: string | number) {
@@ -205,14 +223,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
         next: () => {
           this.successMsg = 'Request updated successfully!';
           this.submitting = false;
-
-          // ✅ Notify all subscribers that requests have changed so every
-          //    component (UserCheckStatusComponent, OrderHistoryComponent,
-          //    user dashboard counters) reloads immediately without a manual
-          //    browser refresh.
           this.refresh.notifyRequests();
-
-          // Navigate back after a short visual confirmation delay.
           setTimeout(() => {
             this.router.navigate(['/user-dashboard/my-requests']);
           }, 1000);
