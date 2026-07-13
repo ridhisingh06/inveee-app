@@ -378,8 +378,7 @@ public sealed class RequestsController : ControllerBase
     [HttpGet("orders/by-request/{requestId:int}")]
     public async Task<IActionResult> GetOrderByRequestId([FromRoute] int requestId)
     {
-        var userId = User.GetUserId();
-        var result = await _orderSummaryService.GetOrderSummaryByRequestIdAsync(requestId, userId);
+        var result = await _orderSummaryService.GetOrderSummaryByRequestAsync(requestId);
         if (result == null) return NotFound(new { message = "Order not found" });
         return Ok(result);
     }
