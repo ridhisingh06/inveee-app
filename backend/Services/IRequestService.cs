@@ -15,5 +15,7 @@ namespace invmgmt.web.Services
         Task<(bool Success, string Message)> RejectRequestAsync(int id);
         Task<(bool Success, string Message)> CheckCanRequestAsync(int userId);
         Task<(bool Success, string Message)> DeleteRequestAsync(int id, int userId);
+        Task<UpdateRequestResultDto> UpdateRequestAsync(int requestId, int userId, UpdateRequestDto dto);
+        Task<RequestEditableDto> IsRequestEditableAsync(int requestId, int userId);
     }
 }

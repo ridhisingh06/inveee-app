@@ -143,6 +143,19 @@ export class UserCheckStatusComponent implements OnInit {
     }, 1500);
   }
 
+  // ── Edit Request ─────────────────────────────────────────────────────────
+
+  /** A request is editable only if it is PendingWithIssuer and all items are still PendingWithIssuer */
+  isEditable(req: any): boolean {
+    if (this.normalizeStatus(req.status) !== 'pendingwithissuer') return false;
+    if (!req.items || req.items.length === 0) return false;
+    return req.items.every((i: any) => this.normalizeStatus(i.status) === 'pendingwithissuer');
+  }
+
+  editRequest(requestId: number): void {
+    this.router.navigate(['/user-dashboard/edit-request', requestId]);
+  }
+
   // ── Per-item receive (legacy — kept for backward compat) ─────────────────
 
   receiveItem(requestId: number, itemId: number) {

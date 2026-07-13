@@ -1,4 +1,5 @@
 using invmgmt.web.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace invmgmt.web.DTOs;
 
@@ -42,13 +43,31 @@ public sealed class RequestDetailDto
     public DateTime? UpdatedAt { get; set; }
     public List<RequestItemDetailDto> Items { get; set; } = new();
 }
+
 public sealed class UpdateRequestDto
 {
+    [Required]
     public List<UpdateRequestLineDto> Items { get; set; } = new();
 }
 
 public sealed class UpdateRequestLineDto
 {
     public int ItemId { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
     public int Quantity { get; set; }
+}
+
+public sealed class UpdateRequestResultDto
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public int RequestId { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+}
+
+public sealed class RequestEditableDto
+{
+    public bool Editable { get; set; }
+    public string Reason { get; set; } = string.Empty;
 }

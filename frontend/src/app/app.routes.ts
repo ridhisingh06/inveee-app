@@ -23,6 +23,7 @@ import { MonthlyRegisterComponent } from './monthly-register/monthly-register';
 import { SectionWiseQueryComponent } from './section-wise-query/section-wise-query';
 import { OrderHistoryComponent } from './order-history/order-history';
 import { OrderSummaryComponent } from './order-summary/order-summary';
+import { EditRequestComponent } from './edit-request/edit-request';
 
 export const routes: Routes = [
   // register page
@@ -112,6 +113,7 @@ export const routes: Routes = [
       { path: 'cart', component: UserCartComponent },
       { path: 'order-history', component: OrderHistoryComponent },
       { path: 'order-summary/:id', component: OrderSummaryComponent },
+      { path: 'edit-request/:id', component: EditRequestComponent },
       // Legacy redirects for old links
       { path: 'request-items', redirectTo: 'item-list', pathMatch: 'full' },
       { path: 'check-status', redirectTo: 'my-requests', pathMatch: 'full' }

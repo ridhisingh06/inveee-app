@@ -138,20 +138,32 @@
   border-radius: 8px; padding: 0.28rem 0.6rem; white-space: nowrap;
 }
 
-/* ── Reorder ── */
+/* ── Reorder Section ── */
 .reorder-section {
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  margin-top: 1rem; padding: 1rem; background: #fffbeb; border: 1px solid #fef3c7;
-  border-radius: 12px;
+  padding: 1.25rem 1.5rem; background: #fffbeb; border-top: 1px solid rgba(245,158,11,0.2);
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
 }
-.reorder-prompt {
-  font-size: 0.85rem; color: #b45309; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
-}
+.reorder-prompt { display: flex; align-items: center; gap: 0.5rem; color: #92400e; font-size: 0.9rem; font-weight: 500; }
+.warning-icon { font-size: 1.1rem; }
 .reorder-btn {
-  background: #f59e0b; color: white; border: none; padding: 0.5rem 1rem;
-  border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+  background: #f59e0b; color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 8px;
+  font-weight: 600; cursor: pointer; transition: var(--transition-base); font-size: 0.85rem;
 }
 .reorder-btn:hover { background: #d97706; }
+
+/* ── Edit Request Section ── */
+.edit-section {
+  padding: 1.25rem 1.5rem; background: var(--bg-tertiary); border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+}
+.edit-prompt { display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; }
+.edit-icon { color: var(--primary); }
+.edit-request-btn {
+  background: transparent; color: var(--primary); border: 1px solid var(--primary);
+  padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer;
+  transition: var(--transition-base); font-size: 0.85rem;
+}
+.edit-request-btn:hover { background: var(--primary); color: #fff; }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {

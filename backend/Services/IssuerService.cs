@@ -108,7 +108,9 @@ namespace invmgmt.web.Services
             try
             {
                 // STEP 1: Validate request exists
-                var request = await _context.Requests.FindAsync(dto.RequestId);
+                var request = await _context.Requests
+                    .Include(r => r.RequestItems)
+                    .FirstOrDefaultAsync(r => r.Id == dto.RequestId);
                 if (request == null)
                 {
                     _logger.LogWarning("Request not found: RequestId={RequestId}", dto.RequestId);
@@ -258,15 +260,14 @@ namespace invmgmt.web.Services
                         }
 
                         // STEP 8: Update request status if all items issued
-                        if (await _requestItemRepo.AllItemsIssuedAsync(dto.RequestId))
+                        // After updating items, recalculate overall request status based on item states
+                        request.RecalculateStatus();
+                        // Ensure audit fields are set if request moved to PendingAdminApproval
+                        if (request.Status == RequestStatus.PendingAdminApproval)
                         {
-                            request.Status = RequestStatus.PendingAdminApproval;
                             request.IssuedDate = issuedDate;
                             request.IssuedBy = issuerId;
                             request.UpdatedAt = issuedDate;
-                            _context.Requests.Update(request);
-
-                            _logger.LogInformation("Request status updated to PendingAdminApproval: RequestId={RequestId}", dto.RequestId);
                         }
 
                         // STEP 9: Single SaveChanges — flushes inventory deductions,

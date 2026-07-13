@@ -120,4 +120,39 @@ export class RequestService {
         })
       );
   }
+
+  /**
+   * Update an existing request (only if PendingWithIssuer and untouched)
+   * @param id - Request ID
+   * @param payload - Updated items
+   * @returns Observable<{ success: boolean; message: string; requestId: number; updatedAt?: string }>
+   */
+  updateRequest(id: number, payload: { items: { itemId: number; quantity: number }[] }): Observable<any> {
+    return this.http.put<any>(`${this.base}/${id}`, payload)
+      .pipe(
+        catchError(err => {
+          console.error('[RequestService] Error updating request:', err);
+          return throwError(() => new Error(
+            err?.error?.message || 'Failed to update request. Please try again.'
+          ));
+        })
+      );
+  }
+
+  /**
+   * Check if a request can still be edited
+   * @param id - Request ID
+   * @returns Observable<{ editable: boolean; reason: string }>
+   */
+  isRequestEditable(id: number): Observable<{ editable: boolean; reason: string }> {
+    return this.http.get<{ editable: boolean; reason: string }>(`${this.base}/${id}/editable`)
+      .pipe(
+        catchError(err => {
+          console.error('[RequestService] Error checking if request is editable:', err);
+          return throwError(() => new Error(
+            err?.error?.message || 'Failed to check if request is editable. Please try again.'
+          ));
+        })
+      );
+  }
 }

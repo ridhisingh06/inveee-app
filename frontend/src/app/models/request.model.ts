@@ -285,3 +285,26 @@ export interface RequestDetailEnhanced {
   receivedDate?: string;
   items: RequestItemDetailEnhanced[];
 }
+
+// ============================================================
+// EDIT REQUEST DTOs
+// ============================================================
+
+/** Payload to update an existing PendingWithIssuer request */
+export interface UpdateRequestPayload {
+  items: { itemId: number; quantity: number }[];
+}
+
+/** Response from PUT /api/requests/{id} */
+export interface UpdateRequestResult {
+  success: boolean;
+  message: string;
+  requestId: number;
+  updatedAt?: string;
+}
+
+/** Response from GET /api/requests/{id}/editable */
+export interface RequestEditable {
+  editable: boolean;
+  reason: string;
+}

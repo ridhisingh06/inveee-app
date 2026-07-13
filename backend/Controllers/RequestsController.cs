@@ -279,6 +279,57 @@ public sealed class RequestsController : ControllerBase
     }
 
     /// <summary>
+    /// GET /api/requests/{id}/editable
+    /// Returns whether the request can still be edited by the current user.
+    /// </summary>
+    [Authorize(Roles = "USER")]
+    [HttpGet("{id:int}/editable")]
+    public async Task<IActionResult> GetEditable(int id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var result = await _requestService.IsRequestEditableAsync(id, userId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in RequestsController.GetEditable (RequestId={RequestId})", id);
+            return StatusCode(500, new { message = "An internal server error occurred." });
+        }
+    }
+
+    /// <summary>
+    /// PUT /api/requests/{id}
+    /// User updates an existing PendingWithIssuer request before the Issuer starts processing.
+    /// Validates ownership, status, and that no issuer processing has begun.
+    /// Upserts / deletes RequestItems as needed. Keeps the same RequestId.
+    /// </summary>
+    [Authorize(Roles = "USER")]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateRequestDto dto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userId = User.GetUserId();
+            var result = await _requestService.UpdateRequestAsync(id, userId, dto);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in RequestsController.Update (RequestId={RequestId})", id);
+            return StatusCode(500, new { message = "An internal server error occurred." });
+        }
+    }
+
+    /// <summary>
     /// GET /api/requests/can-request
     /// </summary>
     [Authorize(Roles = "USER")]

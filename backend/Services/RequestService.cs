@@ -227,5 +227,153 @@ namespace invmgmt.web.Services
 
             return (true, "Request cancelled successfully");
         }
+
+        /// <summary>
+        /// Returns whether the given request can still be edited by the user.
+        /// Editable = Status is PendingWithIssuer AND every RequestItem is still PendingWithIssuer
+        /// (i.e. the issuer has not touched any item yet).
+        /// </summary>
+        public async Task<RequestEditableDto> IsRequestEditableAsync(int requestId, int userId)
+        {
+            var request = await _requestRepo.GetByIdWithItemsAsync(requestId);
+            if (request == null || request.UserId != userId)
+                return new RequestEditableDto { Editable = false, Reason = "Request not found." };
+
+            if (request.Status != RequestStatus.PendingWithIssuer)
+                return new RequestEditableDto { Editable = false, Reason = $"Request is in '{request.Status}' status and can no longer be edited." };
+
+            var anyTouched = request.RequestItems.Any(ri => ri.Status != RequestItemStatus.PendingWithIssuer);
+            if (anyTouched)
+                return new RequestEditableDto { Editable = false, Reason = "The issuer has started processing this request. Editing is no longer allowed." };
+
+            return new RequestEditableDto { Editable = true, Reason = "Request is editable." };
+        }
+
+        /// <summary>
+        /// Updates an existing PendingWithIssuer request's items:
+        ///   - Merges duplicate ItemIds in payload.
+        ///   - Updates quantities for existing items.
+        ///   - Deletes items removed from the payload.
+        ///   - Inserts new items from the payload.
+        /// Only allowed while no issuer processing has occurred.
+        /// </summary>
+        public async Task<UpdateRequestResultDto> UpdateRequestAsync(int requestId, int userId, UpdateRequestDto dto)
+        {
+            var result = new UpdateRequestResultDto { RequestId = requestId };
+
+            try
+            {
+                // ── 1. Load request ──────────────────────────────────────────────────────
+                var request = await _requestRepo.GetByIdWithItemsAsync(requestId);
+                if (request == null || request.UserId != userId)
+                {
+                    result.Success = false;
+                    result.Message = "Request not found.";
+                    return result;
+                }
+
+                // ── 2. Check status ──────────────────────────────────────────────────────
+                if (request.Status != RequestStatus.PendingWithIssuer)
+                {
+                    result.Success = false;
+                    result.Message = $"Request is in '{request.Status}' status and can no longer be edited.";
+                    return result;
+                }
+
+                // ── 3. Check issuer has NOT touched any item ─────────────────────────────
+                if (request.RequestItems.Any(ri => ri.Status != RequestItemStatus.PendingWithIssuer))
+                {
+                    result.Success = false;
+                    result.Message = "The issuer has started processing this request. Editing is no longer allowed.";
+                    return result;
+                }
+
+                // ── 4. Validate payload ──────────────────────────────────────────────────
+                if (dto.Items == null || dto.Items.Count == 0)
+                {
+                    result.Success = false;
+                    result.Message = "Request must contain at least one item.";
+                    return result;
+                }
+
+                if (dto.Items.Any(i => i.Quantity <= 0))
+                {
+                    result.Success = false;
+                    result.Message = "All item quantities must be greater than 0.";
+                    return result;
+                }
+
+                // ── 5. Merge duplicate ItemIds in payload ────────────────────────────────
+                var merged = dto.Items
+                    .GroupBy(i => i.ItemId)
+                    .Select(g => new UpdateRequestLineDto { ItemId = g.Key, Quantity = g.Sum(x => x.Quantity) })
+                    .ToList();
+
+                // ── 6. Validate all ItemIds exist ────────────────────────────────────────
+                var incomingItemIds = merged.Select(i => i.ItemId).Distinct().ToList();
+                if (!await _requestRepo.ItemsExistAsync(incomingItemIds))
+                {
+                    result.Success = false;
+                    result.Message = "One or more items in the request do not exist.";
+                    return result;
+                }
+
+                // ── 7. Apply item-level changes ──────────────────────────────────────────
+                var existingItems = request.RequestItems.ToList();
+                var existingItemIds = existingItems.Select(ri => ri.ItemId).ToHashSet();
+                var incomingSet = merged.ToDictionary(i => i.ItemId, i => i.Quantity);
+
+                // 7a. Update or delete existing items
+                foreach (var existing in existingItems)
+                {
+                    if (incomingSet.TryGetValue(existing.ItemId, out var newQty))
+                    {
+                        existing.QuantityRequested = newQty;
+                        _logger.LogInformation("UpdateRequest: Updated item {ItemId} qty -> {Qty} (ReqId={RequestId})", existing.ItemId, newQty, requestId);
+                    }
+                    else
+                    {
+                        // Item removed — delete from DB
+                        _logger.LogInformation("UpdateRequest: Removed item {ItemId} from ReqId={RequestId}", existing.ItemId, requestId);
+                        request.RequestItems.Remove(existing);
+                    }
+                }
+
+                // 7b. Insert new items not already in the request
+                foreach (var line in merged.Where(m => !existingItemIds.Contains(m.ItemId)))
+                {
+                    var newItem = new RequestItem
+                    {
+                        RequestId = requestId,
+                        ItemId = line.ItemId,
+                        QuantityRequested = line.Quantity,
+                        QuantityApproved = 0,
+                        QuantityIssued = 0,
+                        Status = RequestItemStatus.PendingWithIssuer
+                    };
+                    request.RequestItems.Add(newItem);
+                    _logger.LogInformation("UpdateRequest: Added new item {ItemId} qty={Qty} to ReqId={RequestId}", line.ItemId, line.Quantity, requestId);
+                }
+
+                // ── 8. Update request audit fields ───────────────────────────────────────
+                request.UpdatedAt = DateTime.UtcNow;
+                await _requestRepo.UpdateRequestAsync(request);
+                await _requestRepo.SaveChangesAsync();
+
+                _logger.LogInformation("UpdateRequest: Successfully updated ReqId={RequestId} by UserId={UserId}", requestId, userId);
+
+                result.Success = true;
+                result.Message = "Request updated successfully.";
+                result.UpdatedAt = request.UpdatedAt;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateRequest: Unexpected error for ReqId={RequestId}", requestId);
+                result.Success = false;
+                result.Message = "An unexpected error occurred while updating the request.";
+            }
+
+            return result;
+        }
     }
 }
