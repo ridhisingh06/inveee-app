@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { InventoryItem, Category, InventoryActionResult } from '../models/item';
+import { RefreshService } from './refresh.service';
 
 /**
  * InventoryService
@@ -40,7 +41,7 @@ export class InventoryService {
   // Cache for quick lookup
   private itemsCache: Map<number | string, InventoryItem> = new Map();
   
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private refresh: RefreshService) {}
   
   /**
    * Load all inventory items from API
@@ -113,6 +114,9 @@ export class InventoryService {
           this.itemsCache.set(newItem.id, newItem);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
+          // ✅ Notify any subscribers (e.g. UserItemListComponent) that
+          //    inventory has changed so they can refresh without a page reload.
+          this.refresh.notifyInventory();
         }),
         catchError(err => {
           let errorMsg = this.handleError(err, 'Failed to add item');
@@ -160,6 +164,8 @@ export class InventoryService {
           this.itemsCache.set(id, updatedItem);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
+          // ✅ Notify subscribers that an item was updated.
+          this.refresh.notifyInventory();
         }),
         catchError(err => {
           const errorMsg = this.handleError(err, 'Failed to update item');
@@ -187,6 +193,8 @@ export class InventoryService {
           this.itemsCache.delete(id);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
+          // ✅ Notify subscribers that an item was deleted.
+          this.refresh.notifyInventory();
         }),
         catchError(err => {
           const errorMsg = this.handleError(err, 'Failed to delete item');
@@ -236,6 +244,8 @@ export class InventoryService {
           this.itemsCache.set(id, updatedItem);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
+          // ✅ Notify subscribers after stock increase.
+          this.refresh.notifyInventory();
         }),
         catchError(err => {
           const errorMsg = this.handleError(err, 'Failed to increase stock');
@@ -292,6 +302,8 @@ export class InventoryService {
           this.itemsCache.set(id, updatedItem);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
+          // ✅ Notify subscribers after stock decrease.
+          this.refresh.notifyInventory();
         }),
         catchError(err => {
           const errorMsg = this.handleError(err, 'Failed to decrease stock');

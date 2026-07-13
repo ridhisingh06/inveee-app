@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ADMIN_NAV_GROUPS } from '../models/nav-constants';
 import { environment } from '../../environments/environment';
+import { RefreshService } from '../services/refresh.service';
 
 interface SummaryData {
   totalCategories: number;
@@ -29,9 +30,24 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private refresh: RefreshService
+  ) {}
 
   ngOnInit() {
+    // ✅ Refresh summary whenever:
+    //    - An admin approves/rejects a pending-approval group (PendingApprovalsComponent)
+    //    - An admin approves/rejects a registration request (AdminPendingComponent)
+    //    Both emit on their respective streams so counts stay in sync.
+    this.refresh.adminApproval$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.fetchSummary());
+
+    this.refresh.registration$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.fetchSummary());
+
     this.fetchSummary();
   }
 
@@ -40,12 +56,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Fetch admin dashboard summary with proper error handling
-   */
   fetchSummary() {
     this.loadingError = '';
-    
+
     this.http.get<SummaryData>(`${environment.apiUrl}/admin/summary`)
       .pipe(takeUntil(this.destroy$))
       .subscribe({

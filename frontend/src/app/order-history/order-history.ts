@@ -5,18 +5,16 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { WorkflowService } from '../services/workflow.service';
+import { RefreshService } from '../services/refresh.service';
 import { getStatusClass } from '../utils/status.util';
 import { OrderHistoryList, OrderHistoryItem } from '../models/request.model';
 
 /**
  * OrderHistoryComponent — My Orders Page
  *
- * Displays paginated order history for the current user.
- * Features:
- *  - Search by request ID / item count
- *  - Sorting by date / status
- *  - Status filter chips
- *  - Click to view full order summary (receipt)
+ * Subscribes to RefreshService.orders$ so that when a user confirms receipt
+ * in UserCheckStatusComponent the order history table refreshes immediately
+ * without requiring a manual browser reload.
  */
 @Component({
   standalone: true,
@@ -30,14 +28,14 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   loading       = true;
   errorMsg      = '';
 
-  // ── Pagination ────────────────────────────────────────────────────────────
+  // ── Pagination ─────────────────────────────────────────────────────────────
   currentPage = 1;
   pageSize    = 12;
   totalCount  = 0;
 
-  // ── Search / filter ───────────────────────────────────────────────────────
+  // ── Search / filter ────────────────────────────────────────────────────────
   searchText = '';
-  statusFilter: string | null = null; // 'Received', 'Approved', etc.
+  statusFilter: string | null = null;
   sortBy: 'date' | 'status' = 'date';
 
   private readonly search$  = new Subject<string>();
@@ -46,13 +44,21 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly workflow: WorkflowService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly refresh: RefreshService
   ) {}
 
   ngOnInit(): void {
     this.search$
       .pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => this.loadOrders(1));
+
+    // ✅ Reload order history whenever a receipt is confirmed elsewhere
+    //    (e.g. UserCheckStatusComponent.receiveAll) so this list shows the
+    //    new order without a manual browser refresh.
+    this.refresh.orders$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadOrders(this.currentPage));
 
     this.loadOrders(1);
   }
@@ -84,8 +90,6 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
       });
   }
 
-  refresh(): void { this.loadOrders(this.currentPage); }
-
   onSearchChange(value: string): void {
     this.searchText = value;
     this.search$.next(value);
@@ -96,13 +100,11 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   applyClientFilters(orders: OrderHistoryItem[]): OrderHistoryItem[] {
     let filtered = [...orders];
 
-    // Status filter
     const normalizedStatusFilter = (this.statusFilter ?? '').toLowerCase();
     if (normalizedStatusFilter) {
       filtered = filtered.filter(o => (o.status ?? '').toLowerCase() === normalizedStatusFilter);
     }
 
-    // Search
     const normalizedSearchText = (this.searchText ?? '').trim().toLowerCase();
     if (normalizedSearchText) {
       filtered = filtered.filter(o =>
@@ -111,7 +113,6 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Sort
     if (this.sortBy === 'date') {
       filtered.sort((a, b) => new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime());
     } else if (this.sortBy === 'status') {
@@ -142,8 +143,4 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   get totalPages(): number { return Math.max(1, Math.ceil(this.totalCount / this.pageSize)); }
   prevPage(): void { if (this.currentPage > 1) this.loadOrders(this.currentPage - 1); }
   nextPage(): void { if (this.currentPage < this.totalPages) this.loadOrders(this.currentPage + 1); }
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  // getStatusClass provided by shared util
 }

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CartService, CartLine } from '../services/cart.service';
+import { RefreshService } from '../services/refresh.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -26,7 +27,8 @@ export class UserCartComponent implements OnInit, OnDestroy {
   constructor(
     private cart: CartService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private refresh: RefreshService
   ) {
     // Subscribe with takeUntil to prevent memory leaks
     this.cart.lines$.pipe(takeUntil(this.destroy$)).subscribe((lines) => (this.lines = lines));
@@ -41,11 +43,8 @@ export class UserCartComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Check if current user can submit a request
-   */
   private checkCanRequest() {
-    this.http.get<{canRequest: boolean, message: string}>(`${environment.apiUrl}/requests/can-request`)
+    this.http.get<{ canRequest: boolean; message: string }>(`${environment.apiUrl}/requests/can-request`)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
@@ -82,17 +81,13 @@ export class UserCartComponent implements OnInit, OnDestroy {
     return this.lines.reduce((acc, line) => acc + line.qty, 0);
   }
 
-  /**
-   * Submit the cart as a new request
-   */
   requestAll() {
     if (this.lines.length === 0) return;
-    
+
     this.submitting = true;
     this.errorMsg = '';
     this.successMsg = '';
 
-    // Transform cart lines into backend format
     const payload = {
       categoryId: null,
       items: this.lines.map(line => ({
@@ -108,11 +103,14 @@ export class UserCartComponent implements OnInit, OnDestroy {
           this.successMsg = 'Request submitted successfully!';
           this.cart.clear();
           this.submitting = false;
-          
-          // Navigate after a short delay to show success message
+
+          // ✅ Notify UserCheckStatusComponent / MyRequestsComponent to reload
+          //    immediately so the new request appears without a manual refresh.
+          this.refresh.notifyRequests();
+
           setTimeout(() => {
-            this.router.navigate(['/user-dashboard/check-status']);
-          }, 1500);
+            this.router.navigate(['/user-dashboard/my-requests']);
+          }, 1200);
         },
         error: (err) => {
           console.error('[UserCartComponent] Error submitting request:', err);

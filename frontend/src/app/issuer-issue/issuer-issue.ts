@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } fr
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { WorkflowService } from '../services/workflow.service';
+import { RefreshService } from '../services/refresh.service';
 import { IssuerPendingItem, IssuerPendingList } from '../models/request.model';
 import { normalizeStatus, getStatusLabel, getStatusClass } from '../utils/status.util';
 import { TotalRequestedPipe, TotalIssuePipe, TotalRejectPipe } from '../pipes/workflow-totals.pipe';
@@ -11,15 +12,10 @@ import { TotalRequestedPipe, TotalIssuePipe, TotalRejectPipe } from '../pipes/wo
 /**
  * IssuerIssueComponent — Partial Issuing Table
  *
- * Replaced the old binary Issue/Not-Issue per-item UI.
- *
- * New behaviour:
- *  - Fetches items from GET /api/issuer/pending (grouped by requestId)
- *  - Per request group: builds a ReactiveForm with one row per item
- *  - Each row: Issue Qty (editable), Reject Qty (auto = requested − issue), validation badge
- *  - Validation: issueQty + rejectQty = requestedQty AND issueQty ≤ availableQty
- *  - Submit via PUT /api/issuer/issue-partially (one call per request group)
- *  - Real-time low-stock warning when issueQty < requestedQty due to stock
+ * After a successful submit:
+ *  1. The submitted group is removed from the local view (instant feedback).
+ *  2. RefreshService.notifyIssuer() is called so IssuerDashboardComponent
+ *     reloads its stats cards without a manual browser refresh.
  */
 @Component({
   standalone: true,
@@ -31,18 +27,14 @@ import { TotalRequestedPipe, TotalIssuePipe, TotalRejectPipe } from '../pipes/wo
 export class IssuerIssueComponent implements OnInit, OnDestroy {
   // ── Data ─────────────────────────────────────────────────────────────────
   pendingList: IssuerPendingList | null = null;
-  /** requestId → grouped items */
   requestGroups: { requestId: number; requesterName: string; requestedDate: string; items: IssuerPendingItem[] }[] = [];
-  /** requestId → FormGroup */
   formMap: { [requestId: number]: FormGroup } = {};
 
   // ── UI state ─────────────────────────────────────────────────────────────
   loading       = true;
   errorMsg      = '';
   successMsg    = '';
-  /** requestId → true while submitting */
   submittingMap: { [requestId: number]: boolean } = {};
-  /** requestId → error string */
   submitErrorMap: { [requestId: number]: string } = {};
 
   // ── Pagination / search ───────────────────────────────────────────────────
@@ -56,7 +48,8 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly workflow: WorkflowService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly refresh: RefreshService
   ) {}
 
   ngOnInit(): void {
@@ -95,7 +88,7 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
       });
   }
 
-  refresh(): void { this.loadPage(this.currentPage); }
+  refresh_page(): void { this.loadPage(this.currentPage); }
 
   onSearchChange(value: string): void {
     this.searchText = value;
@@ -105,7 +98,6 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
   // ── Group + Form building ─────────────────────────────────────────────────
 
   private buildGroups(items: IssuerPendingItem[]): void {
-    // Filter by search text client-side (search is over item names / requester)
     const normalizedSearch = this.searchText.trim().toLowerCase();
     const filtered = normalizedSearch
       ? items.filter(i =>
@@ -114,7 +106,6 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
         )
       : items;
 
-    // Group by requestId
     const map = new Map<number, IssuerPendingItem[]>();
     for (const item of filtered) {
       const arr = map.get(item.requestId) ?? [];
@@ -133,7 +124,6 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
         items: groupItems
       });
 
-      // Build one FormGroup per request
       const rowControls = groupItems.map(item =>
         this.fb.group({
           requestItemId: [item.requestItemId],
@@ -152,7 +142,6 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
       const fg = this.fb.group({ rows: this.fb.array(rowControls) });
       this.formMap[requestId] = fg;
 
-      // Wire up auto-calculation and cross-validation for each row
       rowControls.forEach((rowFg, idx) => {
         rowFg.get('issueQty')!.valueChanges
           .pipe(takeUntil(this.destroy$))
@@ -177,14 +166,10 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
     const available = row.get('availableQty')!.value as number;
     const issue     = Math.max(0, parseInt(rawValue, 10) || 0);
     const clamped   = Math.min(issue, requested, available);
+    const reject    = requested - clamped;
 
-    // Reject = requested - issue (clamped)
-    const reject = requested - clamped;
-
-    // Silently update rejectQty without emitting (avoid circular loop)
     row.get('rejectQty')!.setValue(reject, { emitEvent: false });
 
-    // Clamp issueQty back if user typed more than allowed
     if (issue !== clamped) {
       row.get('issueQty')!.setValue(clamped, { emitEvent: false });
     }
@@ -253,10 +238,16 @@ export class IssuerIssueComponent implements OnInit, OnDestroy {
         next: (res) => {
           delete this.submittingMap[requestId];
           this.successMsg = res.message || `Request #${requestId} issued successfully.`;
-          // Remove the submitted group from the view
+
+          // Remove the submitted group from the view immediately.
           this.requestGroups = this.requestGroups.filter(g => g.requestId !== requestId);
           delete this.formMap[requestId];
           this.totalCount = Math.max(0, this.totalCount - payload.items.length);
+
+          // ✅ Notify IssuerDashboardComponent to refresh stats cards so the
+          //    "Pending" and "Issued" counts update without a page reload.
+          this.refresh.notifyIssuer();
+
           setTimeout(() => { this.successMsg = ''; }, 5000);
         },
         error: (err) => {

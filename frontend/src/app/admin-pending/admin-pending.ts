@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AdminPendingService, PendingUser } from './admin-pending.service';
+import { RefreshService } from '../services/refresh.service';
 
 @Component({
   selector: 'app-admin-pending',
@@ -9,7 +12,7 @@ import { AdminPendingService, PendingUser } from './admin-pending.service';
   templateUrl: './admin-pending.html',
   styleUrls: ['./admin-pending.css']
 })
-export class AdminPendingComponent implements OnInit {
+export class AdminPendingComponent implements OnInit, OnDestroy {
   pendingRequests: PendingUser[] = [];
   loading = false;
   loadingMore = false;
@@ -17,18 +20,28 @@ export class AdminPendingComponent implements OnInit {
   successMsg = '';
 
   // Cursor pagination state
-  limit = 10; // fixed page size
-  afterId: number | null = null; // id of the last item fetched
+  limit = 10;
+  afterId: number | null = null;
   totalRecords = 0;
 
   // Track approval/rejection states
   approvingId: number | null = null;
   rejectingId: number | null = null;
 
-  constructor(private adminPendingService: AdminPendingService) { }
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private adminPendingService: AdminPendingService,
+    private refresh: RefreshService
+  ) {}
 
   ngOnInit() {
     this.loadPendingRequests();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadPendingRequests(append = false) {
@@ -42,6 +55,7 @@ export class AdminPendingComponent implements OnInit {
     this.errorMsg = '';
 
     this.adminPendingService.getPendingUsers(this.afterId, this.limit)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           const fetched = res.data;
@@ -50,7 +64,6 @@ export class AdminPendingComponent implements OnInit {
           } else {
             this.pendingRequests = fetched;
           }
-          // Update cursor based on last item's id
           if (fetched.length > 0) {
             this.afterId = fetched[fetched.length - 1].id;
           }
@@ -73,15 +86,13 @@ export class AdminPendingComponent implements OnInit {
     }
   }
 
-  trackById(index: number, item: PendingUser) {
+  trackById(_index: number, item: PendingUser) {
     return item.id;
   }
 
-  // Use trackBy in ngFor to avoid unnecessary DOM re‑creation
   approve(id: number, roleId: number, departmentId: number) {
     if (!id || !roleId || !departmentId) {
       this.errorMsg = 'Invalid request data. Missing roleId or departmentId.';
-      console.error('[ERROR] Invalid approval payload:', { id, roleId, departmentId });
       return;
     }
 
@@ -89,45 +100,26 @@ export class AdminPendingComponent implements OnInit {
     this.errorMsg = '';
     this.successMsg = '';
 
-    const payload = { roleId, departmentId };
-    console.log('[INFO] Submitting approval request:', {
-      requestId: id,
-      payload,
-      timestamp: new Date().toISOString()
-    });
-
-    this.adminPendingService.approveUser(id, payload)
+    this.adminPendingService.approveUser(id, { roleId, departmentId })
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: any) => {
-          console.log('[✓] Approval successful:', {
-            requestId: id,
-            response: res,
-            timestamp: new Date().toISOString()
-          });
-
           this.successMsg = res.message || 'User approved successfully';
           this.removeRequestFromList(id);
 
-          // Clear success message after 3 seconds
-          setTimeout(() => {
-            this.successMsg = '';
-          }, 3000);
+          // ✅ Signal AdminDashboardComponent to refresh its summary counts.
+          this.refresh.notifyRegistration();
 
-          // Optionally refresh the list after a short delay to ensure DB is updated
-          setTimeout(() => {
-            if (this.pendingRequests.length === 0) {
-              this.loadPendingRequests();
-            }
-          }, 500);
+          setTimeout(() => { this.successMsg = ''; }, 3000);
+
+          // Reload list if now empty to pick up any further pending items.
+          if (this.pendingRequests.length === 0) {
+            this.loadPendingRequests();
+          }
         },
         error: (err: any) => {
           this.errorMsg = err?.error?.message || 'Unable to approve the selected request.';
-          console.error('[ERROR] Approval failed:', {
-            requestId: id,
-            error: err?.error,
-            status: err?.status,
-            timestamp: new Date().toISOString()
-          });
+          console.error('[ERROR] Approval failed:', err);
         },
         complete: () => {
           this.approvingId = null;
@@ -138,7 +130,6 @@ export class AdminPendingComponent implements OnInit {
   reject(id: number) {
     if (!id) {
       this.errorMsg = 'Invalid request data.';
-      console.error('[ERROR] Invalid rejection request:', { id });
       return;
     }
 
@@ -146,43 +137,25 @@ export class AdminPendingComponent implements OnInit {
     this.errorMsg = '';
     this.successMsg = '';
 
-    console.log('[INFO] Submitting rejection request:', {
-      requestId: id,
-      timestamp: new Date().toISOString()
-    });
-
     this.adminPendingService.rejectUser(id)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: any) => {
-          console.log('[✓] Rejection successful:', {
-            requestId: id,
-            response: res,
-            timestamp: new Date().toISOString()
-          });
-
           this.successMsg = res.message || 'User rejected successfully';
           this.removeRequestFromList(id);
 
-          // Clear success message after 3 seconds
-          setTimeout(() => {
-            this.successMsg = '';
-          }, 3000);
+          // ✅ Signal AdminDashboardComponent to refresh its summary counts.
+          this.refresh.notifyRegistration();
 
-          // Refresh list if needed
-          setTimeout(() => {
-            if (this.pendingRequests.length === 0) {
-              this.loadPendingRequests();
-            }
-          }, 500);
+          setTimeout(() => { this.successMsg = ''; }, 3000);
+
+          if (this.pendingRequests.length === 0) {
+            this.loadPendingRequests();
+          }
         },
         error: (err: any) => {
           this.errorMsg = err?.error?.message || 'Unable to reject the selected request.';
-          console.error('[ERROR] Rejection failed:', {
-            requestId: id,
-            error: err?.error,
-            status: err?.status,
-            timestamp: new Date().toISOString()
-          });
+          console.error('[ERROR] Rejection failed:', err);
         },
         complete: () => {
           this.rejectingId = null;

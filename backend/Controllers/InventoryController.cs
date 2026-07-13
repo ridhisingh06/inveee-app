@@ -149,7 +149,26 @@ public class InventoryController : ControllerBase
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Item updated: ItemId={ItemId}", id);
-        return Ok(new { message = "Item Updated Successfully" });
+
+        // Load category name for the response
+        var categoryName = "Uncategorized";
+        if (item.CategoryId > 0)
+        {
+            var cat = await _context.Categories.FindAsync(item.CategoryId);
+            if (cat != null) categoryName = cat.Name ?? categoryName;
+        }
+
+        return Ok(new
+        {
+            id = item.Id,
+            name = item.Name,
+            categoryId = item.CategoryId,
+            category = categoryName,
+            availableQuantity = stock?.AvailableQuantity ?? dto.TotalQuantity,
+            totalQuantity = stock?.TotalQuantity ?? dto.TotalQuantity,
+            description = item.Description,
+            createdDate = item.CreatedAt
+        });
     }
 
     //  DELETE ITEM

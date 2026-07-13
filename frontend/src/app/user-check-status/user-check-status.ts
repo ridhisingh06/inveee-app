@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { WorkflowService } from '../services/workflow.service';
 import { CartService } from '../services/cart.service';
+import { RefreshService } from '../services/refresh.service';
 import { normalizeStatus, getStatusClass, getStatusLabel } from '../utils/status.util';
 import { ReorderModalComponent } from './reorder-modal.component';
 
@@ -15,7 +18,7 @@ import { ReorderModalComponent } from './reorder-modal.component';
   templateUrl: './user-check-status.html',
   styleUrls: ['./user-check-status.css']
 })
-export class UserCheckStatusComponent implements OnInit {
+export class UserCheckStatusComponent implements OnInit, OnDestroy {
   normalizeStatus = normalizeStatus;
   getStatusClass = getStatusClass;
   getStatusLabel = getStatusLabel;
@@ -35,20 +38,38 @@ export class UserCheckStatusComponent implements OnInit {
   reorderSuggestions: any[] = [];
   reorderLoading = false;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private http: HttpClient,
     private workflow: WorkflowService,
     private cart: CartService,
-    private router: Router
+    private router: Router,
+    private refresh: RefreshService
   ) {}
 
-  ngOnInit() { this.loadRequests(); }
+  ngOnInit() {
+    // ✅ Subscribe to the requests refresh signal.
+    // EditRequestComponent emits this after a successful save so this list
+    // refreshes automatically — no manual browser reload required.
+    this.refresh.requests$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadRequests());
+
+    this.loadRequests();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   loadRequests() {
     this.loading  = true;
     this.errorMsg = '';
-    // Use the role-aware GET /api/requests endpoint (USER sees own requests)
+
     this.http.get<any>(`${environment.apiUrl}/requests`)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {
           this.requests = Array.isArray(res) ? res : (res.data ?? []);
@@ -70,19 +91,22 @@ export class UserCheckStatusComponent implements OnInit {
     this.errorMsg   = '';
 
     this.workflow.receiveItems(requestId)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          // Mark request as received in the local list
-          const req = this.requests.find((r: any) => r.id === requestId);
-          if (req) {
-            req.status = 'Received';
-            (req.items ?? []).forEach((i: any) => { i.status = 'Received'; });
-          }
           if (res.orderSummaryId) {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
           }
-          this.successMsg = `Request #${requestId} received! Order receipt generated.`;
           delete this.receivingMap[requestId];
+          this.successMsg = `Request #${requestId} received! Order receipt generated.`;
+
+          // ✅ Refresh the request list immediately with latest data from API
+          // instead of only mutating the local array (which can get out of sync).
+          this.loadRequests();
+
+          // ✅ Also notify OrderHistoryComponent to reload its list.
+          this.refresh.notifyOrders();
+
           setTimeout(() => { this.successMsg = ''; }, 6000);
         },
         error: (err: any) => {
@@ -97,22 +121,24 @@ export class UserCheckStatusComponent implements OnInit {
     if (summaryId) {
       this.router.navigate(['/user-dashboard/order-summary', summaryId]);
     } else {
-      // Try to look up via request ID
-      this.workflow.getOrderSummaryByRequestId(requestId).subscribe({
-        next: (os) => this.router.navigate(['/user-dashboard/order-summary', os.id]),
-        error: ()  => this.errorMsg = 'Order receipt not found for this request.'
-      });
+      this.workflow.getOrderSummaryByRequestId(requestId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (os) => this.router.navigate(['/user-dashboard/order-summary', os.id]),
+          error: ()  => this.errorMsg = 'Order receipt not found for this request.'
+        });
     }
   }
 
-  // ── Reorder logic ────────────────────────────────────────────────────────
+  // ── Reorder logic ─────────────────────────────────────────────────────────
 
   openReorderModal(requestId: number): void {
     this.isReorderModalOpen = true;
     this.reorderLoading = true;
     this.reorderSuggestions = [];
-    
+
     this.http.get<any[]>(`${environment.apiUrl}/requests/${requestId}/reorderable-items`)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           this.reorderSuggestions = res || [];
@@ -130,20 +156,25 @@ export class UserCheckStatusComponent implements OnInit {
   handleReorder(items: any[]): void {
     this.isReorderModalOpen = false;
     items.forEach(item => {
-      // Create a mock item object that matches what CartService expects.
-      // CartService expects an Item model, which should at least have id and name.
-      const mockItem = { id: item.itemId, name: item.itemName, stockLimit: 999, availableQuantity: 999, categoryId: 0, reorderLevel: 0 } as any;
+      const mockItem = {
+        id: item.itemId,
+        name: item.itemName,
+        stockLimit: 999,
+        availableQuantity: 999,
+        categoryId: 0,
+        reorderLevel: 0
+      } as any;
       this.cart.addItem(mockItem, item.suggestedQuantity);
     });
-    
+
     this.successMsg = 'Reorder items added to cart! Redirecting...';
-    setTimeout(() => { 
-      this.successMsg = ''; 
+    setTimeout(() => {
+      this.successMsg = '';
       this.router.navigate(['/user-dashboard/cart']);
     }, 1500);
   }
 
-  // ── Edit Request ─────────────────────────────────────────────────────────
+  // ── Edit Request ──────────────────────────────────────────────────────────
 
   /** A request is editable only if it is PendingWithIssuer and all items are still PendingWithIssuer */
   isEditable(req: any): boolean {
@@ -156,22 +187,16 @@ export class UserCheckStatusComponent implements OnInit {
     this.router.navigate(['/user-dashboard/edit-request', requestId]);
   }
 
-  // ── Per-item receive (legacy — kept for backward compat) ─────────────────
+  // ── Per-item receive (legacy — kept for backward compat) ──────────────────
 
   receiveItem(requestId: number, itemId: number) {
     this.http.patch(`${environment.apiUrl}/requests/${requestId}/items/${itemId}/receive`, {})
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          const req = this.requests.find((r: any) => r.id === requestId);
-          if (req?.items) {
-            const item = req.items.find((i: any) => i.id === itemId);
-            if (item) item.status = 'Received';
-            const allDone = req.items.every((i: any) => {
-              const s = this.normalizeStatus(i.status);
-              return s === 'received' || s === 'notissued' || s === 'rejected';
-            });
-            if (allDone) req.status = 'Received';
-          }
+          // ✅ Reload from API instead of mutating the local array to guarantee
+          //    the displayed data matches the database.
+          this.loadRequests();
           this.successMsg = 'Item marked as received.';
           setTimeout(() => { this.successMsg = ''; }, 3000);
         },
@@ -198,7 +223,6 @@ export class UserCheckStatusComponent implements OnInit {
     return req.items?.some((i: any) => i.issuerRejectedQuantity > 0) ?? false;
   }
 
-
   getStatusIcon(status: string): string {
     const s = this.normalizeStatus(status);
     if (s === 'pendingwithissuer')    return '1';
@@ -209,8 +233,6 @@ export class UserCheckStatusComponent implements OnInit {
     if (s === 'received')             return '✓';
     return '-';
   }
-
-  // getStatusClass and getStatusLabel are provided by imported utilities
 
   getItemStatusClass  = (s: string) => this.getStatusClass(s);
   getItemStatusLabel  = (s: string) => this.getStatusLabel(s);
@@ -228,6 +250,4 @@ export class UserCheckStatusComponent implements OnInit {
       return s === 'rejected' || s === 'notissued';
     }).length;
   }
-
-  // normalizeStatus is provided by imported utility
 }

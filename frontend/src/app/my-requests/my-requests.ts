@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { RefreshService } from '../services/refresh.service';
 import { normalizeStatus, getStatusClass, getStatusLabel } from '../utils/status.util';
 
 @Component({
@@ -13,7 +14,7 @@ import { normalizeStatus, getStatusClass, getStatusLabel } from '../utils/status
   templateUrl: './my-requests.html',
   styleUrls: ['./my-requests.css']
 })
-export class MyRequestsComponent implements OnInit {
+export class MyRequestsComponent implements OnInit, OnDestroy {
   requests: any[] = [];
   pageNumber = 1;
   pageSize = 10;
@@ -22,12 +23,21 @@ export class MyRequestsComponent implements OnInit {
   normalizeStatus = normalizeStatus;
   getStatusClass = getStatusClass;
   getStatusLabel = getStatusLabel;
-  
+
   private destroy$ = new Subject<void>();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private refresh: RefreshService
+  ) {}
 
   ngOnInit() {
+    // ✅ Reload whenever another component (EditRequest, UserCart, etc.)
+    //    signals that request data has changed.
+    this.refresh.requests$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.getMyRequests());
+
     this.getMyRequests();
   }
 
@@ -36,15 +46,13 @@ export class MyRequestsComponent implements OnInit {
     this.destroy$.complete();
   }
 
-  /**
-   * Fetch requests from API with proper error handling
-   */
   getMyRequests() {
     this.loading = true;
     this.errorMsg = '';
-    
-    this.http.get<any>(`${environment.apiUrl}/requests?pageNumber=${this.pageNumber}&pageSize=${this.pageSize}`)
-      .pipe(takeUntil(this.destroy$))
+
+    this.http.get<any>(
+      `${environment.apiUrl}/requests?pageNumber=${this.pageNumber}&pageSize=${this.pageSize}`
+    ).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           this.requests = Array.isArray(res) ? res : (res.data ?? []);
@@ -71,6 +79,4 @@ export class MyRequestsComponent implements OnInit {
       this.getMyRequests();
     }
   }
-
-  // getStatusClass and getStatusLabel provided by shared util
 }

@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { WorkflowService } from '../services/workflow.service';
+import { RefreshService } from '../services/refresh.service';
 import { AdminPendingItem, AdminPendingList } from '../models/request.model';
 import { normalizeStatus, getStatusLabel, getStatusClass } from '../utils/status.util';
 import {
@@ -15,14 +16,10 @@ import {
 /**
  * PendingApprovalsComponent — Admin Partial-Approval Table
  *
- * Replaces the old binary approve/reject-per-item UI.
- *
- * New behaviour:
- *  - Fetches items from GET /api/admin/pending (grouped by requestId)
- *  - Each item shows: Requested Qty, Issuer-Issued Qty, Approve Qty (editable), Reject Qty (auto)
- *  - Validation: approveQty + rejectQty = issuerIssuedQty, no negatives, approve ≤ issued
- *  - Submit per request group via PUT /api/admin/approve-partially
- *  - Rejected quantities are restored to inventory on the backend (inside a DB transaction)
+ * After a successful submit:
+ *  1. The submitted group is removed from the local view immediately.
+ *  2. RefreshService.notifyAdminApproval() is called so AdminDashboardComponent
+ *     re-fetches its summary counts without a manual page reload.
  */
 @Component({
   standalone: true,
@@ -47,16 +44,13 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
     items: AdminPendingItem[];
   }[] = [];
 
-  /** requestId → FormGroup */
   formMap: { [requestId: number]: FormGroup } = {};
 
   // ── UI state ─────────────────────────────────────────────────────────────
   loading       = true;
   errorMsg      = '';
   successMsg    = '';
-  /** requestId → true while submitting */
   submittingMap: { [requestId: number]: boolean } = {};
-  /** requestId → error string */
   submitErrorMap: { [requestId: number]: string } = {};
 
   // ── Pagination / search ───────────────────────────────────────────────────
@@ -70,7 +64,8 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly workflow: WorkflowService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly refresh: RefreshService
   ) {}
 
   ngOnInit(): void {
@@ -108,7 +103,7 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
       });
   }
 
-  refresh(): void { this.loadPage(this.currentPage); }
+  refresh_page(): void { this.loadPage(this.currentPage); }
 
   onSearchChange(value: string): void {
     this.searchText = value;
@@ -152,16 +147,14 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
           requestedQty:  [item.requestedQuantity],
           issuedQty:     [item.issuerIssuedQuantity],
           issuerRejected:[item.issuerRejectedQuantity],
-          // Default: approve all that issuer issued
-          approveQty: [item.issuerIssuedQuantity],
-          rejectQty:  [0]
+          approveQty:    [item.issuerIssuedQuantity],
+          rejectQty:     [0]
         })
       );
 
       const fg = this.fb.group({ rows: this.fb.array(rowControls) });
       this.formMap[requestId] = fg;
 
-      // Wire up live recalc for each row
       rowControls.forEach((rowFg, idx) => {
         rowFg.get('approveQty')!.valueChanges
           .pipe(takeUntil(this.destroy$))
@@ -236,7 +229,7 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
     const payload = {
       requestId,
       items: rows.controls.map(row => ({
-        requestItemId: row.get('requestItemId')!.value,
+        requestItemId:   row.get('requestItemId')!.value,
         approveQuantity: row.get('approveQty')!.value,
         rejectQuantity:  row.get('rejectQty')!.value
       }))
@@ -248,9 +241,16 @@ export class PendingApprovalsComponent implements OnInit, OnDestroy {
         next: (res) => {
           delete this.submittingMap[requestId];
           this.successMsg = res.message || `Request #${requestId} approved successfully.`;
+
+          // Remove submitted group from the view immediately.
           this.requestGroups = this.requestGroups.filter(g => g.requestId !== requestId);
           delete this.formMap[requestId];
           this.totalCount = Math.max(0, this.totalCount - payload.items.length);
+
+          // ✅ Notify AdminDashboardComponent to re-fetch its summary so the
+          //    counts in dashboard cards update without a browser refresh.
+          this.refresh.notifyAdminApproval();
+
           setTimeout(() => { this.successMsg = ''; }, 5000);
         },
         error: (err) => {

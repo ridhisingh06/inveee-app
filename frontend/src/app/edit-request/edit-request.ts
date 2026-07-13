@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RequestService } from '../services/request.service';
+import { RefreshService } from '../services/refresh.service';
 import { RequestDetailEnhanced } from '../models/request.model';
 import { Item } from '../models/item';
 
@@ -30,7 +31,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   successMsg = '';
 
   lines: EditLine[] = [];
-  
+
   // Inventory state for adding new items
   allItems: Item[] = [];
   filteredItems: Item[] = [];
@@ -44,7 +45,8 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private requestService: RequestService
+    private requestService: RequestService,
+    private refresh: RefreshService
   ) {}
 
   ngOnInit() {
@@ -84,7 +86,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: (req) => {
-                const r = req as any; // Cast for now, model might have changed slightly
+                const r = req as any;
                 this.lines = (r.items || []).map((ri: any) => ({
                   item: { id: ri.itemId, name: ri.itemName, category: 'Unknown' },
                   qty: ri.quantityRequested
@@ -142,7 +144,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   }
 
   // ── Add Item Flow ─────────────────────────────────────────────────────────
-  
+
   toggleItemSearch() {
     this.showItemSearch = !this.showItemSearch;
     if (this.showItemSearch) {
@@ -154,7 +156,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   filterItems() {
     const term = (this.searchText || '').toLowerCase().trim();
     if (!term) {
-      this.filteredItems = this.allItems.slice(0, 50); // Show max 50 by default
+      this.filteredItems = this.allItems.slice(0, 50);
       return;
     }
     this.filteredItems = this.allItems
@@ -185,7 +187,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
       this.errorMsg = 'Request must contain at least one item.';
       return;
     }
-    
+
     this.submitting = true;
     this.errorMsg = '';
     this.successMsg = '';
@@ -200,12 +202,20 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     this.requestService.updateRequest(this.requestId, payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res) => {
+        next: () => {
           this.successMsg = 'Request updated successfully!';
           this.submitting = false;
+
+          // ✅ Notify all subscribers that requests have changed so every
+          //    component (UserCheckStatusComponent, OrderHistoryComponent,
+          //    user dashboard counters) reloads immediately without a manual
+          //    browser refresh.
+          this.refresh.notifyRequests();
+
+          // Navigate back after a short visual confirmation delay.
           setTimeout(() => {
             this.router.navigate(['/user-dashboard/my-requests']);
-          }, 1500);
+          }, 1000);
         },
         error: (err) => {
           this.errorMsg = err.message || 'Failed to update request.';
