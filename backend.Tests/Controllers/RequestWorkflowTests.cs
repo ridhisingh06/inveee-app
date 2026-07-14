@@ -101,7 +101,7 @@ public class RequestWorkflowTests
     public void WorkflowEndpoints_RequireExpectedRoles()
     {
         AssertEndpointRoles(nameof(RequestsController.Issue), "ISSUER");
-        AssertEndpointRoles(nameof(RequestsController.IssueItem), "ISSUER");
+        AssertEndpointRoles(nameof(RequestsController.IssueItem), "ISSUER,ADMIN");
         AssertEndpointRoles(nameof(RequestsController.NotIssueItem), "ISSUER");
         AssertEndpointRoles(nameof(RequestsController.Approve), "ADMIN");
         AssertEndpointRoles(nameof(RequestsController.ApproveItem), "ADMIN");
@@ -179,12 +179,14 @@ public class RequestWorkflowTests
 
     private static RequestService CreateRequestService(AppDbContext db)
     {
-        return new RequestService(new RequestRepository(db), NullLogger<RequestService>.Instance);
+        return new RequestService(new RequestRepository(db, NullLogger<RequestRepository>.Instance), NullLogger<RequestService>.Instance);
     }
 
     private static RequestsController CreateRequestsController(AppDbContext db, IRequestService requestService, int userId, string role)
     {
-        var controller = new RequestsController(db, requestService, NullLogger<RequestsController>.Instance);
+        var orderSummarySvc = Moq.Mock.Of<invmgmt.web.Services.IOrderSummaryService>();
+        var config          = Moq.Mock.Of<Microsoft.Extensions.Configuration.IConfiguration>();
+        var controller = new RequestsController(db, requestService, orderSummarySvc, NullLogger<RequestsController>.Instance, config);
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext

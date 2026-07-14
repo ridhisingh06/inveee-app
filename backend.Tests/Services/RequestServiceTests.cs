@@ -21,7 +21,7 @@ namespace invmgmt.web.Tests.Services
         public RequestServiceTests()
         {
             _fixture = new BaseTestFixture();
-            _requestRepo = new RequestRepository(_fixture.DbContext);
+            _requestRepo = new RequestRepository(_fixture.DbContext, NullLogger<RequestRepository>.Instance);
             _service = new RequestService(_requestRepo, NullLogger<RequestService>.Instance);
         }
 

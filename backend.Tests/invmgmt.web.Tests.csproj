@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\invmgmt.web\invmgmt.web.csproj" />
+    <ProjectReference Include="..\backend\invmgmt.web.csproj" />
   </ItemGroup>
 
 </Project>
