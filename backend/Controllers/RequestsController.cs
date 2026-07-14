@@ -352,6 +352,7 @@ public sealed class RequestsController : ControllerBase
     /// <summary>
     /// PATCH /api/requests/{id}/receive
     /// User confirms they received items -> RECEIVED (only if APPROVED).
+    /// Also creates an immutable OrderSummary record and returns orderSummaryId.
     /// </summary>
     [Authorize(Roles = "USER")]
     [HttpPatch("{id:int}/receive")]
@@ -360,15 +361,35 @@ public sealed class RequestsController : ControllerBase
         try
         {
             var userId = User.GetUserId();
-            var result = await _requestService.ConfirmReceivedAsync(id, userId);
+
+            // Create the order summary (which also marks the request as Received internally)
+            var result = await _orderSummaryService.CreateOrderSummaryAsync(id, userId);
+
             if (!result.Success)
             {
-                if (result.Message == "Request not found") return NotFound(new { message = result.Message });
-                if (result.Message == "Request already received") return Conflict(new { message = result.Message });
+                // Surface domain-specific errors with appropriate status codes
+                if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                    return NotFound(new { message = result.Message });
+
+                if (result.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Idempotent: already received — look up the existing summary and return it
+                    var existing = await _orderSummaryService.GetOrderSummaryByRequestAsync(id);
+                    if (existing != null)
+                        return Ok(new { message = "Request already received.", orderSummaryId = existing.Id });
+                    return Conflict(new { message = result.Message });
+                }
+
                 return BadRequest(new { message = result.Message });
             }
 
-            return Ok(new { message = result.Message });
+            return Ok(new
+            {
+                message = result.Message,
+                orderSummaryId = result.OrderSummaryId,
+                requestId = result.RequestId,
+                receivedDate = result.ReceivedDate
+            });
         }
         catch (Exception ex)
         {
@@ -982,47 +1003,11 @@ public sealed class RequestsController : ControllerBase
     }
 
     /// <summary>
-    /// GET /api/requests/orders/{id}
-    /// Get complete order summary details (receipt-style)
-    /// </summary>
-    [Authorize(Roles = "USER")]
-    [HttpGet("orders/{id:int}")]
-    public async Task<IActionResult> GetOrderSummary(int id)
-    {
-        try
-        {
-            var userId = User.GetUserId();
-
-            _logger.LogInformation("Fetching order summary: Id={Id}, UserId={UserId}", id, userId);
-
-            var orderSummary = await _orderSummaryService.GetOrderSummaryByIdAsync(id);
-
-            if (orderSummary == null)
-            {
-                _logger.LogWarning("Order summary not found: Id={Id}", id);
-                return NotFound(new { message = "Order summary not found" });
-            }
-
-            // Verify user owns this order
-            if (orderSummary.UserId != userId)
-            {
-                _logger.LogWarning("Unauthorized access to order summary: Id={Id}, UserId={UserId}, ActualUserId={ActualUserId}",
-                    id, userId, orderSummary.UserId);
-                return Forbid();
-            }
-
-            return Ok(orderSummary);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching order summary: Id={Id}", id);
-            return StatusCode(500, new { message = "Error fetching order summary", error = ex.Message });
-        }
-    }
-
-    /// <summary>
     /// GET /api/requests/orders/by-request/{requestId}
-    /// Get order summary by original request ID
+    /// Get order summary by original request ID.
+    /// IMPORTANT: This route MUST be declared before orders/{id:int} so that
+    /// the literal segment "by-request" is matched first and is not swallowed
+    /// by the {id:int} integer-constraint route.
     /// </summary>
     [Authorize(Roles = "USER")]
     [HttpGet("orders/by-request/{requestId:int}")]
@@ -1063,8 +1048,46 @@ public sealed class RequestsController : ControllerBase
     [HttpOptions("orders/by-request/{requestId:int}")]
     public IActionResult OptionsOrderByRequest()
     {
-        // Respond to preflight OPTIONS request with appropriate CORS headers (handled by middleware)
         return Ok();
+    }
+
+    /// <summary>
+    /// GET /api/requests/orders/{id}
+    /// Get complete order summary details (receipt-style)
+    /// </summary>
+    [Authorize(Roles = "USER")]
+    [HttpGet("orders/{id:int}")]
+    public async Task<IActionResult> GetOrderSummary(int id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+
+            _logger.LogInformation("Fetching order summary: Id={Id}, UserId={UserId}", id, userId);
+
+            var orderSummary = await _orderSummaryService.GetOrderSummaryByIdAsync(id);
+
+            if (orderSummary == null)
+            {
+                _logger.LogWarning("Order summary not found: Id={Id}", id);
+                return NotFound(new { message = "Order summary not found" });
+            }
+
+            // Verify user owns this order
+            if (orderSummary.UserId != userId)
+            {
+                _logger.LogWarning("Unauthorized access to order summary: Id={Id}, UserId={UserId}, ActualUserId={ActualUserId}",
+                    id, userId, orderSummary.UserId);
+                return Forbid();
+            }
+
+            return Ok(orderSummary);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching order summary: Id={Id}", id);
+            return StatusCode(500, new { message = "Error fetching order summary", error = ex.Message });
+        }
     }
 
 
