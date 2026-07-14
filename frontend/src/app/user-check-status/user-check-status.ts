@@ -209,6 +209,9 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Status helpers ────────────────────────────────────────────────────────
 
   isRequestApproved(req: any): boolean {
+    // ✅ Show Receive button whenever the request is Approved (ReadyToReceive).
+    // This covers partial-issue scenarios where some items are NotIssued and
+    // the remaining approved items are ready for the user to collect.
     return this.normalizeStatus(req.status) === 'approved';
   }
 
@@ -220,7 +223,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   isItemReceived(status: string):  boolean { return this.normalizeStatus(status) === 'received'; }
 
   hasRejectedItems(req: any): boolean {
-    return req.items?.some((i: any) => i.issuerRejectedQuantity > 0) ?? false;
+    // ✅ Show the reorder prompt when any item was rejected at either stage.
+    return req.items?.some(
+      (i: any) => (i.issuerRejectedQuantity ?? 0) > 0 || (i.adminRejectedQuantity ?? 0) > 0
+    ) ?? false;
   }
 
   getStatusIcon(status: string): string {
@@ -239,12 +245,17 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
   // ── Counters ──────────────────────────────────────────────────────────────
 
-  get pendingCount()  { return this.requests.filter(r => { const s = this.normalizeStatus(r.status); return s === 'pendingwithissuer' || s === 'pendingadminapproval'; }).length; }
-  get requestedCount(){ return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingwithissuer').length; }
-  get issuedCount()   { return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingadminapproval').length; }
-  get approvedCount() { return this.requests.filter(r => this.normalizeStatus(r.status) === 'approved').length; }
-  get receivedCount() { return this.requests.filter(r => this.normalizeStatus(r.status) === 'received').length; }
-  get rejectedCount() {
+  get pendingCount(): number {
+    return this.requests.filter(r => {
+      const s = this.normalizeStatus(r.status);
+      return s === 'pendingwithissuer' || s === 'pendingadminapproval';
+    }).length;
+  }
+  get requestedCount(): number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingwithissuer').length; }
+  get issuedCount():    number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingadminapproval').length; }
+  get approvedCount():  number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'approved').length; }
+  get receivedCount():  number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'received').length; }
+  get rejectedCount():  number {
     return this.requests.filter(r => {
       const s = this.normalizeStatus(r.status);
       return s === 'rejected' || s === 'notissued';

@@ -183,16 +183,31 @@
       </div>
       <div class="summary-box blue">
         <div class="sb-value">{{ order.totalApprovedQuantity }}</div>
-        <div class="sb-label">Total Approved</div>
+        <div class="sb-label">Admin Approved</div>
+      </div>
+      <div class="summary-box orange">
+        <div class="sb-value">{{ totalIssuerRejected }}</div>
+        <div class="sb-label">Issuer Rejected</div>
       </div>
       <div class="summary-box red">
         <div class="sb-value">{{ order.totalRejectedQuantity }}</div>
-        <div class="sb-label">Total Rejected</div>
+        <div class="sb-label">Total Rejected
+          <span class="sb-hint">(Issuer + Admin)</span>
+        </div>
       </div>
       <div class="summary-box gray">
         <div class="sb-value">{{ order.totalRequestedQuantity }}</div>
         <div class="sb-label">Total Requested</div>
       </div>
+    </div>
+
+    <!-- ── Rejection Breakdown Note ── -->
+    <div class="rejection-note" *ngIf="order.totalRejectedQuantity > 0">
+      <strong>Rejection breakdown:</strong>
+      Issuer Rejected: {{ totalIssuerRejected }} &nbsp;|&nbsp;
+      Admin Rejected: {{ totalAdminRejected }} &nbsp;|&nbsp;
+      <strong>Final Rejected: {{ order.totalRejectedQuantity }}</strong>
+      ({{ totalIssuerRejected }} + {{ totalAdminRejected }})
     </div>
 
     <!-- ── Receipt Footer ── -->
