@@ -71,16 +71,30 @@ namespace invmgmt.web.Repositories
 
         public async Task<bool> HasActiveRequestAsync(int userId)
         {
-            // Business rule:
-            // - Block new requests while any existing request is waiting with issuer/admin or is in an approved state that still requires user action.
-            // - Allow new requests after a request reaches terminal states like Received, Rejected, or NotIssued.
-            // Note: "Approved" in the enum corresponds to "Ready to Receive" which should *not* block new requests.
-            var activeStatuses = new[] { RequestStatus.PendingWithIssuer, RequestStatus.PendingAdminApproval, RequestStatus.Pending };
-            var activeItemStatuses = new[] { Models.Enums.RequestItemStatus.PendingWithIssuer, Models.Enums.RequestItemStatus.PendingAdminApproval };
+            // ── Business Rule ────────────────────────────────────────────────────────
+            // A user is BLOCKED from creating a new request only when they have one in
+            // a non-terminal, in-progress state:
+            //   • PendingWithIssuer   — waiting for issuer to process
+            //   • PendingAdminApproval — waiting for admin to approve
+            //   • Approved (ReadyToReceive) — approved but user hasn't confirmed receipt
+            //
+            // A user is NOT blocked when the latest request is in a terminal state:
+            //   • Received  — fully completed workflow
+            //   • Rejected  — fully or partially rejected
+            //   • NotIssued — issuer rejected all items
+            //   • Pending   — legacy status treated as terminal if corrected below
+            // ────────────────────────────────────────────────────────────────────────
+            var activeStatuses = new[]
+            {
+                RequestStatus.PendingWithIssuer,
+                RequestStatus.PendingAdminApproval,
+                RequestStatus.Approved,   // ReadyToReceive — blocks until user clicks Receive
+                RequestStatus.Pending     // legacy alias
+            };
 
-            // First: detect and correct any requests whose recorded Request.Status is stale
-            // (e.g. still PendingWithIssuer while all underlying items are terminal). This
-            // ensures dashboards driven by item statuses and the request-level status stay in sync.
+            // Stale-status correction: if a request is recorded as active but its items
+            // have all reached terminal states, correct the request-level status so the
+            // user isn't permanently blocked.
             var candidates = await _context.Requests
                 .Where(r => r.UserId == userId && activeStatuses.Contains(r.Status))
                 .Include(r => r.RequestItems)
@@ -92,24 +106,21 @@ namespace invmgmt.web.Repositories
                 var recalculated = RecalculateStatusFromItems(req.RequestItems.Select(ri => ri.Status));
                 if (recalculated != req.Status)
                 {
-                    _logger.LogInformation("Correcting stale request status: RequestId={RequestId} {OldStatus} -> {NewStatus}", req.Id, req.Status, recalculated);
-                    req.Status = recalculated;
-                    req.UpdatedAt = System.DateTime.UtcNow;
+                    _logger.LogInformation(
+                        "Correcting stale request status: RequestId={RequestId} {OldStatus} -> {NewStatus}",
+                        req.Id, req.Status, recalculated);
+                    req.Status     = recalculated;
+                    req.UpdatedAt  = System.DateTime.UtcNow;
                     _context.Requests.Update(req);
                     changed = true;
                 }
             }
             if (changed)
-            {
                 await _context.SaveChangesAsync();
-            }
 
-            // Now evaluate active condition using both request-level and item-level states.
+            // After corrections, re-query using only the active statuses.
             return await _context.Requests
-                .AnyAsync(r => r.UserId == userId && (
-                    activeStatuses.Contains(r.Status)
-                    || r.RequestItems.Any(ri => activeItemStatuses.Contains(ri.Status))
-                ));
+                .AnyAsync(r => r.UserId == userId && activeStatuses.Contains(r.Status));
         }
 
         private static RequestStatus RecalculateStatusFromItems(IEnumerable<Models.Enums.RequestItemStatus> itemStatusesEnum)
@@ -117,15 +128,46 @@ namespace invmgmt.web.Repositories
             var itemStatuses = itemStatusesEnum.ToList();
             if (itemStatuses.Count == 0) return RequestStatus.PendingWithIssuer;
 
-            if (itemStatuses.Any(status => status == Models.Enums.RequestItemStatus.PendingWithIssuer)) return RequestStatus.PendingWithIssuer;
-            if (itemStatuses.Any(status => status == Models.Enums.RequestItemStatus.PendingAdminApproval)) return RequestStatus.PendingAdminApproval;
-            if (itemStatuses.All(status => status == Models.Enums.RequestItemStatus.NotIssued)) return RequestStatus.NotIssued;
-            if (itemStatuses.All(status => status == Models.Enums.RequestItemStatus.Received || status == Models.Enums.RequestItemStatus.NotIssued || status == Models.Enums.RequestItemStatus.Rejected))
+            // Still waiting for issuer
+            if (itemStatuses.Any(s => s == Models.Enums.RequestItemStatus.PendingWithIssuer))
+                return RequestStatus.PendingWithIssuer;
+
+            // Still waiting for admin approval
+            if (itemStatuses.Any(s => s == Models.Enums.RequestItemStatus.PendingAdminApproval))
+                return RequestStatus.PendingAdminApproval;
+
+            // Every item was rejected by the issuer — nothing to approve
+            if (itemStatuses.All(s => s == Models.Enums.RequestItemStatus.NotIssued))
+                return RequestStatus.NotIssued;
+
+            // All items are in terminal states (Received, NotIssued, Rejected)
+            var terminalStatuses = new[]
             {
-                if (itemStatuses.All(status => status == Models.Enums.RequestItemStatus.Received || status == Models.Enums.RequestItemStatus.NotIssued)) return RequestStatus.Received;
+                Models.Enums.RequestItemStatus.Received,
+                Models.Enums.RequestItemStatus.NotIssued,
+                Models.Enums.RequestItemStatus.Rejected
+            };
+            if (itemStatuses.All(s => terminalStatuses.Contains(s)))
+            {
+                // If at least one was received, the request completed (Received)
+                if (itemStatuses.Any(s => s == Models.Enums.RequestItemStatus.Received))
+                    return RequestStatus.Received;
                 return RequestStatus.Rejected;
             }
-            if (itemStatuses.All(status => status == Models.Enums.RequestItemStatus.Approved || status == Models.Enums.RequestItemStatus.NotIssued || status == Models.Enums.RequestItemStatus.Received)) return RequestStatus.Approved;
+
+            // ✅ Approved: all remaining non-terminal items are Approved; some may be NotIssued.
+            // This covers Scenario 1 & 2 — partial issue where some items got NotIssued
+            // by the issuer and the rest were approved by admin.
+            var approvedTerminalStatuses = new[]
+            {
+                Models.Enums.RequestItemStatus.Approved,
+                Models.Enums.RequestItemStatus.NotIssued,
+                Models.Enums.RequestItemStatus.Received
+            };
+            if (itemStatuses.All(s => approvedTerminalStatuses.Contains(s))
+                && itemStatuses.Any(s => s == Models.Enums.RequestItemStatus.Approved))
+                return RequestStatus.Approved;
+
             return RequestStatus.Rejected;
         }
 

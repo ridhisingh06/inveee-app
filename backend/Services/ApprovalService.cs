@@ -246,16 +246,37 @@ namespace invmgmt.web.Services
                             });
                         }
 
-                        // STEP 7: Update request status if all items approved
-                        if (await _requestItemRepo.AllItemsApprovedAsync(dto.RequestId))
-                        {
-                            request.Status = RequestStatus.Approved;
-                            request.ApprovedDate = approvedDate;
-                            request.ApprovedBy = adminId;
-                            request.UpdatedAt = approvedDate;
-                            _context.Requests.Update(request);
+                        // STEP 7: Recalculate request status from item statuses.
+                        //
+                        // ✅ Business rule: after admin processes all PendingAdminApproval items,
+                        // the request moves to Approved (ReadyToReceive) if at least one item
+                        // was approved — even when other items are NotIssued (issuer-rejected).
+                        //
+                        // We reload items from the context (tracked) so RecalculateStatus()
+                        // sees the freshly-updated statuses written by UpdateAdminQuantitiesAsync.
+                        var updatedItems = await _context.RequestItems
+                            .Where(ri => ri.RequestId == dto.RequestId)
+                            .ToListAsync();
 
-                            _logger.LogInformation("Request status updated to Approved: RequestId={RequestId}", dto.RequestId);
+                        // Reload the tracked request so we can mutate and save it.
+                        var trackedRequest = await _context.Requests.FindAsync(dto.RequestId);
+                        if (trackedRequest != null)
+                        {
+                            // Attach the freshly-loaded items so RecalculateStatus can read them.
+                            trackedRequest.RequestItems = updatedItems;
+                            trackedRequest.RecalculateStatus();
+
+                            if (trackedRequest.Status == RequestStatus.Approved)
+                            {
+                                trackedRequest.ApprovedDate = approvedDate;
+                                trackedRequest.ApprovedBy   = adminId;
+                            }
+                            trackedRequest.UpdatedAt = approvedDate;
+                            _context.Requests.Update(trackedRequest);
+
+                            _logger.LogInformation(
+                                "Request status after admin approval: RequestId={RequestId}, Status={Status}",
+                                dto.RequestId, trackedRequest.Status);
                         }
 
                         // STEP 8: Single SaveChanges — covers inventory restoration,

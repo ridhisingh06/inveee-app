@@ -41,6 +41,16 @@ namespace invmgmt.web.Models
 
         /// <summary>
         /// Recalculates and updates the overall Request status based on its RequestItems.
+        ///
+        /// Priority order (highest wins):
+        ///  1. Any item still PendingWithIssuer  → PendingWithIssuer
+        ///  2. Any item still PendingAdminApproval → PendingAdminApproval
+        ///  3. All items NotIssued               → NotIssued  (issuer rejected everything)
+        ///  4. All items in {Approved, NotIssued, Received}
+        ///     and at least one Approved          → Approved   (ReadyToReceive)
+        ///  5. All items in terminal states
+        ///     and at least one Received          → Received
+        ///  6. All items terminal, none Received  → Rejected
         /// </summary>
         public void RecalculateStatus()
         {
@@ -52,38 +62,56 @@ namespace invmgmt.web.Models
 
             var itemStatuses = RequestItems.Select(ri => ri.Status).ToList();
 
-            if (itemStatuses.Any(status => status == RequestItemStatus.PendingWithIssuer))
+            // 1. Still waiting for issuer
+            if (itemStatuses.Any(s => s == RequestItemStatus.PendingWithIssuer))
             {
                 Status = RequestStatus.PendingWithIssuer;
                 return;
             }
 
-            if (itemStatuses.Any(status => status == RequestItemStatus.PendingAdminApproval))
+            // 2. Still waiting for admin
+            if (itemStatuses.Any(s => s == RequestItemStatus.PendingAdminApproval))
             {
                 Status = RequestStatus.PendingAdminApproval;
                 return;
             }
 
-            if (itemStatuses.All(status => status == RequestItemStatus.NotIssued))
+            // 3. Issuer rejected everything
+            if (itemStatuses.All(s => s == RequestItemStatus.NotIssued))
             {
                 Status = RequestStatus.NotIssued;
                 return;
             }
 
-            if (itemStatuses.All(status => status == RequestItemStatus.Received || status == RequestItemStatus.NotIssued || status == RequestItemStatus.Rejected))
+            // 4. ✅ Approved (ReadyToReceive): all remaining items are Approved,
+            //    NotIssued (issuer-rejected), or already Received — and at least
+            //    one is Approved.  This handles partial-issue scenarios where some
+            //    items were rejected by the issuer and others were approved by admin.
+            var approvedGroup = new[]
             {
-                if (itemStatuses.All(status => status == RequestItemStatus.Received || status == RequestItemStatus.NotIssued))
-                {
-                    Status = RequestStatus.Received;
-                    return;
-                }
-                Status = RequestStatus.Rejected;
+                RequestItemStatus.Approved,
+                RequestItemStatus.NotIssued,
+                RequestItemStatus.Received
+            };
+            if (itemStatuses.All(s => approvedGroup.Contains(s))
+                && itemStatuses.Any(s => s == RequestItemStatus.Approved))
+            {
+                Status = RequestStatus.Approved;
                 return;
             }
 
-            if (itemStatuses.All(status => status == RequestItemStatus.Approved || status == RequestItemStatus.NotIssued || status == RequestItemStatus.Received))
+            // 5 & 6. All terminal
+            var terminalGroup = new[]
             {
-                Status = RequestStatus.Approved;
+                RequestItemStatus.Received,
+                RequestItemStatus.NotIssued,
+                RequestItemStatus.Rejected
+            };
+            if (itemStatuses.All(s => terminalGroup.Contains(s)))
+            {
+                Status = itemStatuses.Any(s => s == RequestItemStatus.Received)
+                    ? RequestStatus.Received
+                    : RequestStatus.Rejected;
                 return;
             }
 

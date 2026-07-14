@@ -69,12 +69,15 @@ namespace invmgmt.web.Services
                     return response;
                 }
 
-                // STEP 2: Validate request is approved
+                // STEP 2: Validate request is ready to receive.
+                // ✅ Accept both Approved (all items processed) and the edge case where
+                // the request is still technically Approved while some items are NotIssued
+                // — both represent a completed workflow that the user can now receive.
                 if (request.Status != RequestStatus.Approved)
                 {
                     _logger.LogWarning("Request is not approved: RequestId={RequestId}, Status={Status}", requestId, request.Status);
                     response.Success = false;
-                    response.Message = $"Request must be approved before receiving items. Current status: {request.Status}";
+                    response.Message = $"Only approved requests can be received. Current status: {request.Status}";
                     return response;
                 }
 
@@ -87,37 +90,55 @@ namespace invmgmt.web.Services
                     return response;
                 }
 
-                // STEP 4: Calculate summary quantities from request items
+                // STEP 4: Calculate summary quantities from request items.
+                // FinalRejectedQuantity = IssuerRejectedQuantity + AdminRejectedQuantity (per item).
                 var orderItems = new List<OrderSummaryItem>();
                 int totalRequested = 0;
-                int totalIssued = 0;
-                int totalApproved = 0;
-                int totalRejected = 0;
-                int totalReceived = 0;
+                int totalIssued    = 0;
+                int totalApproved  = 0;
+                int totalRejected  = 0;
+                int totalReceived  = 0;
 
                 foreach (var requestItem in request.RequestItems)
                 {
+                    // Items the issuer fully rejected (NotIssued) have 0 issued / 0 approved.
+                    var issuedQty    = requestItem.IssuerIssuedQuantity;
+                    var approvedQty  = requestItem.AdminApprovedQuantity;
+                    var receivedQty  = approvedQty; // user receives what admin approved
+
+                    // ✅ Final rejected = issuer rejected + admin rejected
+                    var issuerRejected = requestItem.IssuerRejectedQuantity;
+                    var adminRejected  = requestItem.AdminRejectedQuantity;
+
                     totalRequested += requestItem.QuantityRequested;
-                    totalIssued += requestItem.IssuerIssuedQuantity;
-                    totalApproved += requestItem.AdminApprovedQuantity;
-                    totalRejected += requestItem.IssuerRejectedQuantity + requestItem.AdminRejectedQuantity;
-                    totalReceived += requestItem.AdminApprovedQuantity; // User receives what admin approved
+                    totalIssued    += issuedQty;
+                    totalApproved  += approvedQty;
+                    totalRejected  += issuerRejected + adminRejected;
+                    totalReceived  += receivedQty;
 
-                    // Create order summary item (immutable copy of transaction details)
-                    var orderItem = new OrderSummaryItem
+                    orderItems.Add(new OrderSummaryItem
                     {
-                        ItemId = requestItem.ItemId,
-                        RequestedQuantity = requestItem.QuantityRequested,
-                        IssuedQuantity = requestItem.IssuerIssuedQuantity,
-                        IssuerRejectedQuantity = requestItem.IssuerRejectedQuantity,
-                        ApprovedQuantity = requestItem.AdminApprovedQuantity,
-                        AdminRejectedQuantity = requestItem.AdminRejectedQuantity,
-                        ReceivedQuantity = requestItem.AdminApprovedQuantity,
-                        RequestItemId = requestItem.Id,
-                        CreatedAt = DateTime.UtcNow
-                    };
+                        ItemId                 = requestItem.ItemId,
+                        RequestedQuantity      = requestItem.QuantityRequested,
+                        IssuedQuantity         = issuedQty,
+                        IssuerRejectedQuantity = issuerRejected,
+                        ApprovedQuantity       = approvedQty,
+                        AdminRejectedQuantity  = adminRejected,
+                        ReceivedQuantity       = receivedQty,
+                        RequestItemId          = requestItem.Id,
+                        CreatedAt              = DateTime.UtcNow
+                    });
+                }
 
-                    orderItems.Add(orderItem);
+                // Mark all Approved items as Received; NotIssued/Rejected items stay as-is.
+                foreach (var ri in request.RequestItems)
+                {
+                    if (ri.Status == RequestItemStatus.Approved)
+                    {
+                        ri.Status           = RequestItemStatus.Received;
+                        ri.ReceivedQuantity = ri.AdminApprovedQuantity;
+                        ri.ReceivedDate     = DateTime.UtcNow;
+                    }
                 }
 
                 // STEP 5: Create order summary

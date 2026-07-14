@@ -83,11 +83,16 @@ namespace invmgmt.web.Repositories
             }
 
             // Update issuer quantities
-            requestItem.IssuerIssuedQuantity = issuerIssuedQuantity;
+            requestItem.IssuerIssuedQuantity   = issuerIssuedQuantity;
             requestItem.IssuerRejectedQuantity = issuerRejectedQuantity;
-            requestItem.IssuedDate = issuedDate;
-            requestItem.IssuedBy = issuedByUserId;
-            requestItem.Status = RequestItemStatus.PendingAdminApproval;
+            requestItem.IssuedDate             = issuedDate;
+            requestItem.IssuedBy               = issuedByUserId;
+
+            // ✅ If the issuer issued 0 units (fully rejected), the item is NotIssued
+            // and must NOT go to PendingAdminApproval — there is nothing for admin to review.
+            requestItem.Status = issuerIssuedQuantity > 0
+                ? RequestItemStatus.PendingAdminApproval
+                : RequestItemStatus.NotIssued;
 
             // Increment concurrency token for optimistic locking
             requestItem.ConcurrencyToken++;
@@ -116,9 +121,14 @@ namespace invmgmt.web.Repositories
             // Update admin quantities
             requestItem.AdminApprovedQuantity = adminApprovedQuantity;
             requestItem.AdminRejectedQuantity = adminRejectedQuantity;
-            requestItem.ApprovedDate = approvedDate;
-            requestItem.ApprovedBy = approvedByUserId;
-            requestItem.Status = RequestItemStatus.Approved;
+            requestItem.ApprovedDate          = approvedDate;
+            requestItem.ApprovedBy            = approvedByUserId;
+
+            // ✅ If admin approved 0 units (fully rejected), mark as Rejected.
+            // Only mark Approved when at least 1 unit was approved.
+            requestItem.Status = adminApprovedQuantity > 0
+                ? RequestItemStatus.Approved
+                : RequestItemStatus.Rejected;
 
             // Increment concurrency token
             requestItem.ConcurrencyToken++;
@@ -252,12 +262,13 @@ namespace invmgmt.web.Repositories
 
         public async Task<bool> AllItemsApprovedAsync(int requestId)
         {
-            // Check if all items in the request have been approved (not PendingAdminApproval)
-            var pendingCount = await _context.RequestItems
-                .Where(ri => ri.RequestId == requestId && ri.Status == RequestItemStatus.PendingAdminApproval)
-                .CountAsync();
-
-            return pendingCount == 0;
+            // ✅ A request is fully processed from admin's perspective when no item is
+            // still PendingAdminApproval.  NotIssued items (issuer-rejected) are terminal
+            // and must NOT block this check — they will never reach PendingAdminApproval.
+            return !await _context.RequestItems
+                .Where(ri => ri.RequestId == requestId
+                          && ri.Status == RequestItemStatus.PendingAdminApproval)
+                .AnyAsync();
         }
 
         public async Task SaveChangesAsync()
