@@ -40,6 +40,12 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    // ✅ Ensure all JSON property names are camelCase so Angular can access
+    //    them as editableRes.editable, editableRes.reason, etc.
+    //    Without this, .NET serializes C# PascalCase properties as-is
+    //    (e.g. "Editable" instead of "editable") which causes undefined
+    //    reads on the frontend.
+    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

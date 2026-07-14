@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subject, forkJoin } from 'rxjs';
-import { switchMap, takeUntil } from 'rxjs/operators';
+import { takeUntil, timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RequestService } from '../services/request.service';
 import { RefreshService } from '../services/refresh.service';
@@ -31,7 +31,6 @@ export class EditRequestComponent implements OnInit, OnDestroy {
 
   lines: EditLine[] = [];
 
-  // Inventory state for adding new items
   allItems: Item[] = [];
   filteredItems: Item[] = [];
   searchText = '';
@@ -69,12 +68,15 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load the editable check AND the full request details in a single
-   * sequential chain (switchMap), plus the inventory list in parallel via
-   * forkJoin so both arrive at the same time.
+   * Load the request details and inventory list in parallel.
    *
-   * This replaces the old two-subscription nested pattern which was fragile
-   * and doubled the perceived latency.
+   * The editability check is derived from the request data itself
+   * (status + item statuses) rather than making a separate API call to
+   * /editable — this removes one network round-trip and eliminates the
+   * risk of the page hanging when that endpoint is slow.
+   *
+   * A 15-second timeout guard prevents the spinner from running forever
+   * if the backend is unreachable.
    */
   loadAll() {
     if (!this.requestId) return;
@@ -82,15 +84,17 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     this.inventoryLoading = true;
     this.errorMsg = '';
 
-    // ── Parallel: editable-check + inventory ──────────────────────────────
     forkJoin({
-      editable: this.requestService.isRequestEditable(this.requestId),
+      request: this.requestService.getRequestById(this.requestId),
       inventory: this.http.get<any[]>(`${environment.apiUrl}/inventory`)
     })
-    .pipe(takeUntil(this.destroy$))
+    .pipe(
+      timeout(15000),          // 15 s hard cap — prevents infinite spinner
+      takeUntil(this.destroy$)
+    )
     .subscribe({
-      next: ({ editable, inventory }) => {
-        // ── Populate inventory list (used by Add New Item panel) ──────────
+      next: ({ request, inventory }) => {
+        // ── Populate inventory list for the Add New Item panel ────────────
         this.allItems = (inventory || []).map((i: any) => ({
           id: i.id,
           name: i.name,
@@ -98,53 +102,54 @@ export class EditRequestComponent implements OnInit, OnDestroy {
         }));
         this.inventoryLoading = false;
 
-        // ── Guard: property may arrive as "editable" OR "Editable" ────────
-        // The backend now emits camelCase via PropertyNamingPolicy, but this
-        // defensive check keeps things working even against older cached builds.
-        const isEditable: boolean =
-          (editable as any)['editable'] ?? (editable as any)['Editable'] ?? false;
-        const reason: string =
-          (editable as any)['reason'] ?? (editable as any)['Reason'] ?? '';
+        const r = request as any;
 
-        if (!isEditable) {
-          this.errorMsg = reason || 'This request can no longer be edited.';
+        // ── Derive editability from the response directly ─────────────────
+        // A request is editable when:
+        //   1. Request-level status is PendingWithIssuer
+        //   2. Every item is still PendingWithIssuer (issuer hasn't touched it)
+        const reqStatus: string = (r.status ?? r.Status ?? '').toLowerCase().trim();
+        const items: any[] = r.items ?? r.Items ?? [];
+
+        const isPendingWithIssuer = reqStatus === 'pendingwithissuer' || reqStatus === 'requested';
+
+        const allItemsPending = items.length > 0 && items.every((i: any) => {
+          const s = (i.status ?? i.Status ?? '').toLowerCase().trim();
+          return s === 'pendingwithissuer' || s === 'requested';
+        });
+
+        if (!isPendingWithIssuer || !allItemsPending) {
+          // Not editable — show a clear message and offer to go back
+          this.errorMsg = isPendingWithIssuer
+            ? 'The issuer has started processing this request. Editing is no longer allowed.'
+            : `This request is in "${r.status ?? 'unknown'}" status and can no longer be edited.`;
           this.loading = false;
           return;
         }
 
-        // ── Load request details only if editable ─────────────────────────
-        this.requestService.getRequestById(this.requestId!)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (req) => {
-              const r = req as any;
-              this.lines = (r.items || []).map((ri: any) => ({
-                item: {
-                  id: ri.itemId ?? ri.ItemId,
-                  name: ri.itemName ?? ri.ItemName ?? 'Unknown',
-                  category: 'Unknown'
-                },
-                qty: ri.quantityRequested ?? ri.QuantityRequested ?? 1
-              }));
-              this.loading = false;
-            },
-            error: (err) => {
-              this.errorMsg = err.message || 'Failed to load request details.';
-              this.loading = false;
-            }
-          });
+        // ── Populate edit lines ───────────────────────────────────────────
+        this.lines = items.map((ri: any) => ({
+          item: {
+            id: ri.itemId ?? ri.ItemId,
+            name: ri.itemName ?? ri.ItemName ?? 'Unknown',
+            category: 'Unknown'
+          },
+          qty: ri.quantityRequested ?? ri.QuantityRequested ?? 1
+        }));
+
+        this.loading = false;
       },
       error: (err) => {
-        // If either parallel call fails, surface the error immediately.
-        this.errorMsg = err?.message || 'Failed to load request. Please try again.';
+        if (err?.name === 'TimeoutError') {
+          this.errorMsg = 'Request timed out. Please check your connection and try again.';
+        } else {
+          this.errorMsg = err?.message || 'Failed to load request. Please try again.';
+        }
         this.loading = false;
         this.inventoryLoading = false;
       }
     });
   }
-
-  // ── Kept for explicit manual refresh (not currently called by template) ──
-  loadRequest() { this.loadAll(); }
 
   changeQty(itemId: string | number, currentQty: number, delta: 1 | -1) {
     const next = currentQty + delta;
@@ -161,7 +166,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     return this.lines.reduce((acc, line) => acc + line.qty, 0);
   }
 
-  // ── Add Item Flow ─────────────────────────────────────────────────────────
+  // ── Add Item Panel ────────────────────────────────────────────────────────
 
   toggleItemSearch() {
     this.showItemSearch = !this.showItemSearch;

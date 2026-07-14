@@ -19,8 +19,13 @@
     <div class="spinner"></div>
     <p>Loading request details...</p>
   </div>
-  
-  <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- Error state: shows message + a way back so user is never trapped -->
+  <div class="error-block" *ngIf="!loading && errorMsg">
+    <div class="error-msg">{{ errorMsg }}</div>
+    <button class="btn-cancel" style="margin-top:16px" (click)="cancel()">← Back to My Requests</button>
+  </div>
+
   <div class="success-msg" *ngIf="successMsg">{{ successMsg }}</div>
 
   <!-- ════════════════════ EDIT FORM ════════════════════ -->
