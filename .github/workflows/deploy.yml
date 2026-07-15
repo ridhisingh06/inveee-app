@@ -123,6 +123,36 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: DEBUG — Verify installation and environment
+        working-directory: frontend
+        run: |
+          echo "=== Current working directory ==="
+          pwd
+          echo ""
+          echo "=== Directory listing ==="
+          ls -la
+          echo ""
+          echo "=== node_modules/.bin directory ==="
+          ls -la node_modules/.bin/ 2>/dev/null || echo "node_modules/.bin not found"
+          echo ""
+          echo "=== Check for ng binary ==="
+          ls -la node_modules/.bin/ng 2>/dev/null || echo "ng binary not found in node_modules/.bin"
+          echo ""
+          echo "=== npm ls @angular/cli ==="
+          npm ls @angular/cli
+          echo ""
+          echo "=== npx ng version ==="
+          npx ng version
+          echo ""
+          echo "=== NODE_ENV ==="
+          echo "NODE_ENV=$NODE_ENV"
+          echo ""
+          echo "=== npm config ==="
+          npm config get production
+          echo ""
+          echo "=== PATH ==="
+          echo $PATH
+
       - name: Build project via Vercel
         working-directory: frontend
         run: vercel build --prod --token $VERCEL_TOKEN
