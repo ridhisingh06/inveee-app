@@ -177,21 +177,14 @@ jobs:
           echo "=== PATH ==="
           echo $PATH
 
-      - name: Build Angular
-        working-directory: frontend
-        run: npm run build
-
-      - name: DEBUG — build output
+      - name: Deploy Frontend
         working-directory: frontend
         run: |
-          echo "=== dist/ directory ==="
-          ls -la dist/ 2>/dev/null || echo "dist/ not found"
-          echo "=== dist/index.html ==="
-          ls -la dist/index.html 2>/dev/null || echo "index.html not found"
-
-      - name: Deploy to Vercel (production)
-        working-directory: frontend
-        run: vercel deploy --prebuilt --prod --token $VERCEL_TOKEN
+          vercel deploy \
+            --prod \
+            --yes \
+            --token=$VERCEL_TOKEN \
+            --scope=$VERCEL_ORG_ID
 
       - name: DEBUG — post-deployment
         if: always()
@@ -201,8 +194,6 @@ jobs:
           pwd
           echo "=== .vercel/project.json ==="
           cat .vercel/project.json 2>/dev/null || echo "not found"
-          echo "=== Build output ==="
-          ls -la dist/ 2>/dev/null || echo "dist directory not found"
 
   # ----------------------------------------------------------------
   # BACKEND DEPLOY  (AWS ECS / Fargate)
