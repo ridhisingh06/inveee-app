@@ -138,7 +138,7 @@
           <button
             class="receive-btn"
             [disabled]="receivingMap[req.id]"
-            (click)="receiveAll(req.id)"
+            (click)="openReceiveConfirmDialog(req.id)"
           >
             <span *ngIf="receivingMap[req.id]">
               <span class="btn-spinner"></span> Confirming…
@@ -183,5 +183,31 @@
     (close)="isReorderModalOpen = false"
     (reorder)="handleReorder($event)">
   </app-reorder-modal>
+
+  <!-- Receive Confirmation Dialog -->
+  <div class="dialog-overlay" *ngIf="isReceiveConfirmDialogOpen" (click)="closeReceiveConfirmDialog()">
+    <div class="dialog-box" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h3>Confirm Receipt</h3>
+        <button class="dialog-close-btn" (click)="closeReceiveConfirmDialog()">
+          <svg viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+            <path d="M4.72 4.72a.75.75 0 0 1 1.06 0L10 8.94l4.22-4.22a.75.75 0 1 1 1.06 1.06L11.06 10l4.22 4.22a.75.75 0 1 1-1.06 1.06L10 11.06l-4.22 4.22a.75.75 0 0 1-1.06-1.06L8.94 10 4.72 5.78a.75.75 0 0 1 0-1.06Z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="dialog-body">
+        <p>Have you received the items for Request #{{ receiveConfirmRequestId }}?</p>
+        <p class="dialog-subtext">This action will mark the request as received and generate your order receipt.</p>
+      </div>
+      <div class="dialog-footer">
+        <button class="dialog-btn dialog-btn-secondary" (click)="closeReceiveConfirmDialog()">
+          Cancel
+        </button>
+        <button class="dialog-btn dialog-btn-primary" (click)="confirmReceive()">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
 
 </div>

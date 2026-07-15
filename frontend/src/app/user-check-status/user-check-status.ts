@@ -38,6 +38,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   reorderSuggestions: any[] = [];
   reorderLoading = false;
 
+  // Receive Confirmation Dialog State
+  isReceiveConfirmDialogOpen = false;
+  receiveConfirmRequestId: number | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -83,6 +87,23 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   // ── Receive entire approved request ──────────────────────────────────────
+
+  openReceiveConfirmDialog(requestId: number): void {
+    this.receiveConfirmRequestId = requestId;
+    this.isReceiveConfirmDialogOpen = true;
+  }
+
+  closeReceiveConfirmDialog(): void {
+    this.isReceiveConfirmDialogOpen = false;
+    this.receiveConfirmRequestId = null;
+  }
+
+  confirmReceive(): void {
+    if (!this.receiveConfirmRequestId) return;
+    
+    this.closeReceiveConfirmDialog();
+    this.receiveAll(this.receiveConfirmRequestId);
+  }
 
   receiveAll(requestId: number): void {
     if (this.receivingMap[requestId]) return;
