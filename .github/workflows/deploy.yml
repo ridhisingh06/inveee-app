@@ -82,7 +82,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -138,16 +138,31 @@ jobs:
           echo "=== Check for ng binary ==="
           ls -la node_modules/.bin/ng 2>/dev/null || echo "ng binary not found in node_modules/.bin"
           echo ""
+          echo "=== which node ==="
+          which node
+          echo ""
+          echo "=== node -v ==="
+          node -v
+          echo ""
+          echo "=== npm -v ==="
+          npm -v
+          echo ""
           echo "=== npm ls @angular/cli ==="
           npm ls @angular/cli
           echo ""
           echo "=== npx ng version ==="
           npx ng version
           echo ""
+          echo "=== cat angular.json ==="
+          cat angular.json
+          echo ""
+          echo "=== cat package.json ==="
+          cat package.json
+          echo ""
           echo "=== NODE_ENV ==="
           echo "NODE_ENV=$NODE_ENV"
           echo ""
-          echo "=== npm config ==="
+          echo "=== npm config production ==="
           npm config get production
           echo ""
           echo "=== PATH ==="
