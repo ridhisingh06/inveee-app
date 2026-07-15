@@ -63,9 +63,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-backend
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    # The Vercel CLI reads VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID
+    # automatically from the environment — no --token flag needed on any command.
+    # Passing --token=${{ secrets.X }} with an empty secret causes
+    # "missing-token-value"; env vars are the safe alternative.
     env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.Project_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -89,48 +94,33 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # Pull project config & env vars from Vercel
-      # This writes .vercel/project.json inside frontend/ (already committed)
-      # and downloads any env vars the project has configured in the dashboard.
+      # Pull project settings + any env vars configured in the Vercel dashboard.
+      # VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID are read from env above.
       - name: Pull Vercel project metadata
         working-directory: frontend
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production
 
-      # Mark dist/frontend as a pre-built Vercel output so Vercel
-      # skips its own build step entirely.
+      # Build the Vercel Output API bundle manually so `vercel deploy --prebuilt`
+      # uploads a static site with the Angular SPA rewrite rules baked in.
       - name: Configure pre-built output for Vercel
         working-directory: frontend
         run: |
-          # vercel deploy --prebuilt expects a .vercel/output directory
-          # containing config.json + a static/ folder.
           mkdir -p .vercel/output/static
           cp -r dist/frontend/. .vercel/output/static/
           cat > .vercel/output/config.json <<'EOF'
           {
             "version": 3,
             "routes": [
-              {
-                "src": "/assets/(.*)",
-                "dest": "/assets/$1"
-              },
-              {
-                "src": "/(.*\\.(js|css|ico|png|svg|woff2?|ttf|eot|map))",
-                "dest": "/$1"
-              },
-              {
-                "src": "/(.*)",
-                "dest": "/index.html"
-              }
+              { "src": "/assets/(.*)",                                  "dest": "/assets/$1" },
+              { "src": "/(.*\\.(js|css|ico|png|svg|woff2?|ttf|eot|map))", "dest": "/$1"       },
+              { "src": "/(.*)",                                          "dest": "/index.html" }
             ]
           }
           EOF
 
       - name: Deploy to Vercel (production)
         working-directory: frontend
-        run: |
-          vercel deploy --prebuilt --prod \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --scope=${{ secrets.VERCEL_ORG_ID }}
+        run: vercel deploy --prebuilt --prod
 
   # ----------------------------------------------------------------
   # BACKEND DEPLOY (AWS ECS via ECR + Fargate)
