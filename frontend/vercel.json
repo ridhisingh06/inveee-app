@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "framework": "angular",
-  "outputDirectory": "dist",
+  "framework": null,
   "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install --include=dev",
   "rewrites": [
     {
       "source": "/(.*)",
