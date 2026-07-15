@@ -13,7 +13,9 @@ permissions:
   id-token: write
 
 jobs:
-  # ---------------- DEBUG ----------------
+  # ----------------------------------------------------------------
+  # DEBUG
+  # ----------------------------------------------------------------
   debug:
     runs-on: ubuntu-latest
     steps:
@@ -21,25 +23,32 @@ jobs:
       - name: Show repository structure
         run: ls -Rla
 
-  # ---------------- BACKEND BUILD ----------------
+  # ----------------------------------------------------------------
+  # BACKEND BUILD
+  # ----------------------------------------------------------------
   build-backend:
     runs-on: ubuntu-latest
     needs: debug
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '10.0.x'
+
       - name: Build backend
         working-directory: backend
         run: dotnet build invmgmt.web.csproj -c Release
+
       - name: Run backend tests
         working-directory: backend
         run: dotnet test -c Release --no-build
+
       - name: Publish backend
         working-directory: backend
         run: dotnet publish invmgmt.web.csproj -c Release -o out
+
       - name: Upload backend artifact
         uses: actions/upload-artifact@v4
         with:
@@ -47,33 +56,57 @@ jobs:
           path: backend/out
 
   # ----------------------------------------------------------------
-  # FRONTEND DEPLOY (Vercel)
+  # FRONTEND DEPLOY  (Vercel)
   #
-  # Live URL: https://inveee-app.vercel.app
-  # Project:  prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v  (team_W1pwDE1fq8hpwxXcYSXsH7p0)
+  # Live URL:  https://inveee-app.vercel.app
+  # Project:   prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v
+  # Org:       team_W1pwDE1fq8hpwxXcYSXsH7p0
   #
-  # Strategy: build Angular ourselves with `npm run build` (production),
-  # then hand the pre-built dist/ to `vercel deploy --prebuilt` so
-  # Vercel does zero additional build work — no double-build, no
-  # framework detection surprises.
+  # Root cause of the old "frontend/frontend" error:
+  #   vercel pull writes rootDirectory="frontend" into .vercel/project.json.
+  #   When the CLI also runs inside working-directory: frontend, paths double.
   #
-  # Runs on: push to main  OR  manual workflow_dispatch
+  # Fix:
+  #   1. Commit frontend/.vercel/project.json with projectId + orgId so
+  #      vercel pull is never needed at CI runtime.
+  #   2. Run ALL vercel commands from the REPO ROOT using --cwd frontend.
+  #      Vercel resolves everything relative to --cwd, not to the shell CWD,
+  #      so rootDirectory in the dashboard setting never doubles the path.
+  #   3. Drop --prebuilt entirely — let Vercel run `npm run build` itself
+  #      so there is one canonical build path and no manual output assembly.
+  #
+  # Secrets required (GitHub → Settings → Secrets → Actions):
+  #   VERCEL_TOKEN   — Vercel personal access token
+  #   VERCEL_ORG_ID  — team_W1pwDE1fq8hpwxXcYSXsH7p0
+  #   Project_ID     — prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v
   # ----------------------------------------------------------------
   deploy-frontend:
     runs-on: ubuntu-latest
     needs: build-backend
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-    # The Vercel CLI reads VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID
-    # automatically from the environment — no --token flag needed on any command.
-    # Passing --token=${{ secrets.X }} with an empty secret causes
-    # "missing-token-value"; env vars are the safe alternative.
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.Project_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      # ── Diagnostics ─────────────────────────────────────────────
+      - name: DEBUG — repo structure at checkout
+        run: |
+          echo "=== PWD ==="
+          pwd
+          echo "=== Root listing ==="
+          ls -la
+          echo "=== frontend/ listing ==="
+          ls -la frontend/
+          echo "=== frontend/.vercel/ listing ==="
+          ls -la frontend/.vercel/ 2>/dev/null || echo "frontend/.vercel/ does not exist"
+          echo "=== frontend/.vercel/project.json ==="
+          cat frontend/.vercel/project.json 2>/dev/null || echo "project.json not found"
+
+      # ── Node / npm ───────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -81,49 +114,51 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Build Angular app (production)
-        working-directory: frontend
-        run: npm run build
-        # npm run build  →  ng build --configuration production
-        # Output lands in  dist/frontend/  (flat, index.html at root)
-
+      # ── Vercel CLI ───────────────────────────────────────────────
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # Pull project settings + any env vars configured in the Vercel dashboard.
-      # VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID are read from env above.
-      - name: Pull Vercel project metadata
-        working-directory: frontend
-        run: vercel pull --yes --environment=production
-
-      # Build the Vercel Output API bundle manually so `vercel deploy --prebuilt`
-      # uploads a static site with the Angular SPA rewrite rules baked in.
-      - name: Configure pre-built output for Vercel
-        working-directory: frontend
+      - name: DEBUG — vercel CLI version and env
         run: |
-          mkdir -p .vercel/output/static
-          cp -r dist/frontend/. .vercel/output/static/
-          cat > .vercel/output/config.json <<'EOF'
-          {
-            "version": 3,
-            "routes": [
-              { "src": "/assets/(.*)",                                  "dest": "/assets/$1" },
-              { "src": "/(.*\\.(js|css|ico|png|svg|woff2?|ttf|eot|map))", "dest": "/$1"       },
-              { "src": "/(.*)",                                          "dest": "/index.html" }
-            ]
-          }
-          EOF
+          echo "=== Vercel CLI version ==="
+          vercel --version
+          echo "=== VERCEL_PROJECT_ID ==="
+          echo "$VERCEL_PROJECT_ID"
+          echo "=== VERCEL_ORG_ID ==="
+          echo "$VERCEL_ORG_ID"
+          echo "=== VERCEL_TOKEN set? ==="
+          [ -n "$VERCEL_TOKEN" ] && echo "YES" || echo "NO — secret is empty"
+
+      # ── Deploy ───────────────────────────────────────────────────
+      # --cwd frontend  tells the CLI the project root is ./frontend
+      # from the repo root. Vercel reads frontend/.vercel/project.json
+      # (committed above) so no `vercel pull` is needed.
+      # Vercel runs `npm run build` inside frontend/ and deploys the
+      # output defined in frontend/vercel.json → outputDirectory: dist
+      - name: DEBUG — directory state before deploy
+        run: |
+          echo "=== PWD before deploy ==="
+          pwd
+          echo "=== frontend/.vercel/ ==="
+          ls -la frontend/.vercel/
+          echo "=== frontend/.vercel/project.json ==="
+          cat frontend/.vercel/project.json
 
       - name: Deploy to Vercel (production)
-        working-directory: frontend
-        run: vercel deploy --prebuilt --prod
+        run: vercel deploy --prod --yes --cwd frontend
+
+      - name: DEBUG — directory state after deploy
+        if: always()
+        run: |
+          echo "=== PWD after deploy ==="
+          pwd
+          echo "=== frontend/dist/ ==="
+          ls -la frontend/dist/ 2>/dev/null || echo "dist/ not present (Vercel built remotely)"
+          echo "=== frontend/.vercel/ after deploy ==="
+          ls -la frontend/.vercel/ 2>/dev/null || echo "no .vercel dir"
 
   # ----------------------------------------------------------------
-  # BACKEND DEPLOY (AWS ECS via ECR + Fargate)
+  # BACKEND DEPLOY  (AWS ECS / Fargate)
   # ----------------------------------------------------------------
   deploy-backend:
     runs-on: ubuntu-latest

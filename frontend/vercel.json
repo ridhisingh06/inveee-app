@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": "angular",
-  "outputDirectory": "dist/frontend",
+  "outputDirectory": "dist",
   "buildCommand": "npm run build",
   "rewrites": [
     {
