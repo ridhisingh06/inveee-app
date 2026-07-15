@@ -49,7 +49,7 @@ jobs:
   # ----------------------------------------------------------------
   # FRONTEND DEPLOY (Vercel)
   #
-  # Live URL: https://inveee-app-ebon.vercel.app
+  # Live URL: https://inveee-app.vercel.app
   # Project:  prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v  (team_W1pwDE1fq8hpwxXcYSXsH7p0)
   #
   # Strategy: build Angular ourselves with `npm run build` (production),

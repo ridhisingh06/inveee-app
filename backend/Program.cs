@@ -128,18 +128,15 @@ builder.Services.AddMemoryCache();
 builder.Services.AddCors(options =>
 {
     // ── Production origins ───────────────────────────────────────────────────
-    // inveee-app-ebon.vercel.app  — the actual live Vercel URL for this project.
-    // inveee-app.vercel.app       — legacy alias kept for backward compatibility.
-    //
+    // https://inveee-app.vercel.app is the permanent production domain.
     // Additional origins can be supplied at runtime via FRONTEND_URL
     // (comma-separated) env var — useful for preview deploys or staging.
     var hardcodedOrigins = new[]
     {
-        "https://inveee-app-ebon.vercel.app", // primary production domain
-        "https://inveee-app.vercel.app",      // legacy alias — kept so old bookmarks still work
-        "http://localhost:4200",              // Angular dev server
-        "http://localhost:3000",              // alternative dev port
-        "https://localhost:4200",             // HTTPS dev
+        "https://inveee-app.vercel.app", // production domain
+        "http://localhost:4200",         // Angular dev server
+        "http://localhost:3000",         // alternative dev port
+        "https://localhost:4200",        // HTTPS dev
     };
 
     // ── Runtime origins from FRONTEND_URL env var ────────────────────────────

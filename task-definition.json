@@ -31,7 +31,7 @@
         },
         {
           "name": "FRONTEND_URL",
-          "value": "https://inveee-app-ebon.vercel.app,https://inveee-app.vercel.app"
+          "value": "https://inveee-app.vercel.app"
         },
         {
           "name": "ConnectionStrings__DefaultConnection",
