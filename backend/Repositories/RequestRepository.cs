@@ -199,6 +199,19 @@ namespace invmgmt.web.Repositories
             _context.Requests.Remove(request);
         }
 
+        /// <summary>
+        /// Explicitly removes a RequestItem row from the DbSet.
+        /// This is required when updating a request because calling
+        /// _context.Requests.Update(request) re-marks everything as Modified,
+        /// which would override any Remove() tracking on child entities.
+        /// By explicitly removing from the DbSet first we ensure the DELETE
+        /// statement is emitted regardless of the subsequent Update() call.
+        /// </summary>
+        public void RemoveRequestItem(RequestItem item)
+        {
+            _context.RequestItems.Remove(item);
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

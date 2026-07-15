@@ -64,6 +64,14 @@ public sealed class UpdateRequestResultDto
     public string Message { get; set; } = string.Empty;
     public int RequestId { get; set; }
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Internal error classification used by the controller to choose the right
+    /// HTTP status code.  NOT_FOUND → 404, FORBIDDEN → 403, BAD_REQUEST → 400,
+    /// SERVER_ERROR → 500.  Null means success (200).
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? ErrorCode { get; set; }
 }
 
 public sealed class RequestEditableDto

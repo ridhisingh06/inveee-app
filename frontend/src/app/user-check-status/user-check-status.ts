@@ -176,13 +176,31 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
   // ── Edit Request ──────────────────────────────────────────────────────────
 
-  /** A request is editable only if it is PendingWithIssuer and all items are still PendingWithIssuer */
+  /**
+   * A request is editable only when:
+   *  - request status is PendingWithIssuer (or legacy alias "Requested")
+   *  - it has at least one item
+   *  - every item is still PendingWithIssuer (issuer has not touched any item)
+   *
+   * The list endpoint (GET /api/requests) returns status as a plain string via
+   * .ToString(), e.g. "PendingWithIssuer".  normalizeStatus() lowercases it so
+   * the comparison is case-insensitive.
+   */
   isEditable(req: any): boolean {
-    if (this.normalizeStatus(req.status) !== 'pendingwithissuer') return false;
-    if (!req.items || req.items.length === 0) return false;
-    return req.items.every((i: any) => this.normalizeStatus(i.status) === 'pendingwithissuer');
+    if (!req) return false;
+    const reqStatus = this.normalizeStatus(req.status);
+    if (reqStatus !== 'pendingwithissuer' && reqStatus !== 'requested') return false;
+    const items: any[] = req.items ?? [];
+    if (items.length === 0) return false;
+    return items.every(
+      (i: any) => {
+        const s = this.normalizeStatus(i.status);
+        return s === 'pendingwithissuer' || s === 'requested';
+      }
+    );
   }
 
+  /** Navigate to the edit page for the given request. */
   editRequest(requestId: number): void {
     this.router.navigate(['/user-dashboard/edit-request', requestId]);
   }

@@ -38,7 +38,8 @@ export class RequestService {
   }
 
   /**
-   * Get full details (with items) for one request
+   * Get full details (with items) for one request.
+   * Used by EditRequestComponent to populate the edit form.
    * @param id - Request ID
    * @returns Observable<RequestDetail> - Full request details or error
    */
@@ -47,9 +48,16 @@ export class RequestService {
       .pipe(
         catchError(err => {
           console.error('[RequestService] Error fetching request details:', err);
-          return throwError(() => new Error(
-            err?.error?.message || 'Failed to load request details. Please try again.'
-          ));
+          const status: number = err?.status ?? 0;
+          let msg: string;
+          if (status === 403) {
+            msg = 'You are not authorized to view this request.';
+          } else if (status === 404) {
+            msg = 'Request not found.';
+          } else {
+            msg = err?.error?.message || 'Failed to load request details. Please try again.';
+          }
+          return throwError(() => new Error(msg));
         })
       );
   }
@@ -122,19 +130,26 @@ export class RequestService {
   }
 
   /**
-   * Update an existing request (only if PendingWithIssuer and untouched)
+   * Update an existing request (only if PendingWithIssuer and untouched by issuer).
    * @param id - Request ID
-   * @param payload - Updated items
-   * @returns Observable<{ success: boolean; message: string; requestId: number; updatedAt?: string }>
+   * @param payload - Updated items list
+   * @returns Observable with success result or typed error
    */
   updateRequest(id: number, payload: { items: { itemId: number; quantity: number }[] }): Observable<any> {
     return this.http.put<any>(`${this.base}/${id}`, payload)
       .pipe(
         catchError(err => {
           console.error('[RequestService] Error updating request:', err);
-          return throwError(() => new Error(
-            err?.error?.message || 'Failed to update request. Please try again.'
-          ));
+          const status: number = err?.status ?? 0;
+          let msg: string;
+          if (status === 403) {
+            msg = err?.error?.message || 'This request can no longer be edited.';
+          } else if (status === 404) {
+            msg = 'Request not found.';
+          } else {
+            msg = err?.error?.message || 'Failed to update request. Please try again.';
+          }
+          return throwError(() => new Error(msg));
         })
       );
   }

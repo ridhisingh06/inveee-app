@@ -18,6 +18,14 @@ namespace invmgmt.web.Repositories
         Task<bool> IsEditableAsync(int requestId);
         Task<bool> ItemsExistAsync(IEnumerable<int> itemIds);
         void DeleteRequest(Request request);
+
+        /// <summary>
+        /// Explicitly removes a RequestItem row from the DbSet so EF Core marks it
+        /// for deletion independently of the parent Request tracking state.
+        /// Required in UpdateRequestAsync to avoid Update() overriding Remove() tracking.
+        /// </summary>
+        void RemoveRequestItem(RequestItem item);
+
         Task SaveChangesAsync();
     }
 }

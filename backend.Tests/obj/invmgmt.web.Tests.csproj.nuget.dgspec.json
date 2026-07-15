@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\inveeeR\\invmgmt.web.Tests\\invmgmt.web.Tests.csproj": {}
+    "D:\\inveee-app\\backend.Tests\\invmgmt.web.Tests.csproj": {}
   },
   "projects": {
-    "D:\\inveeeR\\invmgmt.web.Tests\\invmgmt.web.Tests.csproj": {
+    "D:\\inveee-app\\backend.Tests\\invmgmt.web.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\inveeeR\\invmgmt.web.Tests\\invmgmt.web.Tests.csproj",
+        "projectUniqueName": "D:\\inveee-app\\backend.Tests\\invmgmt.web.Tests.csproj",
         "projectName": "invmgmt.web.Tests",
-        "projectPath": "D:\\inveeeR\\invmgmt.web.Tests\\invmgmt.web.Tests.csproj",
+        "projectPath": "D:\\inveee-app\\backend.Tests\\invmgmt.web.Tests.csproj",
         "packagesPath": "C:\\Users\\singh\\.nuget\\packages\\",
-        "outputPath": "D:\\inveeeR\\invmgmt.web.Tests\\obj\\",
+        "outputPath": "D:\\inveee-app\\backend.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -32,8 +32,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj": {
-                "projectPath": "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj"
+              "D:\\inveee-app\\backend\\invmgmt.web.csproj": {
+                "projectPath": "D:\\inveee-app\\backend\\invmgmt.web.csproj"
               }
             }
           }
@@ -369,14 +369,14 @@
         }
       }
     },
-    "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj": {
+    "D:\\inveee-app\\backend\\invmgmt.web.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj",
+        "projectUniqueName": "D:\\inveee-app\\backend\\invmgmt.web.csproj",
         "projectName": "invmgmt.web",
-        "projectPath": "D:\\inveeeR\\invmgmt.web\\invmgmt.web.csproj",
+        "projectPath": "D:\\inveee-app\\backend\\invmgmt.web.csproj",
         "packagesPath": "C:\\Users\\singh\\.nuget\\packages\\",
-        "outputPath": "D:\\inveeeR\\invmgmt.web\\obj\\",
+        "outputPath": "D:\\inveee-app\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -401,7 +401,8 @@
         },
         "warningProperties": {
           "noWarn": [
-            "NU1510"
+            "NU1510",
+            "NU1903"
           ],
           "warnAsError": [
             "NU1605"
@@ -454,6 +455,10 @@
               "target": "Package",
               "version": "[10.0.7, )"
             },
+            "Microsoft.OpenApi": {
+              "target": "Package",
+              "version": "[2.6.0, )"
+            },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[10.0.1, )"
@@ -480,7 +485,7 @@
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[10.1.7, )"
+              "version": "[10.2.0, )"
             }
           },
           "imports": [

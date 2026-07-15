@@ -99,7 +99,7 @@ namespace invmgmt.web.Services
                 {
                     Id = ri.Id,
                     ItemId = ri.ItemId,
-                    ItemName = ri.Item.Name,
+                    ItemName = ri.Item?.Name ?? string.Empty,
                     QuantityRequested = ri.QuantityRequested,
                     QuantityApproved = ri.QuantityApproved,
                     QuantityIssued = ri.QuantityIssued,
@@ -256,6 +256,8 @@ namespace invmgmt.web.Services
         ///   - Deletes items removed from the payload.
         ///   - Inserts new items from the payload.
         /// Only allowed while no issuer processing has occurred.
+        /// Returns result.HttpStatusCode to allow the controller to return the
+        /// correct HTTP status (200, 400, 403, 404).
         /// </summary>
         public async Task<UpdateRequestResultDto> UpdateRequestAsync(int requestId, int userId, UpdateRequestDto dto)
         {
@@ -265,34 +267,47 @@ namespace invmgmt.web.Services
             {
                 // ── 1. Load request ──────────────────────────────────────────────────────
                 var request = await _requestRepo.GetByIdWithItemsAsync(requestId);
-                if (request == null || request.UserId != userId)
+                if (request == null)
                 {
                     result.Success = false;
                     result.Message = "Request not found.";
+                    result.ErrorCode = "NOT_FOUND";
                     return result;
                 }
 
-                // ── 2. Check status ──────────────────────────────────────────────────────
+                // ── 2. Ownership check ───────────────────────────────────────────────────
+                if (request.UserId != userId)
+                {
+                    result.Success = false;
+                    result.Message = "You are not authorized to edit this request.";
+                    result.ErrorCode = "FORBIDDEN";
+                    return result;
+                }
+
+                // ── 3. Check status ──────────────────────────────────────────────────────
                 if (request.Status != RequestStatus.PendingWithIssuer)
                 {
                     result.Success = false;
                     result.Message = $"Request is in '{request.Status}' status and can no longer be edited.";
+                    result.ErrorCode = "FORBIDDEN";
                     return result;
                 }
 
-                // ── 3. Check issuer has NOT touched any item ─────────────────────────────
+                // ── 4. Check issuer has NOT touched any item ─────────────────────────────
                 if (request.RequestItems.Any(ri => ri.Status != RequestItemStatus.PendingWithIssuer))
                 {
                     result.Success = false;
                     result.Message = "The issuer has started processing this request. Editing is no longer allowed.";
+                    result.ErrorCode = "FORBIDDEN";
                     return result;
                 }
 
-                // ── 4. Validate payload ──────────────────────────────────────────────────
+                // ── 5. Validate payload ──────────────────────────────────────────────────
                 if (dto.Items == null || dto.Items.Count == 0)
                 {
                     result.Success = false;
                     result.Message = "Request must contain at least one item.";
+                    result.ErrorCode = "BAD_REQUEST";
                     return result;
                 }
 
@@ -300,30 +315,36 @@ namespace invmgmt.web.Services
                 {
                     result.Success = false;
                     result.Message = "All item quantities must be greater than 0.";
+                    result.ErrorCode = "BAD_REQUEST";
                     return result;
                 }
 
-                // ── 5. Merge duplicate ItemIds in payload ────────────────────────────────
+                // ── 6. Merge duplicate ItemIds in payload ────────────────────────────────
                 var merged = dto.Items
                     .GroupBy(i => i.ItemId)
                     .Select(g => new UpdateRequestLineDto { ItemId = g.Key, Quantity = g.Sum(x => x.Quantity) })
                     .ToList();
 
-                // ── 6. Validate all ItemIds exist ────────────────────────────────────────
+                // ── 7. Validate all ItemIds exist ────────────────────────────────────────
                 var incomingItemIds = merged.Select(i => i.ItemId).Distinct().ToList();
                 if (!await _requestRepo.ItemsExistAsync(incomingItemIds))
                 {
                     result.Success = false;
                     result.Message = "One or more items in the request do not exist.";
+                    result.ErrorCode = "BAD_REQUEST";
                     return result;
                 }
 
-                // ── 7. Apply item-level changes ──────────────────────────────────────────
+                // ── 8. Apply item-level changes ──────────────────────────────────────────
                 var existingItems = request.RequestItems.ToList();
                 var existingItemIds = existingItems.Select(ri => ri.ItemId).ToHashSet();
                 var incomingSet = merged.ToDictionary(i => i.ItemId, i => i.Quantity);
 
-                // 7a. Update or delete existing items
+                // 8a. Update or explicitly delete existing items.
+                //     IMPORTANT: We call _requestRepo.RemoveRequestItem() BEFORE
+                //     _requestRepo.UpdateRequestAsync() so that EF Core's deletion
+                //     tracking is not overwritten by the subsequent Update() call.
+                var itemsToRemove = new List<RequestItem>();
                 foreach (var existing in existingItems)
                 {
                     if (incomingSet.TryGetValue(existing.ItemId, out var newQty))
@@ -333,13 +354,20 @@ namespace invmgmt.web.Services
                     }
                     else
                     {
-                        // Item removed — delete from DB
+                        itemsToRemove.Add(existing);
                         _logger.LogInformation("UpdateRequest: Removed item {ItemId} from ReqId={RequestId}", existing.ItemId, requestId);
-                        request.RequestItems.Remove(existing);
                     }
                 }
 
-                // 7b. Insert new items not already in the request
+                // Remove from DbSet explicitly so EF emits DELETE statements even
+                // after the subsequent Requests.Update() call.
+                foreach (var toRemove in itemsToRemove)
+                {
+                    request.RequestItems.Remove(toRemove);
+                    _requestRepo.RemoveRequestItem(toRemove);
+                }
+
+                // 8b. Insert new items not already in the request
                 foreach (var line in merged.Where(m => !existingItemIds.Contains(m.ItemId)))
                 {
                     var newItem = new RequestItem
@@ -355,7 +383,7 @@ namespace invmgmt.web.Services
                     _logger.LogInformation("UpdateRequest: Added new item {ItemId} qty={Qty} to ReqId={RequestId}", line.ItemId, line.Quantity, requestId);
                 }
 
-                // ── 8. Update request audit fields ───────────────────────────────────────
+                // ── 9. Update request audit fields ───────────────────────────────────────
                 request.UpdatedAt = DateTime.UtcNow;
                 await _requestRepo.UpdateRequestAsync(request);
                 await _requestRepo.SaveChangesAsync();
@@ -371,6 +399,7 @@ namespace invmgmt.web.Services
                 _logger.LogError(ex, "UpdateRequest: Unexpected error for ReqId={RequestId}", requestId);
                 result.Success = false;
                 result.Message = "An unexpected error occurred while updating the request.";
+                result.ErrorCode = "SERVER_ERROR";
             }
 
             return result;

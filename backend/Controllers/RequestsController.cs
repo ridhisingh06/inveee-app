@@ -318,7 +318,15 @@ public sealed class RequestsController : ControllerBase
             var result = await _requestService.UpdateRequestAsync(id, userId, dto);
 
             if (!result.Success)
-                return BadRequest(new { message = result.Message });
+            {
+                return result.ErrorCode switch
+                {
+                    "NOT_FOUND"    => NotFound(new { message = result.Message }),
+                    "FORBIDDEN"    => StatusCode(403, new { message = result.Message }),
+                    "SERVER_ERROR" => StatusCode(500, new { message = result.Message }),
+                    _              => BadRequest(new { message = result.Message })    // BAD_REQUEST / default
+                };
+            }
 
             return Ok(result);
         }

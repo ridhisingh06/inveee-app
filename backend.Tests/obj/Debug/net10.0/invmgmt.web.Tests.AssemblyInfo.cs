@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("invmgmt.web.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e4c210e601b39a54f3254f5a62469819cbb12c3a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a39bea29b3884c70a8f876a3d20caf5865434789")]
 [assembly: System.Reflection.AssemblyProductAttribute("invmgmt.web.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("invmgmt.web.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -30,8 +30,8 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   errorMsg          = '';
   successMsg        = '';
 
-  lines: EditLine[]  = [];
-  allItems: Item[]   = [];
+  lines: EditLine[]     = [];
+  allItems: Item[]      = [];
   filteredItems: Item[] = [];
   searchText     = '';
   showItemSearch = false;
@@ -39,11 +39,11 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private readonly route:    ActivatedRoute,
-    private readonly router:   Router,
-    private readonly http:     HttpClient,
+    private readonly route:          ActivatedRoute,
+    private readonly router:         Router,
+    private readonly http:           HttpClient,
     private readonly requestService: RequestService,
-    private readonly refresh:  RefreshService
+    private readonly refresh:        RefreshService
   ) {}
 
   ngOnInit(): void {
@@ -51,7 +51,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
         const idStr = params.get('id');
-        if (!idStr || isNaN(+idStr)) {
+        if (!idStr || isNaN(+idStr) || +idStr <= 0) {
           this.errorMsg = 'No valid request ID provided.';
           this.loading  = false;
           return;
@@ -66,28 +66,28 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── Step 1: load the request (fast — no timeout race) ──────────────────
+  // ── Load request from GET /api/requests/{id} ────────────────────────────
 
   loadRequest(): void {
     this.loading  = true;
     this.errorMsg = '';
+    this.lines    = [];
 
     this.requestService.getRequestById(this.requestId!)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (req) => {
+          // Cast to any so we can safely read camelCase properties regardless
+          // of whether the TypeScript interface is fully typed.
           const r = req as any;
 
-          // Normalise status — backend always returns camelCase string e.g. "PendingWithIssuer"
-          const reqStatus: string = (r.status ?? r.Status ?? '').toLowerCase().trim();
-          const items: any[]      = r.items ?? r.Items ?? [];
-
+          // ── 1. Normalise request-level status ──────────────────────────────
+          // Backend serialises RequestStatus enum as PascalCase string e.g.
+          // "PendingWithIssuer" (via JsonStringEnumConverter).  Lower-casing it
+          // lets us do a simple equality check that also handles legacy aliases
+          // ("Requested" → "requested" is caught by the second condition).
+          const reqStatus: string = (r.status ?? '').toLowerCase().trim();
           const isPending = reqStatus === 'pendingwithissuer' || reqStatus === 'requested';
-
-          const allItemsPending = items.length > 0 && items.every((i: any) => {
-            const s = (i.status ?? i.Status ?? '').toLowerCase().trim();
-            return s === 'pendingwithissuer' || s === 'requested';
-          });
 
           if (!isPending) {
             this.errorMsg = `This request is in "${r.status}" status and can no longer be edited.`;
@@ -95,17 +95,38 @@ export class EditRequestComponent implements OnInit, OnDestroy {
             return;
           }
 
+          // ── 2. Normalise item list ────────────────────────────────────────
+          // Backend uses camelCase JSON ("items"), but guard against both
+          // casings just in case a proxy or older backend build uses PascalCase.
+          const items: any[] = r.items ?? r.Items ?? [];
+
+          if (items.length === 0) {
+            this.errorMsg = 'This request has no items and cannot be edited.';
+            this.loading  = false;
+            return;
+          }
+
+          // ── 3. Check that the issuer has NOT started processing ────────────
+          // If ANY item has moved out of PendingWithIssuer the issuer has
+          // touched it; editing must be blocked.
+          const allItemsPending = items.every((i: any) => {
+            const s = (i.status ?? i.Status ?? '').toLowerCase().trim();
+            return s === 'pendingwithissuer' || s === 'requested';
+          });
+
           if (!allItemsPending) {
             this.errorMsg = 'The issuer has started processing this request. Editing is no longer allowed.';
             this.loading  = false;
             return;
           }
 
-          // Populate editable lines from the existing request items
+          // ── 4. Populate the editable lines ────────────────────────────────
+          // The detail endpoint (RequestItemDetailDto) uses camelCase field
+          // names: itemId, itemName, quantityRequested.
           this.lines = items.map((ri: any) => ({
             item: {
               id:       ri.itemId   ?? ri.ItemId   ?? 0,
-              name:     ri.itemName ?? ri.ItemName  ?? 'Unknown',
+              name:     ri.itemName ?? ri.ItemName ?? 'Unknown',
               category: 'Unknown'
             } as Item,
             qty: ri.quantityRequested ?? ri.QuantityRequested ?? 1
@@ -113,7 +134,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
 
           this.loading = false;
 
-          // Step 2: load inventory in the background so "Add New Item" works
+          // ── 5. Load inventory in background for "Add New Item" ────────────
           this.loadInventory();
         },
         error: (err) => {
@@ -123,30 +144,36 @@ export class EditRequestComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Step 2: load inventory lazily (non-blocking) ───────────────────────
+  // ── Load inventory lazily — non-blocking ───────────────────────────────
 
   loadInventory(): void {
     this.inventoryLoading = true;
 
-    this.http.get<any[]>(`${environment.apiUrl}/inventory`)
+    this.http.get<any>(`${environment.apiUrl}/inventory`)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (items) => {
-          this.allItems = (items ?? []).map((i: any) => ({
-            id:       i.id,
-            name:     i.name,
-            category: i.category || 'Uncategorized'
-          } as Item));
+        next: (res) => {
+          // GET /api/inventory returns a flat array directly (not paginated).
+          // Guard against unexpected shapes just in case.
+          const raw: any[] = Array.isArray(res) ? res : (res?.data ?? res?.items ?? []);
+
+          this.allItems = raw.map((i: any) => ({
+            id:       i.id   ?? i.Id   ?? 0,
+            name:     i.name ?? i.Name ?? '',
+            category: i.category ?? i.Category ?? 'Uncategorized'
+          } as Item)).filter(i => i.id && i.name);
+
           this.inventoryLoading = false;
         },
         error: () => {
-          // Non-fatal — user can still edit existing items even if inventory fails
+          // Non-fatal: user can still edit quantities on existing items even
+          // if the inventory endpoint is unavailable.
           this.inventoryLoading = false;
         }
       });
   }
 
-  // ── Quantity controls ─────────────────────────────────────────────────
+  // ── Quantity controls ──────────────────────────────────────────────────
 
   changeQty(itemId: string | number, currentQty: number, delta: 1 | -1): void {
     const next = currentQty + delta;
@@ -170,7 +197,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     return this.lines.reduce((acc, l) => acc + l.qty, 0);
   }
 
-  // ── Add new item panel ────────────────────────────────────────────────
+  // ── Add-item panel ─────────────────────────────────────────────────────
 
   toggleItemSearch(): void {
     this.showItemSearch = !this.showItemSearch;
@@ -206,23 +233,31 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     setTimeout(() => { this.successMsg = ''; }, 2500);
   }
 
-  // ── Save ──────────────────────────────────────────────────────────────
+  // ── Save changes via PUT /api/requests/{id} ────────────────────────────
 
   saveChanges(): void {
     if (!this.requestId) return;
 
+    // Guard: at least one item required.
     if (this.lines.length === 0) {
       this.errorMsg = 'A request must contain at least one item.';
       return;
     }
 
-    // Client-side duplicate check (same itemId appearing twice — shouldn't happen
-    // from this UI, but guard it anyway)
+    // Guard: all quantities must be ≥ 1.
+    const invalidLine = this.lines.find(l => !l.qty || l.qty < 1);
+    if (invalidLine) {
+      this.errorMsg = `Quantity for "${invalidLine.item.name}" must be at least 1.`;
+      return;
+    }
+
+    // Guard: no duplicate items (defensive — the UI prevents duplicates, but
+    // validate anyway before hitting the network).
     const seen = new Set<number>();
     for (const line of this.lines) {
       const id = Number(line.item.id);
       if (seen.has(id)) {
-        this.errorMsg = `Duplicate item detected: "${line.item.name}". Please remove duplicates before saving.`;
+        this.errorMsg = `Duplicate item: "${line.item.name}". Please remove the duplicate before saving.`;
         return;
       }
       seen.add(id);
@@ -232,6 +267,8 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     this.errorMsg   = '';
     this.successMsg = '';
 
+    // Payload shape must match backend UpdateRequestDto:
+    //   { items: [{ itemId: number, quantity: number }] }
     const payload = {
       items: this.lines.map(l => ({
         itemId:   Number(l.item.id),
@@ -246,17 +283,17 @@ export class EditRequestComponent implements OnInit, OnDestroy {
           this.submitting = false;
           this.successMsg = res?.message || 'Request updated successfully!';
 
-          // Notify sibling components (MyRequests list) to refresh
+          // Signal the My-Requests list to reload so it shows the updated data.
           this.refresh.notifyRequests();
 
-          // Navigate back after brief success feedback
+          // Navigate back after a brief success flash.
           setTimeout(() => {
             this.router.navigate(['/user-dashboard/my-requests']);
           }, 1200);
         },
         error: (err) => {
-          this.errorMsg   = err?.message || 'Failed to save changes. Please try again.';
           this.submitting = false;
+          this.errorMsg   = err?.message || 'Failed to save changes. Please try again.';
         }
       });
   }
