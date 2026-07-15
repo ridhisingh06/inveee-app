@@ -110,7 +110,36 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # Confirm CWD, .vercel/project.json content, and env vars
+      # .vercel/ is listed in .gitignore so project.json is never checked
+      # into the repo. Write it explicitly here from known values so every
+      # subsequent Vercel CLI command can locate the project without needing
+      # `vercel pull` to create it. The values are not secrets — they are
+      # already visible in vercel.json and the dashboard URL.
+      - name: Create .vercel/project.json
+        working-directory: frontend
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json <<'EOF'
+          {
+            "projectId": "prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v",
+            "orgId": "team_W1pwDE1fq8hpwxXcYSXsH7p0"
+          }
+          EOF
+          echo "=== .vercel/project.json written ==="
+          cat .vercel/project.json
+
+      # Hard-fail immediately if the file is still missing for any reason.
+      - name: Validate .vercel/project.json exists
+        working-directory: frontend
+        run: |
+          if [ ! -f .vercel/project.json ]; then
+            echo "ERROR: .vercel/project.json does not exist — aborting deployment."
+            exit 1
+          fi
+          echo "OK: .vercel/project.json is present."
+          cat .vercel/project.json
+
+      # Confirm CWD, env vars, and project file before any Vercel command.
       - name: DEBUG — pre-flight checks
         working-directory: frontend
         run: |
@@ -120,9 +149,9 @@ jobs:
           cat .vercel/project.json
           echo "=== vercel.json ==="
           cat vercel.json
-          echo "=== VERCEL_TOKEN set?  $([ -n "$VERCEL_TOKEN" ]  && echo YES || echo NO — secret empty)"
-          echo "=== VERCEL_ORG_ID set? $([ -n "$VERCEL_ORG_ID" ] && echo YES || echo NO — secret empty)"
-          echo "=== VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
+          echo "=== VERCEL_TOKEN set?      $([ -n "$VERCEL_TOKEN" ]      && echo YES || echo NO — secret empty)"
+          echo "=== VERCEL_ORG_ID set?     $([ -n "$VERCEL_ORG_ID" ]     && echo YES || echo NO — secret empty)"
+          echo "=== VERCEL_PROJECT_ID set? $([ -n "$VERCEL_PROJECT_ID" ] && echo YES || echo NO — secret empty)"
 
       - name: Install npm dependencies
         working-directory: frontend
