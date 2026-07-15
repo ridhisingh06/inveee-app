@@ -58,22 +58,20 @@ jobs:
   # ----------------------------------------------------------------
   # FRONTEND DEPLOY  (Vercel)
   #
-  # Live URL:  https://inveee-app.vercel.app
-  # Project:   prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v
-  # Org:       team_W1pwDE1fq8hpwxXcYSXsH7p0
+  # Live URL : https://inveee-app.vercel.app
+  # Project  : prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v
+  # Org      : team_W1pwDE1fq8hpwxXcYSXsH7p0
   #
-  # Root cause of the old "frontend/frontend" error:
-  #   vercel pull writes rootDirectory="frontend" into .vercel/project.json.
-  #   When the CLI also runs inside working-directory: frontend, paths double.
+  # All Angular / Vercel steps run with:
+  #   working-directory: frontend
+  # so the shell CWD is always the Angular project root.
+  # No --cwd flag is used on any Vercel command because the shell is
+  # already inside frontend/. Using --cwd on top of working-directory
+  # caused the old "frontend/frontend" double-path error.
   #
-  # Fix:
-  #   1. Commit frontend/.vercel/project.json with projectId + orgId so
-  #      vercel pull is never needed at CI runtime.
-  #   2. Run ALL vercel commands from the REPO ROOT using --cwd frontend.
-  #      Vercel resolves everything relative to --cwd, not to the shell CWD,
-  #      so rootDirectory in the dashboard setting never doubles the path.
-  #   3. Drop --prebuilt entirely — let Vercel run `npm run build` itself
-  #      so there is one canonical build path and no manual output assembly.
+  # frontend/.vercel/project.json is committed in the repo so
+  # `vercel pull` is skipped — the CLI reads project/org IDs from
+  # that file and from the VERCEL_* env vars below.
   #
   # Secrets required (GitHub → Settings → Secrets → Actions):
   #   VERCEL_TOKEN   — Vercel personal access token
@@ -92,21 +90,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── Diagnostics ─────────────────────────────────────────────
-      - name: DEBUG — repo structure at checkout
-        run: |
-          echo "=== PWD ==="
-          pwd
-          echo "=== Root listing ==="
-          ls -la
-          echo "=== frontend/ listing ==="
-          ls -la frontend/
-          echo "=== frontend/.vercel/ listing ==="
-          ls -la frontend/.vercel/ 2>/dev/null || echo "frontend/.vercel/ does not exist"
-          echo "=== frontend/.vercel/project.json ==="
-          cat frontend/.vercel/project.json 2>/dev/null || echo "project.json not found"
-
-      # ── Node / npm ───────────────────────────────────────────────
+      # ── Setup Node.js ────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -114,48 +98,84 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      # ── Vercel CLI ───────────────────────────────────────────────
+      # ── Install Vercel CLI globally ──────────────────────────────
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: DEBUG — vercel CLI version and env
+      # ── Debug: confirm we are inside frontend/ ───────────────────
+      - name: DEBUG — working directory and project files
+        working-directory: frontend
         run: |
-          echo "=== Vercel CLI version ==="
-          vercel --version
-          echo "=== VERCEL_PROJECT_ID ==="
-          echo "$VERCEL_PROJECT_ID"
-          echo "=== VERCEL_ORG_ID ==="
-          echo "$VERCEL_ORG_ID"
-          echo "=== VERCEL_TOKEN set? ==="
-          [ -n "$VERCEL_TOKEN" ] && echo "YES" || echo "NO — secret is empty"
-
-      # ── Deploy ───────────────────────────────────────────────────
-      # --cwd frontend  tells the CLI the project root is ./frontend
-      # from the repo root. Vercel reads frontend/.vercel/project.json
-      # (committed above) so no `vercel pull` is needed.
-      # Vercel runs `npm run build` inside frontend/ and deploys the
-      # output defined in frontend/vercel.json → outputDirectory: dist
-      - name: DEBUG — directory state before deploy
-        run: |
-          echo "=== PWD before deploy ==="
+          echo "=== PWD (must end in /frontend) ==="
           pwd
-          echo "=== frontend/.vercel/ ==="
-          ls -la frontend/.vercel/
-          echo "=== frontend/.vercel/project.json ==="
-          cat frontend/.vercel/project.json
+          echo "=== frontend/ root listing ==="
+          ls -la
+          echo "=== .vercel/ contents ==="
+          ls -la .vercel/ 2>/dev/null || echo ".vercel/ does not exist yet"
+          echo "=== .vercel/project.json ==="
+          cat .vercel/project.json 2>/dev/null || echo "project.json not found"
+          echo "=== vercel.json ==="
+          cat vercel.json
+          echo "=== VERCEL env vars ==="
+          echo "VERCEL_TOKEN set?   $([ -n "$VERCEL_TOKEN" ]   && echo YES || echo NO)"
+          echo "VERCEL_ORG_ID set?  $([ -n "$VERCEL_ORG_ID" ]  && echo YES || echo NO)"
+          echo "VERCEL_PROJECT_ID?  $VERCEL_PROJECT_ID"
 
+      # ── Install npm dependencies ─────────────────────────────────
+      - name: Install npm dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # ── Vercel pull: sync project settings from dashboard ────────
+      # Runs from inside frontend/ so .vercel/ is written into
+      # frontend/.vercel/ — never into a nested frontend/frontend/.
+      - name: Pull Vercel project settings
+        working-directory: frontend
+        run: vercel pull --yes --environment=production
+
+      # ── Debug: confirm .vercel/ was written correctly ────────────
+      - name: DEBUG — .vercel/ after pull
+        working-directory: frontend
+        run: |
+          echo "=== .vercel/ after pull ==="
+          ls -la .vercel/
+          echo "=== .vercel/project.json after pull ==="
+          cat .vercel/project.json
+
+      # ── Vercel build: run Angular build on Vercel infra ──────────
+      # Runs from inside frontend/ so build artefacts land in
+      # frontend/dist/ as defined in angular.json outputPath: "dist".
+      - name: Build project via Vercel
+        working-directory: frontend
+        run: vercel build --prod
+
+      # ── Debug: confirm build output is correct ───────────────────
+      - name: DEBUG — build output
+        working-directory: frontend
+        run: |
+          echo "=== dist/ after build ==="
+          ls -la dist/ 2>/dev/null || echo "dist/ not found"
+          echo "=== dist/index.html ==="
+          ls -la dist/index.html 2>/dev/null || echo "dist/index.html not found"
+          echo "=== .vercel/output/ (Vercel Output API) ==="
+          ls -la .vercel/output/ 2>/dev/null || echo ".vercel/output/ not present"
+
+      # ── Deploy pre-built output to Vercel ────────────────────────
       - name: Deploy to Vercel (production)
-        run: vercel deploy --prod --yes --cwd frontend
+        working-directory: frontend
+        run: vercel deploy --prebuilt --prod
 
-      - name: DEBUG — directory state after deploy
+      # ── Debug: post-deploy state ─────────────────────────────────
+      - name: DEBUG — post-deploy state
         if: always()
+        working-directory: frontend
         run: |
-          echo "=== PWD after deploy ==="
+          echo "=== PWD ==="
           pwd
-          echo "=== frontend/dist/ ==="
-          ls -la frontend/dist/ 2>/dev/null || echo "dist/ not present (Vercel built remotely)"
-          echo "=== frontend/.vercel/ after deploy ==="
-          ls -la frontend/.vercel/ 2>/dev/null || echo "no .vercel dir"
+          echo "=== .vercel/ ==="
+          ls -la .vercel/ 2>/dev/null || echo "no .vercel dir"
+          echo "=== .vercel/project.json ==="
+          cat .vercel/project.json 2>/dev/null || echo "not found"
 
   # ----------------------------------------------------------------
   # BACKEND DEPLOY  (AWS ECS / Fargate)
