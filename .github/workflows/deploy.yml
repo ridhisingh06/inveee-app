@@ -1,4 +1,4 @@
-# Updated workflow on 2026-07-04T06:05:00+05:30
+# Updated workflow on 2026-07-15
 name: Deploy Full Stack
 
 on:
@@ -20,8 +20,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Show repository structure
         run: ls -Rla
-
-
 
   # ---------------- BACKEND BUILD ----------------
   build-backend:
@@ -48,40 +46,125 @@ jobs:
           name: backend-build
           path: backend/out
 
-  # ---------------- DEPLOY ----------------
-  deploy:
+  # ----------------------------------------------------------------
+  # FRONTEND DEPLOY (Vercel)
+  #
+  # Live URL: https://inveee-app-ebon.vercel.app
+  # Project:  prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v  (team_W1pwDE1fq8hpwxXcYSXsH7p0)
+  #
+  # Strategy: build Angular ourselves with `npm run build` (production),
+  # then hand the pre-built dist/ to `vercel deploy --prebuilt` so
+  # Vercel does zero additional build work — no double-build, no
+  # framework detection surprises.
+  #
+  # Runs on: push to main  OR  manual workflow_dispatch
+  # ----------------------------------------------------------------
+  deploy-frontend:
     runs-on: ubuntu-latest
-    needs: [debug, build-backend]
-    if: github.ref == 'refs/heads/main'
+    needs: build-backend
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Angular app (production)
+        working-directory: frontend
+        run: npm run build
+        # npm run build  →  ng build --configuration production
+        # Output lands in  dist/frontend/  (flat, index.html at root)
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      # Pull project config & env vars from Vercel
+      # This writes .vercel/project.json inside frontend/ (already committed)
+      # and downloads any env vars the project has configured in the dashboard.
+      - name: Pull Vercel project metadata
+        working-directory: frontend
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Mark dist/frontend as a pre-built Vercel output so Vercel
+      # skips its own build step entirely.
+      - name: Configure pre-built output for Vercel
+        working-directory: frontend
+        run: |
+          # vercel deploy --prebuilt expects a .vercel/output directory
+          # containing config.json + a static/ folder.
+          mkdir -p .vercel/output/static
+          cp -r dist/frontend/. .vercel/output/static/
+          cat > .vercel/output/config.json <<'EOF'
+          {
+            "version": 3,
+            "routes": [
+              {
+                "src": "/assets/(.*)",
+                "dest": "/assets/$1"
+              },
+              {
+                "src": "/(.*\\.(js|css|ico|png|svg|woff2?|ttf|eot|map))",
+                "dest": "/$1"
+              },
+              {
+                "src": "/(.*)",
+                "dest": "/index.html"
+              }
+            ]
+          }
+          EOF
+
+      - name: Deploy to Vercel (production)
+        working-directory: frontend
+        run: |
+          vercel deploy --prebuilt --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --scope=${{ secrets.VERCEL_ORG_ID }}
+
+  # ----------------------------------------------------------------
+  # BACKEND DEPLOY (AWS ECS via ECR + Fargate)
+  # ----------------------------------------------------------------
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: build-backend
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     env:
       AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: "396287094524"
-      AWS_S3_BUCKET: invmgmt-master
       ECR_REPOSITORY: inveee-app
       ECS_CLUSTER: inveee-cluster
       ECS_SERVICE: inveee-service
       CONTAINER_NAME: app
     steps:
       - uses: actions/checkout@v4
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      - name: Build backend
+
+      - name: Publish backend
         working-directory: backend
         run: dotnet publish invmgmt.web.csproj -c Release -o out
-      - name: Build and Push Docker Image
+
+      - name: Build and push Docker image
         id: build-image
         run: |
           REGISTRY=${{ steps.login-ecr.outputs.registry }}
@@ -92,13 +175,15 @@ jobs:
           docker push $IMAGE_SHA
           docker push $IMAGE_LATEST
           echo "image=$IMAGE_SHA" >> $GITHUB_OUTPUT
-      - name: Render ECS Task Definition
+
+      - name: Render ECS task definition
         id: render-task
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
+
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
@@ -107,7 +192,7 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: false
 
-      - name: Wait for ECS service to become stable
+      - name: Wait for ECS service stability
         run: |
           aws ecs wait services-stable \
             --cluster ${{ env.ECS_CLUSTER }} \
