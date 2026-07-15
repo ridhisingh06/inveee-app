@@ -121,7 +121,7 @@ jobs:
           mkdir -p .vercel
           cat > .vercel/project.json <<'EOF'
           {
-            "projectId": "prj_aY3yPZbu4VL2vhsz8kZHYeCA5K5v",
+            "projectId": "prj_1ncFmrh8PchpNyFXwDMZ4xs6c3fK",
             "orgId": "team_W1pwDE1fq8hpwxXcYSXsH7p0"
           }
           EOF
