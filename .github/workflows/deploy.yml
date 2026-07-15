@@ -123,6 +123,15 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Verify Angular CLI
+        working-directory: frontend
+        run: |
+          echo "=== node_modules/.bin directory ==="
+          ls -la node_modules/.bin
+          echo ""
+          echo "=== Angular CLI version ==="
+          npx ng version
+
       - name: DEBUG — Verify installation and environment
         working-directory: frontend
         run: |
@@ -168,19 +177,17 @@ jobs:
           echo "=== PATH ==="
           echo $PATH
 
-      - name: Build project via Vercel
+      - name: Build Angular
         working-directory: frontend
-        run: vercel build --prod --token $VERCEL_TOKEN
+        run: npm run build
 
       - name: DEBUG — build output
         working-directory: frontend
         run: |
-          echo "=== .vercel/output/ ==="
-          ls -la .vercel/output/ 2>/dev/null || echo ".vercel/output/ not found"
-          echo "=== .vercel/output/static/ (first 20 files) ==="
-          ls -la .vercel/output/static/ 2>/dev/null | head -20 || echo "static/ not found"
-          echo "=== .vercel/output/static/index.html ==="
-          ls -la .vercel/output/static/index.html 2>/dev/null || echo "index.html not found"
+          echo "=== dist/ directory ==="
+          ls -la dist/ 2>/dev/null || echo "dist/ not found"
+          echo "=== dist/index.html ==="
+          ls -la dist/index.html 2>/dev/null || echo "index.html not found"
 
       - name: Deploy to Vercel (production)
         working-directory: frontend
@@ -195,7 +202,7 @@ jobs:
           echo "=== .vercel/project.json ==="
           cat .vercel/project.json 2>/dev/null || echo "not found"
           echo "=== Build output ==="
-          ls -la .vercel/output/ 2>/dev/null || echo "output directory not found"
+          ls -la dist/ 2>/dev/null || echo "dist directory not found"
 
   # ----------------------------------------------------------------
   # BACKEND DEPLOY  (AWS ECS / Fargate)
