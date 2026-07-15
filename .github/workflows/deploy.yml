@@ -106,11 +106,9 @@ jobs:
           echo "All required secrets are set"
 
       - name: Pull Vercel project settings
-        working-directory: frontend
         run: vercel pull --yes --environment=production --token $VERCEL_TOKEN
 
       - name: Validate .vercel/project.json exists
-        working-directory: frontend
         run: |
           if [ ! -f .vercel/project.json ]; then
             echo "ERROR: .vercel/project.json was not created by vercel pull"
@@ -120,12 +118,11 @@ jobs:
           cat .vercel/project.json
 
       - name: Install npm dependencies
-        working-directory: frontend
-        run: npm ci
+        run: cd frontend && npm ci
 
       - name: Verify Angular CLI
-        working-directory: frontend
         run: |
+          cd frontend
           echo "=== node_modules/.bin directory ==="
           ls -la node_modules/.bin
           echo ""
@@ -133,8 +130,8 @@ jobs:
           npx ng version
 
       - name: DEBUG — Verify installation and environment
-        working-directory: frontend
         run: |
+          cd frontend
           echo "=== Current working directory ==="
           pwd
           echo ""
@@ -178,7 +175,6 @@ jobs:
           echo $PATH
 
       - name: Deploy Frontend
-        working-directory: frontend
         run: |
           vercel deploy \
             --prod \
@@ -188,8 +184,8 @@ jobs:
 
       - name: DEBUG — post-deployment
         if: always()
-        working-directory: frontend
         run: |
+          cd frontend
           echo "=== Current working directory ==="
           pwd
           echo "=== .vercel/project.json ==="
