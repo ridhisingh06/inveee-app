@@ -14,9 +14,12 @@ export class UserDashboardComponent implements OnInit {
   userName     = '';
   userInitials = 'U';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    console.log('[UserDashboardComponent] constructor called');
+  }
 
   ngOnInit(): void {
+    console.log('[UserDashboardComponent] ngOnInit called');
     // Pull stored display name / email from auth token payload
     try {
       const token = localStorage.getItem('token');
@@ -35,9 +38,11 @@ export class UserDashboardComponent implements OnInit {
           .slice(0, 2)
           .map((w: string) => w[0].toUpperCase())
           .join('') || 'U';
+        console.log('[UserDashboardComponent] User loaded:', this.userName);
       }
     } catch {
       // Token missing or malformed — no user card details shown
+      console.log('[UserDashboardComponent] Token parsing failed');
     }
   }
 

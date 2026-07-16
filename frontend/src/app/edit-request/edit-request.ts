@@ -44,19 +44,25 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     private readonly http:           HttpClient,
     private readonly requestService: RequestService,
     private readonly refresh:        RefreshService
-  ) {}
+  ) {
+    console.log('[EditRequestComponent] constructor called');
+  }
 
   ngOnInit(): void {
+    console.log('[EditRequestComponent] ngOnInit called');
     this.route.paramMap
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
+        console.log('[EditRequestComponent] paramMap subscription fired', params);
         const idStr = params.get('id');
         if (!idStr || isNaN(+idStr) || +idStr <= 0) {
           this.errorMsg = 'No valid request ID provided.';
           this.loading  = false;
+          console.log('[EditRequestComponent] Invalid request ID, loading set to false');
           return;
         }
         this.requestId = +idStr;
+        console.log('[EditRequestComponent] Valid request ID:', this.requestId, 'calling loadRequest()');
         this.loadRequest();
       });
   }
@@ -69,6 +75,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
   // ── Load request from GET /api/requests/{id} ────────────────────────────
 
   loadRequest(): void {
+    console.log('[EditRequestComponent] loadRequest() called, requestId:', this.requestId);
     this.loading  = true;
     this.errorMsg = '';
     this.lines    = [];
@@ -77,6 +84,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (req) => {
+          console.log('[EditRequestComponent] API response received:', req);
           // Cast to any so we can safely read camelCase properties regardless
           // of whether the TypeScript interface is fully typed.
           const r = req as any;
@@ -88,10 +96,12 @@ export class EditRequestComponent implements OnInit, OnDestroy {
           // ("Requested" → "requested" is caught by the second condition).
           const reqStatus: string = (r.status ?? '').toLowerCase().trim();
           const isPending = reqStatus === 'pendingwithissuer' || reqStatus === 'requested';
+          console.log('[EditRequestComponent] Request status:', r.status, 'isPending:', isPending);
 
           if (!isPending) {
             this.errorMsg = `This request is in "${r.status}" status and can no longer be edited.`;
             this.loading  = false;
+            console.log('[EditRequestComponent] Status not pending, loading set to false');
             return;
           }
 
@@ -99,10 +109,12 @@ export class EditRequestComponent implements OnInit, OnDestroy {
           // Backend uses camelCase JSON ("items"), but guard against both
           // casings just in case a proxy or older backend build uses PascalCase.
           const items: any[] = r.items ?? r.Items ?? [];
+          console.log('[EditRequestComponent] Items count:', items.length);
 
           if (items.length === 0) {
             this.errorMsg = 'This request has no items and cannot be edited.';
             this.loading  = false;
+            console.log('[EditRequestComponent] No items, loading set to false');
             return;
           }
 
@@ -113,10 +125,12 @@ export class EditRequestComponent implements OnInit, OnDestroy {
             const s = (i.status ?? i.Status ?? '').toLowerCase().trim();
             return s === 'pendingwithissuer' || s === 'requested';
           });
+          console.log('[EditRequestComponent] allItemsPending:', allItemsPending);
 
           if (!allItemsPending) {
             this.errorMsg = 'The issuer has started processing this request. Editing is no longer allowed.';
             this.loading  = false;
+            console.log('[EditRequestComponent] Items not all pending, loading set to false');
             return;
           }
 
@@ -131,6 +145,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
             } as Item,
             qty: ri.quantityRequested ?? ri.QuantityRequested ?? 1
           }));
+          console.log('[EditRequestComponent] Lines populated:', this.lines.length, 'loading set to false');
 
           this.loading = false;
 
@@ -138,6 +153,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
           this.loadInventory();
         },
         error: (err) => {
+          console.log('[EditRequestComponent] API error:', err);
           this.errorMsg = err?.message || 'Failed to load request. Please try again.';
           this.loading  = false;
         }
