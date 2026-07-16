@@ -53,7 +53,7 @@
         </span>
       </div>
 
-      <button class="view-btn" title="View Details">
+      <button class="view-btn" (click)="viewReceipt(req.id)" title="View Order Receipt">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
           <circle cx="12" cy="12" r="3"></circle>
@@ -66,5 +66,16 @@
       <button (click)="nextPage()" [disabled]="requests.length < pageSize" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer;">Next</button>
     </div>
   </section>
+
+  <!-- Order Receipt Modal -->
+  <div *ngIf="showReceipt && selectedRequestId" class="receipt-modal-overlay" (click)="closeReceipt()">
+    <div class="receipt-modal-content" (click)="$event.stopPropagation()">
+      <button class="close-modal-btn" (click)="closeReceipt()">×</button>
+      <app-order-receipt 
+        [requestId]="selectedRequestId" 
+        [showReceivedButton]="canShowReceivedButton(requests.find(r => r.id === selectedRequestId)?.status)">
+      </app-order-receipt>
+    </div>
+  </div>
 
 </div>

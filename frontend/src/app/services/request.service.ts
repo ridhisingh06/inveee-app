@@ -170,4 +170,21 @@ export class RequestService {
         })
       );
   }
+
+  /**
+   * Get order receipt for a request
+   * @param id - Request ID
+   * @returns Observable<OrderReceipt> - Order receipt data or error
+   */
+  getOrderReceipt(id: number): Observable<any> {
+    return this.http.get<any>(`${this.base}/${id}/receipt`)
+      .pipe(
+        catchError(err => {
+          console.error('[RequestService] Error fetching order receipt:', err);
+          return throwError(() => new Error(
+            err?.error?.message || 'Failed to load order receipt. Please try again.'
+          ));
+        })
+      );
+  }
 }

@@ -6,11 +6,12 @@ import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RefreshService } from '../services/refresh.service';
 import { normalizeStatus, getStatusClass, getStatusLabel } from '../utils/status.util';
+import { OrderReceiptComponent } from '../order-receipt/order-receipt.component';
 
 @Component({
   standalone: true,
   selector: 'app-my-requests',
-  imports: [CommonModule],
+  imports: [CommonModule, OrderReceiptComponent],
   templateUrl: './my-requests.html',
   styleUrls: ['./my-requests.css']
 })
@@ -23,6 +24,9 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
   normalizeStatus = normalizeStatus;
   getStatusClass = getStatusClass;
   getStatusLabel = getStatusLabel;
+
+  selectedRequestId: number | null = null;
+  showReceipt = false;
 
   private destroy$ = new Subject<void>();
 
@@ -64,6 +68,20 @@ export class MyRequestsComponent implements OnInit, OnDestroy {
           this.loading = false;
         }
       });
+  }
+
+  viewReceipt(requestId: number) {
+    this.selectedRequestId = requestId;
+    this.showReceipt = true;
+  }
+
+  closeReceipt() {
+    this.showReceipt = false;
+    this.selectedRequestId = null;
+  }
+
+  canShowReceivedButton(status: string): boolean {
+    return status === 'Approved' || status === 'Ready To Receive';
   }
 
   nextPage() {

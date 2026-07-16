@@ -358,9 +358,88 @@ public sealed class RequestsController : ControllerBase
     }
 
     /// <summary>
+    /// GET /api/requests/{id}/receipt
+    /// Generate professional order receipt for user viewing
+    /// </summary>
+    [Authorize(Roles = "USER")]
+    [HttpGet("{id:int}/receipt")]
+    public async Task<IActionResult> GetReceipt(int id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var request = await _context.Requests
+                .Include(r => r.User)
+                .Include(r => r.RequestItems)
+                .ThenInclude(ri => ri.Item)
+                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+
+            if (request == null)
+                return NotFound(new { message = "Request not found or access denied" });
+
+            var issuer = await _context.Users.FindAsync(request.IssuedBy);
+            var admin = await _context.Users.FindAsync(request.ApprovedBy);
+
+            var items = request.RequestItems.Select(ri => new OrderReceiptItemDto
+            {
+                ItemName = ri.Item?.Name ?? "Unknown",
+                RequestedQty = ri.QuantityRequested,
+                IssuerIssued = ri.IssuerIssuedQuantity,
+                IssuerRejected = ri.IssuerRejectedQuantity,
+                AdminApproved = ri.AdminApprovedQuantity,
+                AdminRejected = ri.AdminRejectedQuantity,
+                FinalReceiveQty = ri.AdminApprovedQuantity // Final received is what admin approved
+            }).ToList();
+
+            var summary = new OrderReceiptSummaryDto
+            {
+                TotalRequested = items.Sum(i => i.RequestedQty),
+                TotalIssuerApproved = items.Sum(i => i.IssuerIssued),
+                TotalIssuerRejected = items.Sum(i => i.IssuerRejected),
+                TotalAdminApproved = items.Sum(i => i.AdminApproved),
+                TotalAdminRejected = items.Sum(i => i.AdminRejected),
+                TotalFinalReceived = items.Sum(i => i.FinalReceiveQty)
+            };
+
+            // Generate remarks based on the workflow
+            var remarks = new List<string>();
+            if (summary.TotalIssuerRejected > 0)
+                remarks.Add("Some items were rejected due to insufficient stock.");
+            if (summary.TotalAdminRejected > 0)
+                remarks.Add("Some items were rejected during admin approval.");
+            if (summary.TotalFinalReceived > 0)
+                remarks.Add("Only admin-approved items are available for collection.");
+
+            var receipt = new OrderReceiptDto
+            {
+                RequestId = request.Id,
+                OrderNumber = $"ORD-{request.Id:D6}",
+                RequestDate = request.CreatedAt,
+                IssuedDate = request.IssuedDate,
+                ApprovedDate = request.ApprovedDate,
+                CurrentStatus = request.Status.ToString(),
+                IssuerName = issuer?.Username ?? "Not assigned",
+                AdminName = admin?.Username ?? "Not assigned",
+                UserName = request.User?.Username ?? "Unknown",
+                Items = items,
+                Summary = summary,
+                Remarks = string.Join(" ", remarks),
+                GeneratedOn = DateTime.UtcNow
+            };
+
+            return Ok(receipt);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error in RequestsController.GetReceipt");
+            return StatusCode(500, new { message = "An internal server error occurred." });
+        }
+    }
+
+    /// <summary>
     /// PATCH /api/requests/{id}/receive
     /// User confirms they received items -> RECEIVED (only if APPROVED).
-    /// Also creates an immutable OrderSummary record and returns orderSummaryId.
+    /// Updates status, received date, and received by without modifying inventory.
     /// </summary>
     [Authorize(Roles = "USER")]
     [HttpPatch("{id:int}/receive")]
@@ -368,36 +447,49 @@ public sealed class RequestsController : ControllerBase
     {
         try
         {
-            var userId = User.GetUserId();
-
-            // Create the order summary (which also marks the request as Received internally)
-            var result = await _orderSummaryService.CreateOrderSummaryAsync(id, userId);
-
-            if (!result.Success)
+            var strategy = _context.Database.CreateExecutionStrategy();
+            IActionResult? earlyReturn = null;
+            await strategy.ExecuteAsync(async () =>
             {
-                // Surface domain-specific errors with appropriate status codes
-                if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                    return NotFound(new { message = result.Message });
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                var userId = User.GetUserId();
+                var request = await _context.Requests
+                    .Include(r => r.RequestItems)
+                    .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
 
-                if (result.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
+                if (request == null)
+                { earlyReturn = NotFound(new { message = "Request not found or access denied" }); return; }
+
+                if (request.Status != RequestStatus.Approved)
+                { earlyReturn = BadRequest(new { message = $"Only approved requests can be marked as received. Current status: {request.Status}" }); return; }
+
+                // Update request status and received information
+                request.Status = RequestStatus.Received;
+                request.ReceivedDate = DateTime.UtcNow;
+                request.UpdatedAt = DateTime.UtcNow;
+
+                // Update all approved items to received status
+                foreach (var item in request.RequestItems.Where(ri => ri.Status == RequestItemStatus.Approved))
                 {
-                    // Idempotent: already received — look up the existing summary and return it
-                    var existing = await _orderSummaryService.GetOrderSummaryByRequestAsync(id);
-                    if (existing != null)
-                        return Ok(new { message = "Request already received.", orderSummaryId = existing.Id });
-                    return Conflict(new { message = result.Message });
+                    item.Status = RequestItemStatus.Received;
+                    item.ReceivedDate = DateTime.UtcNow;
+                    item.ReceivedQuantity = item.AdminApprovedQuantity;
                 }
 
-                return BadRequest(new { message = result.Message });
-            }
+                // Add received log
+                _context.ReceivedLogs.Add(new ReceivedLog
+                {
+                    RequestId = request.Id,
+                    ReceivedBy = userId,
+                    UserId = userId,
+                    ReceivedDate = DateTime.UtcNow
+                });
 
-            return Ok(new
-            {
-                message = result.Message,
-                orderSummaryId = result.OrderSummaryId,
-                requestId = result.RequestId,
-                receivedDate = result.ReceivedDate
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
             });
+
+            return earlyReturn ?? Ok(new { message = "Items marked as received successfully." });
         }
         catch (Exception ex)
         {
