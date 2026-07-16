@@ -85,8 +85,20 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       .subscribe({
         next: res => {
           console.log('[UserCheckStatus] loadRequests API response:', res);
-          this.requests = Array.isArray(res) ? res : (res.data ?? []);
-          console.log('[UserCheckStatus] requests array:', this.requests);
+          const rawRequests = Array.isArray(res) ? res : (res.data ?? []);
+          
+          // Normalize request objects to ensure they have 'id' property
+          this.requests = rawRequests.map((req: any) => {
+            // Handle both 'id' and 'Id' (uppercase) from backend
+            const normalized = {
+              ...req,
+              id: req.id || req.Id || req.requestId || req.RequestId
+            };
+            console.log('[UserCheckStatus] Normalized request:', normalized);
+            return normalized;
+          });
+          
+          console.log('[UserCheckStatus] Final requests array:', this.requests);
           this.loading  = false;
         },
         error: (err) => {
@@ -100,18 +112,29 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Receive entire approved request ──────────────────────────────────────
 
   openReceiveConfirmDialog(requestId: number): void {
+    console.log('[UserCheckStatus] openReceiveConfirmDialog called with requestId:', requestId);
     this.receiveConfirmRequestId = requestId;
+    console.log('[UserCheckStatus] receiveConfirmRequestId set to:', this.receiveConfirmRequestId);
     this.isReceiveConfirmDialogOpen = true;
   }
 
   closeReceiveConfirmDialog(): void {
+    console.log('[UserCheckStatus] closeReceiveConfirmDialog called');
     this.isReceiveConfirmDialogOpen = false;
     this.receiveConfirmRequestId = null;
+    console.log('[UserCheckStatus] receiveConfirmRequestId reset to null');
   }
 
   confirmReceive(): void {
-    if (!this.receiveConfirmRequestId) return;
+    console.log('[UserCheckStatus] confirmReceive called');
+    console.log('[UserCheckStatus] receiveConfirmRequestId before check:', this.receiveConfirmRequestId);
     
+    if (!this.receiveConfirmRequestId) {
+      console.error('[UserCheckStatus] receiveConfirmRequestId is null/undefined in confirmReceive');
+      return;
+    }
+    
+    console.log('[UserCheckStatus] Calling receiveAll with receiveConfirmRequestId:', this.receiveConfirmRequestId);
     this.closeReceiveConfirmDialog();
     this.receiveAll(this.receiveConfirmRequestId);
   }
@@ -190,8 +213,11 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Receipt Modal ─────────────────────────────────────────────────────────────
 
   openReceiptModal(requestId: number): void {
+    console.log('[UserCheckStatus] openReceiptModal called with requestId:', requestId);
+    
     // Validate request ID before opening modal
     if (!requestId || requestId <= 0) {
+      console.error('[UserCheckStatus] Invalid request ID:', requestId);
       this.errorMsg = 'Invalid request ID. Cannot view receipt.';
       return;
     }
@@ -204,19 +230,31 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
     // Find the request in our local data first
     const request = this.requests.find(r => r.id === requestId);
+    console.log('[UserCheckStatus] Found request in local array:', request);
+    
     if (request) {
       this.currentReceipt = request;
+      console.log('[UserCheckStatus] currentReceipt set from local array:', this.currentReceipt);
       this.receiptLoading = false;
     } else {
+      console.log('[UserCheckStatus] Request not found locally, fetching from API');
       // If not found locally, try to fetch from API
       this.http.get<any>(`${environment.apiUrl}/requests/${requestId}`)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (data) => {
-            this.currentReceipt = data;
+            console.log('[UserCheckStatus] API response data:', data);
+            // Normalize to ensure 'id' property exists
+            const normalized = {
+              ...data,
+              id: data.id || data.Id || data.requestId || data.RequestId || requestId
+            };
+            this.currentReceipt = normalized;
+            console.log('[UserCheckStatus] currentReceipt set from API (normalized):', this.currentReceipt);
             this.receiptLoading = false;
           },
           error: (err) => {
+            console.error('[UserCheckStatus] API error fetching request:', err);
             this.receiptError = 'Failed to load receipt details. Please try again.';
             this.receiptLoading = false;
           }
