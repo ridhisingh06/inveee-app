@@ -439,7 +439,7 @@ public sealed class RequestsController : ControllerBase
     /// <summary>
     /// PATCH /api/requests/{id}/receive
     /// User confirms they received items -> RECEIVED (only if APPROVED).
-    /// Updates status, received date, and received by without modifying inventory.
+    /// Creates OrderSummary and updates status, received date, and received by without modifying inventory.
     /// </summary>
     [Authorize(Roles = "USER")]
     [HttpPatch("{id:int}/receive")]
@@ -447,53 +447,27 @@ public sealed class RequestsController : ControllerBase
     {
         try
         {
-            var strategy = _context.Database.CreateExecutionStrategy();
-            IActionResult? earlyReturn = null;
-            await strategy.ExecuteAsync(async () =>
+            var userId = User.GetUserId();
+            
+            // Use OrderSummaryService to handle the complete receive workflow
+            var result = await _orderSummaryService.CreateOrderSummaryAsync(id, userId);
+            
+            if (!result.Success)
             {
-                await using var transaction = await _context.Database.BeginTransactionAsync();
-                var userId = User.GetUserId();
-                var request = await _context.Requests
-                    .Include(r => r.RequestItems)
-                    .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+                return BadRequest(new { message = result.Message });
+            }
 
-                if (request == null)
-                { earlyReturn = NotFound(new { message = "Request not found or access denied" }); return; }
-
-                if (request.Status != RequestStatus.Approved)
-                { earlyReturn = BadRequest(new { message = $"Only approved requests can be marked as received. Current status: {request.Status}" }); return; }
-
-                // Update request status and received information
-                request.Status = RequestStatus.Received;
-                request.ReceivedDate = DateTime.UtcNow;
-                request.UpdatedAt = DateTime.UtcNow;
-
-                // Update all approved items to received status
-                foreach (var item in request.RequestItems.Where(ri => ri.Status == RequestItemStatus.Approved))
-                {
-                    item.Status = RequestItemStatus.Received;
-                    item.ReceivedDate = DateTime.UtcNow;
-                    item.ReceivedQuantity = item.AdminApprovedQuantity;
-                }
-
-                // Add received log
-                _context.ReceivedLogs.Add(new ReceivedLog
-                {
-                    RequestId = request.Id,
-                    ReceivedBy = userId,
-                    UserId = userId,
-                    ReceivedDate = DateTime.UtcNow
-                });
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+            return Ok(new 
+            { 
+                message = result.Message,
+                requestId = result.RequestId,
+                orderSummaryId = result.OrderSummaryId,
+                receivedDate = result.ReceivedDate
             });
-
-            return earlyReturn ?? Ok(new { message = "Items marked as received successfully." });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error in RequestsController.Receive");
+            _logger.LogError(ex, "Unexpected error in RequestsController.Receive (RequestId={RequestId})", id);
             return StatusCode(500, new { message = "An internal server error occurred." });
         }
     }

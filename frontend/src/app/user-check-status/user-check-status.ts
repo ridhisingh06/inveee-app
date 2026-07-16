@@ -114,6 +114,12 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   receiveAll(requestId: number): void {
+    // Validate request ID before making API call
+    if (!requestId || requestId <= 0) {
+      this.errorMsg = 'Invalid request ID. Cannot confirm receipt.';
+      return;
+    }
+
     if (this.receivingMap[requestId]) return;
     this.receivingMap[requestId] = true;
     this.successMsg = '';
@@ -146,6 +152,12 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   viewReceipt(requestId: number): void {
+    // Validate request ID before making API call
+    if (!requestId || requestId <= 0) {
+      this.errorMsg = 'Invalid request ID. Cannot view receipt.';
+      return;
+    }
+
     const summaryId = this.orderSummaryMap[requestId];
     if (summaryId) {
       this.router.navigate(['/user-dashboard/order-summary', summaryId]);
@@ -153,7 +165,14 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       this.workflow.getOrderSummaryByRequestId(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (os) => this.router.navigate(['/user-dashboard/order-summary', os.id]),
+          next: (os) => {
+            if (os && os.id) {
+              this.orderSummaryMap[requestId] = os.id;
+              this.router.navigate(['/user-dashboard/order-summary', os.id]);
+            } else {
+              this.errorMsg = 'Order receipt not found for this request.';
+            }
+          },
           error: ()  => this.errorMsg = 'Order receipt not found for this request.'
         });
     }
@@ -162,6 +181,12 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Receipt Modal ─────────────────────────────────────────────────────────────
 
   openReceiptModal(requestId: number): void {
+    // Validate request ID before opening modal
+    if (!requestId || requestId <= 0) {
+      this.errorMsg = 'Invalid request ID. Cannot view receipt.';
+      return;
+    }
+
     this.isReceiptModalOpen = true;
     this.receiptLoading = true;
     this.receiptError = '';
@@ -206,6 +231,13 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
     this.receivingFromModal = true;
     const requestId = this.currentReceipt.id;
+
+    // Validate request ID before making API call
+    if (!requestId || requestId <= 0) {
+      this.receiptError = 'Invalid request ID. Cannot confirm receipt.';
+      this.receivingFromModal = false;
+      return;
+    }
 
     this.workflow.receiveItems(requestId)
       .pipe(takeUntil(this.destroy$))
@@ -294,6 +326,12 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Reorder logic ─────────────────────────────────────────────────────────
 
   openReorderModal(requestId: number): void {
+    // Validate request ID before opening modal
+    if (!requestId || requestId <= 0) {
+      this.errorMsg = 'Invalid request ID. Cannot view reorder options.';
+      return;
+    }
+
     this.isReorderModalOpen = true;
     this.reorderLoading = true;
     this.reorderSuggestions = [];
@@ -363,6 +401,11 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
   /** Navigate to the edit page for the given request. */
   editRequest(requestId: number): void {
+    // Validate request ID before navigation
+    if (!requestId || requestId <= 0) {
+      this.errorMsg = 'Invalid request ID. Cannot edit request.';
+      return;
+    }
     this.router.navigate(['/user-dashboard/edit-request', requestId]);
   }
 
