@@ -4,7 +4,7 @@ namespace invmgmt.web.DTOs;
 
 public sealed class OrderReceiptDto
 {
-    public int RequestId { get; set; }
+    public int id { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
     public DateTime RequestDate { get; set; }
     public DateTime? IssuedDate { get; set; }

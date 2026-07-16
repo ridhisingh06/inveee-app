@@ -70,7 +70,7 @@ namespace invmgmt.web.Services
             var requests = await _requestRepo.GetUserRequestsAsync(userId, pageNumber, pageSize);
             return requests.Select(r => new RequestSummaryDto
             {
-                Id = r.Id,
+                id = r.Id,
                 Status = r.Status,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt
@@ -90,14 +90,14 @@ namespace invmgmt.web.Services
 
             return new RequestDetailDto
             {
-                Id = request.Id,
+                id = request.Id,
                 UserId = request.UserId,
                 Status = request.Status,
                 CreatedAt = request.CreatedAt,
                 UpdatedAt = request.UpdatedAt,
                 Items = request.RequestItems.Select(ri => new RequestItemDetailDto
                 {
-                    Id = ri.Id,
+                    id = ri.Id,
                     ItemId = ri.ItemId,
                     ItemName = ri.Item?.Name ?? string.Empty,
                     QuantityRequested = ri.QuantityRequested,

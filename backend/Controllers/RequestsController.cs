@@ -412,7 +412,7 @@ public sealed class RequestsController : ControllerBase
 
             var receipt = new OrderReceiptDto
             {
-                RequestId = request.Id,
+                id = request.Id,
                 OrderNumber = $"ORD-{request.Id:D6}",
                 RequestDate = request.CreatedAt,
                 IssuedDate = request.IssuedDate,

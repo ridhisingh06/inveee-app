@@ -84,10 +84,13 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {
+          console.log('[UserCheckStatus] loadRequests API response:', res);
           this.requests = Array.isArray(res) ? res : (res.data ?? []);
+          console.log('[UserCheckStatus] requests array:', this.requests);
           this.loading  = false;
         },
-        error: () => {
+        error: (err) => {
+          console.error('[UserCheckStatus] loadRequests error:', err);
           this.errorMsg = 'Could not fetch your requests. Please try again.';
           this.loading  = false;
         }
@@ -114,8 +117,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   receiveAll(requestId: number): void {
-    // Validate request ID before making API call
+    console.log('[UserCheckStatus] receiveAll called with requestId:', requestId);
+    
     if (!requestId || requestId <= 0) {
+      console.error('[UserCheckStatus] Invalid request ID:', requestId);
       this.errorMsg = 'Invalid request ID. Cannot confirm receipt.';
       return;
     }
@@ -125,10 +130,13 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     this.successMsg = '';
     this.errorMsg   = '';
 
+    console.log('[UserCheckStatus] Calling receive API with requestId:', requestId);
+    
     this.workflow.receiveItems(requestId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
+          console.log('[UserCheckStatus] Receive API response:', res);
           if (res.orderSummaryId) {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
           }
@@ -145,6 +153,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
           setTimeout(() => { this.successMsg = ''; }, 6000);
         },
         error: (err: any) => {
+          console.error('[UserCheckStatus] Receive API error:', err);
           this.errorMsg = err?.message || 'Failed to confirm receipt.';
           delete this.receivingMap[requestId];
         }
@@ -232,17 +241,24 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     this.receivingFromModal = true;
     const requestId = this.currentReceipt.id;
 
+    console.log('[UserCheckStatus] confirmReceiptFromModal called with requestId:', requestId);
+    console.log('[UserCheckStatus] currentReceipt:', this.currentReceipt);
+
     // Validate request ID before making API call
     if (!requestId || requestId <= 0) {
+      console.error('[UserCheckStatus] Invalid request ID from receipt:', requestId);
       this.receiptError = 'Invalid request ID. Cannot confirm receipt.';
       this.receivingFromModal = false;
       return;
     }
 
+    console.log('[UserCheckStatus] Calling receive API with requestId:', requestId);
+
     this.workflow.receiveItems(requestId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
+          console.log('[UserCheckStatus] Receive API response:', res);
           if (res.orderSummaryId) {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
           }
@@ -262,6 +278,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
           }, 2000);
         },
         error: (err: any) => {
+          console.error('[UserCheckStatus] Receive API error:', err);
           this.receiptError = err?.message || 'Failed to confirm receipt. Please try again.';
           this.receivingFromModal = false;
         }

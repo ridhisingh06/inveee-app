@@ -17,7 +17,7 @@ public sealed class CreateRequestLineDto
 
 public sealed class RequestSummaryDto
 {
-    public int Id { get; set; }
+    public int id { get; set; }
     public RequestStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -25,7 +25,7 @@ public sealed class RequestSummaryDto
 
 public sealed class RequestItemDetailDto
 {
-    public int Id { get; set; }
+    public int id { get; set; }
     public int ItemId { get; set; }
     public string ItemName { get; set; } = string.Empty;
     public int QuantityRequested { get; set; }
@@ -36,7 +36,7 @@ public sealed class RequestItemDetailDto
 
 public sealed class RequestDetailDto
 {
-    public int Id { get; set; }
+    public int id { get; set; }
     public int UserId { get; set; }
     public RequestStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
