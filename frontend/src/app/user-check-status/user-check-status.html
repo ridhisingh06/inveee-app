@@ -155,8 +155,15 @@
             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 0 1 0 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 1.414-1.414L8 12.586l7.293-7.293a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"/>
           </svg>
           Items received
-          <button class="view-receipt-btn" (click)="viewReceipt(req.id)">
+          <button class="view-receipt-btn" (click)="openReceiptModal(req.id)">
             View Order Receipt →
+          </button>
+        </div>
+
+        <!-- ── ALWAYS AVAILABLE: View Receipt for any request ── -->
+        <div class="receipt-section" *ngIf="!isRequestReceived(req) && !isRequestApproved(req)">
+          <button class="view-receipt-btn-small" (click)="openReceiptModal(req.id)">
+            View Receipt Details
           </button>
         </div>
 
@@ -206,6 +213,183 @@
         <button class="dialog-btn dialog-btn-primary" (click)="confirmReceive()">
           Confirm
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Receipt Modal -->
+  <div class="receipt-modal-overlay" *ngIf="isReceiptModalOpen" (click)="closeReceiptModal()">
+    <div class="receipt-modal-content" (click)="$event.stopPropagation()">
+      <button class="receipt-close-btn" (click)="closeReceiptModal()">×</button>
+      
+      <!-- Loading State -->
+      <div class="receipt-loading" *ngIf="receiptLoading">
+        <div class="spinner"></div>
+        <p>Loading receipt details...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="receipt-error" *ngIf="receiptError && !receiptLoading">
+        <div class="error-alert">
+          <span class="error-icon">!</span> {{ receiptError }}
+        </div>
+        <button class="close-error-btn" (click)="closeReceiptModal()">Close</button>
+      </div>
+
+      <!-- Receipt Content -->
+      <div class="receipt-document" *ngIf="!receiptLoading && !receiptError && currentReceipt">
+        <!-- Receipt Header -->
+        <div class="receipt-header">
+          <div class="company-info">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+              <path d="M3 6h18"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <div>
+              <div class="company-name">Inventory Hub</div>
+              <div class="company-sub">Enterprise Inventory Management</div>
+            </div>
+          </div>
+          <div class="receipt-title">
+            <div class="receipt-label">ORDER RECEIPT</div>
+            <div class="receipt-number">REQ-{{ currentReceipt.requestId }}</div>
+          </div>
+        </div>
+
+        <!-- Request Details -->
+        <div class="receipt-section">
+          <h3>Request Details</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Request ID:</label>
+              <span>{{ currentReceipt.requestId }}</span>
+            </div>
+            <div class="info-item">
+              <label>Status:</label>
+              <span class="status-badge" [ngClass]="getStatusClass(currentReceipt.status)">
+                {{ getStatusLabel(currentReceipt.status) }}
+              </span>
+            </div>
+            <div class="info-item">
+              <label>Requested Date:</label>
+              <span>{{ formatDate(currentReceipt.createdAt) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Updated Date:</label>
+              <span>{{ formatDate(currentReceipt.updatedAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workflow Information -->
+        <div class="receipt-section" *ngIf="currentReceipt.issuerName || currentReceipt.adminName">
+          <h3>Processed By</h3>
+          <div class="info-grid">
+            <div class="info-item" *ngIf="currentReceipt.issuerName">
+              <label>Issuer:</label>
+              <span>{{ currentReceipt.issuerName }}</span>
+            </div>
+            <div class="info-item" *ngIf="currentReceipt.adminName">
+              <label>Admin:</label>
+              <span>{{ currentReceipt.adminName }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="receipt-section">
+          <h3>Order Items</h3>
+          <div class="items-table-wrapper">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="qty-col">Requested</th>
+                  <th class="qty-col">Issued</th>
+                  <th class="qty-col">Rejected</th>
+                  <th class="qty-col">Approved</th>
+                  <th class="qty-col">Received</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of currentReceipt.items">
+                  <td class="item-name">{{ item.itemName }}</td>
+                  <td class="qty-col">{{ item.quantityRequested }}</td>
+                  <td class="qty-col">{{ item.issuerIssuedQuantity ?? '-' }}</td>
+                  <td class="qty-col rejected-qty" *ngIf="(item.issuerRejectedQuantity ?? 0) > 0">
+                    {{ item.issuerRejectedQuantity }}
+                  </td>
+                  <td class="qty-col" *ngIf="(item.issuerRejectedQuantity ?? 0) === 0">-</td>
+                  <td class="qty-col">{{ item.adminApprovedQuantity ?? '-' }}</td>
+                  <td class="qty-col received-qty" *ngIf="isItemReceived(item.status)">
+                    {{ item.adminApprovedQuantity ?? item.quantityRequested }}
+                  </td>
+                  <td class="qty-col" *ngIf="!isItemReceived(item.status)">-</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="totals-row">
+                  <td class="totals-label">TOTALS</td>
+                  <td class="qty-col">{{ getTotalRequested() }}</td>
+                  <td class="qty-col">{{ getTotalIssued() }}</td>
+                  <td class="qty-col rejected-qty">{{ getTotalRejected() }}</td>
+                  <td class="qty-col">{{ getTotalApproved() }}</td>
+                  <td class="qty-col received-qty">{{ getTotalReceived() }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Summary Boxes -->
+        <div class="summary-boxes">
+          <div class="summary-box green">
+            <div class="sb-value">{{ getTotalReceived() }}</div>
+            <div class="sb-label">Total Received</div>
+          </div>
+          <div class="summary-box blue">
+            <div class="sb-value">{{ getTotalApproved() }}</div>
+            <div class="sb-label">Total Approved</div>
+          </div>
+          <div class="summary-box orange">
+            <div class="sb-value">{{ getTotalRejected() }}</div>
+            <div class="sb-label">Total Rejected</div>
+          </div>
+          <div class="summary-box gray">
+            <div class="sb-value">{{ getTotalRequested() }}</div>
+            <div class="sb-label">Total Requested</div>
+          </div>
+        </div>
+
+        <!-- Action Section -->
+        <div class="receipt-actions" *ngIf="canShowReceivedButton()">
+          <button 
+            class="received-btn" 
+            (click)="confirmReceiptFromModal()"
+            [disabled]="receivingFromModal">
+            <span *ngIf="receivingFromModal">
+              <span class="btn-spinner"></span> Processing...
+            </span>
+            <span *ngIf="!receivingFromModal">
+              ✓ Confirm Receipt
+            </span>
+          </button>
+          <p class="action-hint">Click to confirm you have received all approved items</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+          <div class="footer-info">
+            <div class="footer-item">
+              <label>Generated:</label>
+              <span>{{ formatDateTime(generatedDate) }}</span>
+            </div>
+          </div>
+          <div class="company-footer">
+            <p>Inventory Hub - Enterprise Inventory Management System</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

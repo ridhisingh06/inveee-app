@@ -42,6 +42,14 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   isReceiveConfirmDialogOpen = false;
   receiveConfirmRequestId: number | null = null;
 
+  // Receipt Modal State
+  isReceiptModalOpen = false;
+  currentReceipt: any = null;
+  receiptLoading = false;
+  receiptError = '';
+  receivingFromModal = false;
+  generatedDate = new Date();
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -149,6 +157,138 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
           error: ()  => this.errorMsg = 'Order receipt not found for this request.'
         });
     }
+  }
+
+  // ── Receipt Modal ─────────────────────────────────────────────────────────────
+
+  openReceiptModal(requestId: number): void {
+    this.isReceiptModalOpen = true;
+    this.receiptLoading = true;
+    this.receiptError = '';
+    this.currentReceipt = null;
+    this.generatedDate = new Date();
+
+    // Find the request in our local data first
+    const request = this.requests.find(r => r.id === requestId);
+    if (request) {
+      this.currentReceipt = request;
+      this.receiptLoading = false;
+    } else {
+      // If not found locally, try to fetch from API
+      this.http.get<any>(`${environment.apiUrl}/requests/${requestId}`)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (data) => {
+            this.currentReceipt = data;
+            this.receiptLoading = false;
+          },
+          error: (err) => {
+            this.receiptError = 'Failed to load receipt details. Please try again.';
+            this.receiptLoading = false;
+          }
+        });
+    }
+  }
+
+  closeReceiptModal(): void {
+    this.isReceiptModalOpen = false;
+    this.currentReceipt = null;
+    this.receiptError = '';
+    this.receivingFromModal = false;
+  }
+
+  canShowReceivedButton(): boolean {
+    return this.currentReceipt && this.isRequestApproved(this.currentReceipt);
+  }
+
+  confirmReceiptFromModal(): void {
+    if (!this.currentReceipt || this.receivingFromModal) return;
+
+    this.receivingFromModal = true;
+    const requestId = this.currentReceipt.id;
+
+    this.workflow.receiveItems(requestId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          if (res.orderSummaryId) {
+            this.orderSummaryMap[requestId] = res.orderSummaryId;
+          }
+          this.receivingFromModal = false;
+          this.successMsg = `Request #${requestId} received! Order receipt generated.`;
+
+          // Refresh the request list
+          this.loadRequests();
+
+          // Notify other components
+          this.refresh.notifyOrders();
+
+          // Close modal after short delay
+          setTimeout(() => {
+            this.closeReceiptModal();
+            this.successMsg = '';
+          }, 2000);
+        },
+        error: (err: any) => {
+          this.receiptError = err?.message || 'Failed to confirm receipt. Please try again.';
+          this.receivingFromModal = false;
+        }
+      });
+  }
+
+  // ── Receipt Helper Methods ─────────────────────────────────────────────────────
+
+  formatDate(date: string | null | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  formatDateTime(date: Date | string): string {
+    return new Date(date).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  getTotalRequested(): number {
+    if (!this.currentReceipt?.items) return 0;
+    return this.currentReceipt.items.reduce((sum: number, item: any) => 
+      sum + (item.quantityRequested || 0), 0);
+  }
+
+  getTotalIssued(): number {
+    if (!this.currentReceipt?.items) return 0;
+    return this.currentReceipt.items.reduce((sum: number, item: any) => 
+      sum + (item.issuerIssuedQuantity || 0), 0);
+  }
+
+  getTotalRejected(): number {
+    if (!this.currentReceipt?.items) return 0;
+    return this.currentReceipt.items.reduce((sum: number, item: any) => 
+      sum + (item.issuerRejectedQuantity || 0) + (item.adminRejectedQuantity || 0), 0);
+  }
+
+  getTotalApproved(): number {
+    if (!this.currentReceipt?.items) return 0;
+    return this.currentReceipt.items.reduce((sum: number, item: any) => 
+      sum + (item.adminApprovedQuantity || 0), 0);
+  }
+
+  getTotalReceived(): number {
+    if (!this.currentReceipt?.items) return 0;
+    return this.currentReceipt.items.reduce((sum: number, item: any) => {
+      if (this.isItemReceived(item.status)) {
+        return sum + (item.adminApprovedQuantity || item.quantityRequested || 0);
+      }
+      return sum;
+    }, 0);
   }
 
   // ── Reorder logic ─────────────────────────────────────────────────────────
@@ -259,7 +399,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   isItemApproved(status: string):  boolean { return this.normalizeStatus(status) === 'approved'; }
-  isItemReceived(status: string):  boolean { return this.normalizeStatus(status) === 'received'; }
+  isItemReceived(status: string):  boolean { 
+    const s = this.normalizeStatus(status);
+    return s === 'received' || s === 'approved'; // Show received for approved items too in modal
+  }
 
   hasRejectedItems(req: any): boolean {
     // ✅ Show the reorder prompt when any item was rejected at either stage.

@@ -104,7 +104,7 @@ export class UserCartComponent implements OnInit, OnDestroy {
           this.cart.clear();
           this.submitting = false;
 
-          // ✅ Notify UserCheckStatusComponent / MyRequestsComponent to reload
+          // ✅ Notify UserCheckStatusComponent to reload
           //    immediately so the new request appears without a manual refresh.
           this.refresh.notifyRequests();
 
