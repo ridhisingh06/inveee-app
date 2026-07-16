@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -43,7 +43,8 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     private readonly router:         Router,
     private readonly http:           HttpClient,
     private readonly requestService: RequestService,
-    private readonly refresh:        RefreshService
+    private readonly refresh:        RefreshService,
+    private readonly cdr:            ChangeDetectorRef
   ) {
     console.log('[EditRequestComponent] constructor called');
   }
@@ -148,6 +149,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
           console.log('[EditRequestComponent] Lines populated:', this.lines.length, 'loading set to false');
 
           this.loading = false;
+          this.cdr.detectChanges();
 
           // ── 5. Load inventory in background for "Add New Item" ────────────
           this.loadInventory();
