@@ -134,9 +134,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       return;
     }
     
-    console.log('[UserCheckStatus] Calling receiveAll with receiveConfirmRequestId:', this.receiveConfirmRequestId);
+    const requestIdToReceive = this.receiveConfirmRequestId;
+    console.log('[UserCheckStatus] Calling receiveAll with requestId:', requestIdToReceive);
     this.closeReceiveConfirmDialog();
-    this.receiveAll(this.receiveConfirmRequestId);
+    this.receiveAll(requestIdToReceive);
   }
 
   receiveAll(requestId: number): void {
