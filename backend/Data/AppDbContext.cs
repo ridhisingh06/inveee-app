@@ -61,6 +61,11 @@ namespace invmgmt.web.Data
                 new Department { Id = 4, Name = "Finance" }
             );
 
+            // Item ID is entered manually by the user, never auto-generated
+            modelBuilder.Entity<Item>()
+                .Property(i => i.Id)
+                .ValueGeneratedNever();
+
             modelBuilder.Entity<Item>()
                 .HasOne(i => i.Category)
                 .WithMany(c => c.Items)

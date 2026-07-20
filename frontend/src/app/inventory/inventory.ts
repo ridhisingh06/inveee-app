@@ -37,6 +37,7 @@ export class InventoryComponent implements OnInit, DoCheck {
   categories: Category[] = [];
 
   // Form state
+  itemId: number | null = null;
   itemName = '';
   selectedCategoryId: number | null = null;
   quantity = 0;
@@ -177,6 +178,14 @@ export class InventoryComponent implements OnInit, DoCheck {
     // Validation
     if (!this.validateForm()) return;
 
+    // ✅ Item ID must be unique (manually entered, not auto-generated)
+    const duplicateId = this.items.some(item => Number(item.id) === Number(this.itemId));
+    if (duplicateId) {
+      this.errorMsg = 'Item ID already exists. Please enter a unique Item ID.';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return;
+    }
+
     // ✅ Check for duplicates (case-insensitive)
     const normalizedName = this.normalizeItemName(this.itemName);
     const duplicateExists = this.items.some(item => 
@@ -203,7 +212,7 @@ export class InventoryComponent implements OnInit, DoCheck {
       description: 'New Item',
       category: this.getCategoryName(this.selectedCategoryId!),
       availableQuantity: this.quantity,
-      id: 0,
+      id: Number(this.itemId),
       createdDate: new Date().toISOString()
     };
 
@@ -227,6 +236,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    */
   editItem(item: InventoryItem): void {
     this.editingItemId = item.id;
+    this.itemId = Number(item.id);
     this.itemName = item.name;
     this.selectedCategoryId = item.categoryId || null;
     this.quantity = item.availableQuantity || 0;
@@ -434,6 +444,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    * Reset form to initial state
    */
   resetForm(): void {
+    this.itemId = null;
     this.itemName = '';
     this.selectedCategoryId = null;
     this.quantity = 0;
@@ -458,6 +469,12 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns true if valid, false otherwise
    */
   private validateForm(): boolean {
+    if (!this.isEditing() && (this.itemId === null || Number(this.itemId) <= 0)) {
+      this.errorMsg = 'Please enter a valid Item ID';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return false;
+    }
+
     if (!this.normalizeItemName(this.itemName)) {
       this.errorMsg = 'Please enter an item name';
       setTimeout(() => this.errorMsg = '', 5000);

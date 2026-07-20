@@ -54,8 +54,22 @@ public class InventoryController : ControllerBase
     {
         if (dto == null) return BadRequest("Invalid item data.");
         
-        _logger.LogInformation("Add item requested: {Name} (CategoryId={CategoryId}, Qty={Qty})", dto.Name, dto.CategoryId, dto.TotalQuantity);
-        
+        _logger.LogInformation("Add item requested: Id={Id}, {Name} (CategoryId={CategoryId}, Qty={Qty})", dto.Id, dto.Name, dto.CategoryId, dto.TotalQuantity);
+
+        // ✅ Item ID is entered manually and is required (not auto-generated)
+        if (dto.Id <= 0)
+        {
+            return BadRequest(new { message = "Item ID is required. Please enter a valid Item ID." });
+        }
+
+        // ✅ Ensure the manually entered Item ID is unique
+        var existingItemById = await _context.Items.FirstOrDefaultAsync(i => i.Id == dto.Id);
+        if (existingItemById != null)
+        {
+            _logger.LogWarning("Duplicate Item ID attempted: {ItemId}", dto.Id);
+            return BadRequest(new { message = "Item ID already exists. Please enter a unique Item ID." });
+        }
+
         // ✅ Validate name and check for duplicate item name (case-insensitive)
         if (string.IsNullOrWhiteSpace(dto.Name))
         {
@@ -76,6 +90,7 @@ public class InventoryController : ControllerBase
         
         var item = new Item
         {
+            Id = dto.Id,
             Name = dto.Name,
             CategoryId = dto.CategoryId,
             Description = dto.Description,
@@ -83,7 +98,7 @@ public class InventoryController : ControllerBase
         };
 
         _context.Items.Add(item);
-        await _context.SaveChangesAsync(); //  item.Id generate
+        await _context.SaveChangesAsync(); //  persists with the manually entered Item ID
 
         var stock = new InventoryStock
         {
