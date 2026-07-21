@@ -26,7 +26,7 @@ namespace invmgmt.web.Services
             if (dto == null || dto.Items == null || dto.Items.Count == 0)
                 return (false, "Cart is empty", null);
 
-            if (dto.Items.Any(i => i.ItemId <= 0 || i.Quantity <= 0))
+            if (dto.Items.Any(i => string.IsNullOrWhiteSpace(i.ItemId) || i.Quantity <= 0))
                 return (false, "Invalid item or quantity", null);
 
             // Block if user already has an active request

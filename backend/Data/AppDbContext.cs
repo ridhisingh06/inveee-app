@@ -70,12 +70,14 @@ namespace invmgmt.web.Data
                 .HasOne(i => i.InventoryStock)
                 .WithOne(s => s.Item)
                 .HasForeignKey<InventoryStock>(s => s.ItemId)
+                .HasPrincipalKey("ItemId")
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<RequestItem>()
                 .HasOne(ri => ri.Item)
                 .WithMany(i => i.RequestItems)
-                .HasForeignKey(ri => ri.ItemId);
+                .HasForeignKey(ri => ri.ItemId)
+                .HasPrincipalKey("ItemId");
 
             // Add indexes on RequestItems to improve query/filter performance
             modelBuilder.Entity<RequestItem>()
@@ -121,10 +123,19 @@ namespace invmgmt.web.Data
                 .HasOne(bi => bi.Item)
                 .WithMany()
                 .HasForeignKey(bi => bi.ItemId)
+                .HasPrincipalKey("ItemId")
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<BillItem>()
                 .HasIndex(bi => bi.BillId);
+
+            // RoleItemLimit to Item relationship
+            modelBuilder.Entity<RoleItemLimit>()
+                .HasOne(rl => rl.Item)
+                .WithMany()
+                .HasForeignKey(rl => rl.ItemId)
+                .HasPrincipalKey("ItemId")
+                .OnDelete(DeleteBehavior.Cascade);
 
             // ========== ORDER SUMMARY RELATIONSHIPS (NEW) ==========
 
@@ -168,6 +179,7 @@ namespace invmgmt.web.Data
                 .HasOne(osi => osi.Item)
                 .WithMany()
                 .HasForeignKey(osi => osi.ItemId)
+                .HasPrincipalKey("ItemId")
                 .OnDelete(DeleteBehavior.Restrict);
 
             // OrderSummaryItem to RequestItem (reference to original request item)

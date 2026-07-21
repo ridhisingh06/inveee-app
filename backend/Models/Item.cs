@@ -11,6 +11,13 @@ namespace invmgmt.web.Models
         public int Id { get; set; }
 
         /// <summary>
+        /// Item ID - manually entered, must be unique
+        /// </summary>
+        [Required(ErrorMessage = "Item ID is required")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "Item ID must be between 1 and 50 characters")]
+        public string ItemId { get; set; } = string.Empty;
+
+        /// <summary>
         /// Item name - must be unique (case-insensitive)
         /// </summary>
         [Required(ErrorMessage = "Item name is required")]

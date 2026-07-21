@@ -33,6 +33,7 @@ public class InventoryController : ControllerBase
             .Select(i => new
             {
                 id = i.Id,
+                itemId = i.ItemId,
                 name = i.Name,
                 categoryId = i.CategoryId,
                 category = i.Category != null ? i.Category.Name : "Uncategorized",
@@ -54,12 +55,31 @@ public class InventoryController : ControllerBase
     {
         if (dto == null) return BadRequest("Invalid item data.");
         
-        _logger.LogInformation("Add item requested: {Name} (CategoryId={CategoryId}, Qty={Qty})", dto.Name, dto.CategoryId, dto.TotalQuantity);
+        _logger.LogInformation("Add item requested: {ItemId}, {Name} (CategoryId={CategoryId}, Qty={Qty})", dto.ItemId, dto.Name, dto.CategoryId, dto.TotalQuantity);
         
+        // ✅ Validate ItemId is provided
+        if (string.IsNullOrWhiteSpace(dto.ItemId))
+        {
+            return BadRequest(new { message = "Item ID is required." });
+        }
+
         // ✅ Validate name and check for duplicate item name (case-insensitive)
         if (string.IsNullOrWhiteSpace(dto.Name))
         {
             return BadRequest(new { message = "Item name is required." });
+        }
+
+        // ✅ Check for duplicate ItemId
+        var normalizedItemId = dto.ItemId.Trim();
+        var existingByItemId = await _context.Items
+            .FirstOrDefaultAsync(i => i.ItemId == normalizedItemId);
+        
+        if (existingByItemId != null)
+        {
+            _logger.LogWarning("Duplicate ItemId attempted: {ItemId}", dto.ItemId);
+            return BadRequest(new { 
+                message = $"An item with the Item ID \"{dto.ItemId}\" already exists. Please enter a unique Item ID." 
+            });
         }
 
         var normalizedName = dto.Name.Trim().ToLower();
@@ -68,7 +88,7 @@ public class InventoryController : ControllerBase
         
         if (existingItem != null)
         {
-            _logger.LogWarning("Duplicate item attempted: {Name}", dto.Name);
+            _logger.LogWarning("Duplicate item name attempted: {Name}", dto.Name);
             return BadRequest(new { 
                 message = $"An item with the name \"{dto.Name}\" already exists. Please use a different name." 
             });
@@ -76,6 +96,7 @@ public class InventoryController : ControllerBase
         
         var item = new Item
         {
+            ItemId = normalizedItemId,
             Name = dto.Name,
             CategoryId = dto.CategoryId,
             Description = dto.Description,
@@ -87,16 +108,16 @@ public class InventoryController : ControllerBase
 
         var stock = new InventoryStock
         {
-            ItemId = item.Id,
-            TotalQuantity = dto.TotalQuantity,              //  FIX
-            AvailableQuantity = dto.TotalQuantity,          //  FIX
+            ItemId = item.ItemId,
+            TotalQuantity = dto.TotalQuantity,
+            AvailableQuantity = dto.TotalQuantity,
             UpdatedAt = DateTime.UtcNow
         };
 
         _context.InventoryStocks.Add(stock);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Item added: ItemId={ItemId}", item.Id);
+        _logger.LogInformation("Item added: ItemId={ItemId}", item.ItemId);
         return Ok(new { message = "Item Added Successfully" });
     }
 
@@ -108,7 +129,7 @@ public class InventoryController : ControllerBase
     {
         if (dto == null) return BadRequest("Invalid item data.");
         
-        _logger.LogInformation("Update item requested: ItemId={ItemId}", id);
+        _logger.LogInformation("Update item requested: Id={Id}", id);
         var item = await _context.Items.FindAsync(id);
 
         if (item == null)
@@ -137,7 +158,7 @@ public class InventoryController : ControllerBase
         item.Description = dto.Description;
 
         var stock = await _context.InventoryStocks
-            .FirstOrDefaultAsync(s => s.ItemId == id);
+            .FirstOrDefaultAsync(s => s.ItemId == item.ItemId);
 
         if (stock != null)
         {
@@ -148,7 +169,7 @@ public class InventoryController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Item updated: ItemId={ItemId}", id);
+        _logger.LogInformation("Item updated: Id={Id}", id);
 
         // Load category name for the response
         var categoryName = "Uncategorized";
@@ -161,6 +182,7 @@ public class InventoryController : ControllerBase
         return Ok(new
         {
             id = item.Id,
+            itemId = item.ItemId,
             name = item.Name,
             categoryId = item.CategoryId,
             category = categoryName,
@@ -176,7 +198,7 @@ public class InventoryController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteItem(int id)
     {
-        _logger.LogInformation("Delete item requested: ItemId={ItemId}", id);
+        _logger.LogInformation("Delete item requested: Id={Id}", id);
         var item = await _context.Items.FindAsync(id);
 
         if (item == null)
@@ -185,7 +207,7 @@ public class InventoryController : ControllerBase
         _context.Items.Remove(item);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Item deleted: ItemId={ItemId}", id);
+        _logger.LogInformation("Item deleted: Id={Id}", id);
         return Ok(new { message = "Item Deleted" });
     }
 
@@ -197,12 +219,16 @@ public class InventoryController : ControllerBase
         if (dto == null || dto.Quantity <= 0)
             return BadRequest("Quantity must be greater than 0");
 
-        _logger.LogInformation("Increase stock requested: ItemId={ItemId}, Quantity={Qty}", id, dto.Quantity);
+        _logger.LogInformation("Increase stock requested: Id={Id}, Quantity={Qty}", id, dto.Quantity);
+
+        var item = await _context.Items.FindAsync(id);
+        if (item == null)
+            return NotFound("Item not found");
 
         var stock = await _context.InventoryStocks
             .Include(s => s.Item)
             .ThenInclude(i => i.Category)
-            .FirstOrDefaultAsync(s => s.ItemId == id);
+            .FirstOrDefaultAsync(s => s.ItemId == item.ItemId);
 
         if (stock == null)
             return NotFound("Item stock not found");
@@ -213,12 +239,13 @@ public class InventoryController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Stock increased: ItemId={ItemId}, NewAvailable={Available}", id, stock.AvailableQuantity);
+        _logger.LogInformation("Stock increased: ItemId={ItemId}, NewAvailable={Available}", item.ItemId, stock.AvailableQuantity);
 
         return Ok(new
         {
             message = "Stock increased successfully",
-            id = stock.ItemId,
+            id = stock.Item.Id,
+            itemId = stock.Item.ItemId,
             name = stock.Item.Name,
             categoryId = stock.Item.CategoryId,
             category = stock.Item.Category != null ? stock.Item.Category.Name : "Uncategorized",
@@ -236,12 +263,16 @@ public class InventoryController : ControllerBase
         if (dto == null || dto.Quantity <= 0)
             return BadRequest("Quantity must be greater than 0");
 
-        _logger.LogInformation("Decrease stock requested: ItemId={ItemId}, Quantity={Qty}", id, dto.Quantity);
+        _logger.LogInformation("Decrease stock requested: Id={Id}, Quantity={Qty}", id, dto.Quantity);
+
+        var item = await _context.Items.FindAsync(id);
+        if (item == null)
+            return NotFound("Item not found");
 
         var stock = await _context.InventoryStocks
             .Include(s => s.Item)
             .ThenInclude(i => i.Category)
-            .FirstOrDefaultAsync(s => s.ItemId == id);
+            .FirstOrDefaultAsync(s => s.ItemId == item.ItemId);
 
         if (stock == null)
             return NotFound("Item stock not found");
@@ -255,12 +286,13 @@ public class InventoryController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Stock decreased: ItemId={ItemId}, NewAvailable={Available}", id, stock.AvailableQuantity);
+        _logger.LogInformation("Stock decreased: ItemId={ItemId}, NewAvailable={Available}", item.ItemId, stock.AvailableQuantity);
 
         return Ok(new
         {
             message = "Stock decreased successfully",
-            id = stock.ItemId,
+            id = stock.Item.Id,
+            itemId = stock.Item.ItemId,
             name = stock.Item.Name,
             categoryId = stock.Item.CategoryId,
             category = stock.Item.Category != null ? stock.Item.Category.Name : "Uncategorized",
@@ -275,7 +307,7 @@ public class InventoryController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetItem(int id)
     {
-        _logger.LogInformation("Get item requested: ItemId={ItemId}", id);
+        _logger.LogInformation("Get item requested: Id={Id}", id);
 
         var item = await _context.Items
             .Include(i => i.Category)
@@ -284,6 +316,7 @@ public class InventoryController : ControllerBase
             .Select(i => new
             {
                 id = i.Id,
+                itemId = i.ItemId,
                 name = i.Name,
                 categoryId = i.CategoryId,
                 category = i.Category != null ? i.Category.Name : "Uncategorized",

@@ -11,7 +11,7 @@ public sealed class CreateRequestFromCartDto
 
 public sealed class CreateRequestLineDto
 {
-    public int ItemId { get; set; }
+    public string ItemId { get; set; } = string.Empty;
     public int Quantity { get; set; }
 }
 
@@ -26,7 +26,7 @@ public sealed class RequestSummaryDto
 public sealed class RequestItemDetailDto
 {
     public int id { get; set; }
-    public int ItemId { get; set; }
+    public string ItemId { get; set; } = string.Empty;
     public string ItemName { get; set; } = string.Empty;
     public int QuantityRequested { get; set; }
     public int QuantityApproved { get; set; }
@@ -52,7 +52,7 @@ public sealed class UpdateRequestDto
 
 public sealed class UpdateRequestLineDto
 {
-    public int ItemId { get; set; }
+    public string ItemId { get; set; } = string.Empty;
 
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
     public int Quantity { get; set; }

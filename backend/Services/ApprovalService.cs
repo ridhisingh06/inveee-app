@@ -143,7 +143,7 @@ namespace invmgmt.web.Services
                 }
 
                 // STEP 4: Validate quantities and prepare restoration operations
-                var restorationOps = new List<(int itemId, int restoreQuantity)>();
+                var restorationOps = new List<(string itemId, int restoreQuantity)>();
 
                 foreach (var dtoItem in dto.Items)
                 {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, computed, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
@@ -16,16 +16,50 @@ import { ReorderModalComponent } from './reorder-modal.component';
   standalone: true,
   imports: [CommonModule, RouterModule, ReorderModalComponent],
   templateUrl: './user-check-status.html',
-  styleUrls: ['./user-check-status.css']
+  styleUrls: ['./user-check-status.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserCheckStatusComponent implements OnInit, OnDestroy {
   normalizeStatus = normalizeStatus;
   getStatusClass = getStatusClass;
   getStatusLabel = getStatusLabel;
-  requests: any[] = [];
-  loading  = true;
-  errorMsg = '';
-  successMsg = '';
+  
+  // Use signals for reactive state
+  requests = signal<any[]>([]);
+  loading = signal(true);
+  errorMsg = signal('');
+  successMsg = signal('');
+  
+  // Computed counters for performance
+  pendingCount = computed(() => {
+    return this.requests().filter(r => {
+      const s = this.normalizeStatus(r.status);
+      return s === 'pendingwithissuer' || s === 'pendingadminapproval';
+    }).length;
+  });
+  
+  requestedCount = computed(() => 
+    this.requests().filter(r => this.normalizeStatus(r.status) === 'pendingwithissuer').length
+  );
+  
+  issuedCount = computed(() => 
+    this.requests().filter(r => this.normalizeStatus(r.status) === 'pendingadminapproval').length
+  );
+  
+  approvedCount = computed(() => 
+    this.requests().filter(r => this.normalizeStatus(r.status) === 'approved').length
+  );
+  
+  receivedCount = computed(() => 
+    this.requests().filter(r => this.normalizeStatus(r.status) === 'received').length
+  );
+  
+  rejectedCount = computed(() => {
+    return this.requests().filter(r => {
+      const s = this.normalizeStatus(r.status);
+      return s === 'rejected' || s === 'notissued';
+    }).length;
+  });
 
   /** requestId → true while "Receive All" call is in flight */
   receivingMap: { [requestId: number]: boolean } = {};
@@ -46,9 +80,34 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   isReceiptModalOpen = false;
   currentReceipt: any = null;
   receiptLoading = false;
-  receiptError = '';
+  receiptError = signal('');
   receivingFromModal = false;
   generatedDate = new Date();
+  
+  // Memoized receipt totals
+  private receiptTotals = computed(() => {
+    if (!this.currentReceipt?.items) return {
+      requested: 0,
+      issued: 0,
+      rejected: 0,
+      approved: 0,
+      received: 0
+    };
+    
+    const items = this.currentReceipt.items;
+    return {
+      requested: items.reduce((sum: number, item: any) => sum + (item.quantityRequested || 0), 0),
+      issued: items.reduce((sum: number, item: any) => sum + (item.issuerIssuedQuantity || 0), 0),
+      rejected: items.reduce((sum: number, item: any) => sum + (item.issuerRejectedQuantity || 0) + (item.adminRejectedQuantity || 0), 0),
+      approved: items.reduce((sum: number, item: any) => sum + (item.adminApprovedQuantity || 0), 0),
+      received: items.reduce((sum: number, item: any) => {
+        if (this.isItemReceived(item.status)) {
+          return sum + (item.adminApprovedQuantity || item.quantityRequested || 0);
+        }
+        return sum;
+      }, 0)
+    };
+  });
 
   private destroy$ = new Subject<void>();
 
@@ -57,7 +116,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     private workflow: WorkflowService,
     private cart: CartService,
     private router: Router,
-    private refresh: RefreshService
+    private refresh: RefreshService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -77,34 +137,33 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   loadRequests() {
-    this.loading  = true;
-    this.errorMsg = '';
+    this.loading.set(true);
+    this.errorMsg.set('');
 
     this.http.get<any>(`${environment.apiUrl}/requests`)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {
-          console.log('[UserCheckStatus] loadRequests API response:', res);
+          if (environment.production) {
+            console.log('[UserCheckStatus] loadRequests API response:', res);
+          }
           const rawRequests = Array.isArray(res) ? res : (res.data ?? []);
           
           // Normalize request objects to ensure they have 'id' property
-          this.requests = rawRequests.map((req: any) => {
-            // Handle both 'id' and 'Id' (uppercase) from backend
-            const normalized = {
-              ...req,
-              id: req.id || req.Id || req.requestId || req.RequestId
-            };
-            console.log('[UserCheckStatus] Normalized request:', normalized);
-            return normalized;
-          });
+          const normalizedRequests = rawRequests.map((req: any) => ({
+            ...req,
+            id: req.id || req.Id || req.requestId || req.RequestId
+          }));
           
-          console.log('[UserCheckStatus] Final requests array:', this.requests);
-          this.loading  = false;
+          this.requests.set(normalizedRequests);
+          this.loading.set(false);
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('[UserCheckStatus] loadRequests error:', err);
-          this.errorMsg = 'Could not fetch your requests. Please try again.';
-          this.loading  = false;
+          this.errorMsg.set('Could not fetch your requests. Please try again.');
+          this.loading.set(false);
+          this.cdr.markForCheck();
         }
       });
   }
@@ -112,22 +171,27 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Receive entire approved request ──────────────────────────────────────
 
   openReceiveConfirmDialog(requestId: number): void {
-    console.log('[UserCheckStatus] openReceiveConfirmDialog called with requestId:', requestId);
+    if (environment.production) {
+      console.log('[UserCheckStatus] openReceiveConfirmDialog called with requestId:', requestId);
+    }
     this.receiveConfirmRequestId = requestId;
-    console.log('[UserCheckStatus] receiveConfirmRequestId set to:', this.receiveConfirmRequestId);
     this.isReceiveConfirmDialogOpen = true;
+    this.cdr.markForCheck();
   }
 
   closeReceiveConfirmDialog(): void {
-    console.log('[UserCheckStatus] closeReceiveConfirmDialog called');
+    if (environment.production) {
+      console.log('[UserCheckStatus] closeReceiveConfirmDialog called');
+    }
     this.isReceiveConfirmDialogOpen = false;
     this.receiveConfirmRequestId = null;
-    console.log('[UserCheckStatus] receiveConfirmRequestId reset to null');
+    this.cdr.markForCheck();
   }
 
   confirmReceive(): void {
-    console.log('[UserCheckStatus] confirmReceive called');
-    console.log('[UserCheckStatus] receiveConfirmRequestId before check:', this.receiveConfirmRequestId);
+    if (environment.production) {
+      console.log('[UserCheckStatus] confirmReceive called');
+    }
     
     if (!this.receiveConfirmRequestId) {
       console.error('[UserCheckStatus] receiveConfirmRequestId is null/undefined in confirmReceive');
@@ -135,51 +199,57 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     }
     
     const requestIdToReceive = this.receiveConfirmRequestId;
-    console.log('[UserCheckStatus] Calling receiveAll with requestId:', requestIdToReceive);
     this.closeReceiveConfirmDialog();
     this.receiveAll(requestIdToReceive);
   }
 
   receiveAll(requestId: number): void {
-    console.log('[UserCheckStatus] receiveAll called with requestId:', requestId);
+    if (environment.production) {
+      console.log('[UserCheckStatus] receiveAll called with requestId:', requestId);
+    }
     
     if (!requestId || requestId <= 0) {
       console.error('[UserCheckStatus] Invalid request ID:', requestId);
-      this.errorMsg = 'Invalid request ID. Cannot confirm receipt.';
+      this.errorMsg.set('Invalid request ID. Cannot confirm receipt.');
+      this.cdr.markForCheck();
       return;
     }
 
     if (this.receivingMap[requestId]) return;
     this.receivingMap[requestId] = true;
-    this.successMsg = '';
-    this.errorMsg   = '';
-
-    console.log('[UserCheckStatus] Calling receive API with requestId:', requestId);
+    this.successMsg.set('');
+    this.errorMsg.set('');
+    this.cdr.markForCheck();
     
     this.workflow.receiveItems(requestId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          console.log('[UserCheckStatus] Receive API response:', res);
+          if (environment.production) {
+            console.log('[UserCheckStatus] Receive API response:', res);
+          }
           if (res.orderSummaryId) {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
           }
           delete this.receivingMap[requestId];
-          this.successMsg = `Request #${requestId} received! Order receipt generated.`;
+          this.successMsg.set(`Request #${requestId} received! Order receipt generated.`);
 
-          // ✅ Refresh the request list immediately with latest data from API
-          // instead of only mutating the local array (which can get out of sync).
+          // Refresh the request list immediately with latest data from API
           this.loadRequests();
 
-          // ✅ Also notify OrderHistoryComponent to reload its list.
+          // Also notify OrderHistoryComponent to reload its list.
           this.refresh.notifyOrders();
 
-          setTimeout(() => { this.successMsg = ''; }, 6000);
+          setTimeout(() => { 
+            this.successMsg.set('');
+            this.cdr.markForCheck();
+          }, 6000);
         },
         error: (err: any) => {
           console.error('[UserCheckStatus] Receive API error:', err);
-          this.errorMsg = err?.message || 'Failed to confirm receipt.';
+          this.errorMsg.set(err?.message || 'Failed to confirm receipt.');
           delete this.receivingMap[requestId];
+          this.cdr.markForCheck();
         }
       });
   }
@@ -187,7 +257,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   viewReceipt(requestId: number): void {
     // Validate request ID before making API call
     if (!requestId || requestId <= 0) {
-      this.errorMsg = 'Invalid request ID. Cannot view receipt.';
+      this.errorMsg.set('Invalid request ID. Cannot view receipt.');
+      this.cdr.markForCheck();
       return;
     }
 
@@ -203,10 +274,14 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
               this.orderSummaryMap[requestId] = os.id;
               this.router.navigate(['/user-dashboard/order-summary', os.id]);
             } else {
-              this.errorMsg = 'Order receipt not found for this request.';
+              this.errorMsg.set('Order receipt not found for this request.');
+              this.cdr.markForCheck();
             }
           },
-          error: ()  => this.errorMsg = 'Order receipt not found for this request.'
+          error: ()  => {
+            this.errorMsg.set('Order receipt not found for this request.');
+            this.cdr.markForCheck();
+          }
         });
     }
   }
@@ -214,50 +289,52 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Receipt Modal ─────────────────────────────────────────────────────────────
 
   openReceiptModal(requestId: number): void {
-    console.log('[UserCheckStatus] openReceiptModal called with requestId:', requestId);
+    if (environment.production) {
+      console.log('[UserCheckStatus] openReceiptModal called with requestId:', requestId);
+    }
     
     // Validate request ID before opening modal
     if (!requestId || requestId <= 0) {
       console.error('[UserCheckStatus] Invalid request ID:', requestId);
-      this.errorMsg = 'Invalid request ID. Cannot view receipt.';
+      this.errorMsg.set('Invalid request ID. Cannot view receipt.');
+      this.cdr.markForCheck();
       return;
     }
 
     this.isReceiptModalOpen = true;
     this.receiptLoading = true;
-    this.receiptError = '';
+    this.receiptError.set('');
     this.currentReceipt = null;
     this.generatedDate = new Date();
+    this.cdr.markForCheck();
 
     // Find the request in our local data first
-    const request = this.requests.find(r => r.id === requestId);
-    console.log('[UserCheckStatus] Found request in local array:', request);
+    const request = this.requests().find(r => r.id === requestId);
     
     if (request) {
       this.currentReceipt = request;
-      console.log('[UserCheckStatus] currentReceipt set from local array:', this.currentReceipt);
       this.receiptLoading = false;
+      this.cdr.markForCheck();
     } else {
-      console.log('[UserCheckStatus] Request not found locally, fetching from API');
       // If not found locally, try to fetch from API
       this.http.get<any>(`${environment.apiUrl}/requests/${requestId}`)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (data) => {
-            console.log('[UserCheckStatus] API response data:', data);
             // Normalize to ensure 'id' property exists
             const normalized = {
               ...data,
               id: data.id || data.Id || data.requestId || data.RequestId || requestId
             };
             this.currentReceipt = normalized;
-            console.log('[UserCheckStatus] currentReceipt set from API (normalized):', this.currentReceipt);
             this.receiptLoading = false;
+            this.cdr.markForCheck();
           },
           error: (err) => {
             console.error('[UserCheckStatus] API error fetching request:', err);
-            this.receiptError = 'Failed to load receipt details. Please try again.';
+            this.receiptError.set('Failed to load receipt details. Please try again.');
             this.receiptLoading = false;
+            this.cdr.markForCheck();
           }
         });
     }
@@ -266,8 +343,9 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   closeReceiptModal(): void {
     this.isReceiptModalOpen = false;
     this.currentReceipt = null;
-    this.receiptError = '';
+    this.receiptError.set('');
     this.receivingFromModal = false;
+    this.cdr.markForCheck();
   }
 
   canShowReceivedButton(): boolean {
@@ -279,30 +357,29 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
     this.receivingFromModal = true;
     const requestId = this.currentReceipt.id;
-
-    console.log('[UserCheckStatus] confirmReceiptFromModal called with requestId:', requestId);
-    console.log('[UserCheckStatus] currentReceipt:', this.currentReceipt);
+    this.cdr.markForCheck();
 
     // Validate request ID before making API call
     if (!requestId || requestId <= 0) {
       console.error('[UserCheckStatus] Invalid request ID from receipt:', requestId);
-      this.receiptError = 'Invalid request ID. Cannot confirm receipt.';
+      this.receiptError.set('Invalid request ID. Cannot confirm receipt.');
       this.receivingFromModal = false;
+      this.cdr.markForCheck();
       return;
     }
-
-    console.log('[UserCheckStatus] Calling receive API with requestId:', requestId);
 
     this.workflow.receiveItems(requestId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          console.log('[UserCheckStatus] Receive API response:', res);
+          if (environment.production) {
+            console.log('[UserCheckStatus] Receive API response:', res);
+          }
           if (res.orderSummaryId) {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
           }
           this.receivingFromModal = false;
-          this.successMsg = `Request #${requestId} received! Order receipt generated.`;
+          this.successMsg.set(`Request #${requestId} received! Order receipt generated.`);
 
           // Refresh the request list
           this.loadRequests();
@@ -313,13 +390,15 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
           // Close modal after short delay
           setTimeout(() => {
             this.closeReceiptModal();
-            this.successMsg = '';
+            this.successMsg.set('');
+            this.cdr.markForCheck();
           }, 2000);
         },
         error: (err: any) => {
           console.error('[UserCheckStatus] Receive API error:', err);
-          this.receiptError = err?.message || 'Failed to confirm receipt. Please try again.';
+          this.receiptError.set(err?.message || 'Failed to confirm receipt. Please try again.');
           this.receivingFromModal = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -345,52 +424,27 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     });
   }
 
-  getTotalRequested(): number {
-    if (!this.currentReceipt?.items) return 0;
-    return this.currentReceipt.items.reduce((sum: number, item: any) => 
-      sum + (item.quantityRequested || 0), 0);
-  }
-
-  getTotalIssued(): number {
-    if (!this.currentReceipt?.items) return 0;
-    return this.currentReceipt.items.reduce((sum: number, item: any) => 
-      sum + (item.issuerIssuedQuantity || 0), 0);
-  }
-
-  getTotalRejected(): number {
-    if (!this.currentReceipt?.items) return 0;
-    return this.currentReceipt.items.reduce((sum: number, item: any) => 
-      sum + (item.issuerRejectedQuantity || 0) + (item.adminRejectedQuantity || 0), 0);
-  }
-
-  getTotalApproved(): number {
-    if (!this.currentReceipt?.items) return 0;
-    return this.currentReceipt.items.reduce((sum: number, item: any) => 
-      sum + (item.adminApprovedQuantity || 0), 0);
-  }
-
-  getTotalReceived(): number {
-    if (!this.currentReceipt?.items) return 0;
-    return this.currentReceipt.items.reduce((sum: number, item: any) => {
-      if (this.isItemReceived(item.status)) {
-        return sum + (item.adminApprovedQuantity || item.quantityRequested || 0);
-      }
-      return sum;
-    }, 0);
-  }
+  // Use computed totals for performance
+  getTotalRequested(): number { return this.receiptTotals().requested; }
+  getTotalIssued(): number { return this.receiptTotals().issued; }
+  getTotalRejected(): number { return this.receiptTotals().rejected; }
+  getTotalApproved(): number { return this.receiptTotals().approved; }
+  getTotalReceived(): number { return this.receiptTotals().received; }
 
   // ── Reorder logic ─────────────────────────────────────────────────────────
 
   openReorderModal(requestId: number): void {
     // Validate request ID before opening modal
     if (!requestId || requestId <= 0) {
-      this.errorMsg = 'Invalid request ID. Cannot view reorder options.';
+      this.errorMsg.set('Invalid request ID. Cannot view reorder options.');
+      this.cdr.markForCheck();
       return;
     }
 
     this.isReorderModalOpen = true;
     this.reorderLoading = true;
     this.reorderSuggestions = [];
+    this.cdr.markForCheck();
 
     this.http.get<any[]>(`${environment.apiUrl}/requests/${requestId}/reorderable-items`)
       .pipe(takeUntil(this.destroy$))
@@ -398,12 +452,14 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.reorderSuggestions = res || [];
           this.reorderLoading = false;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('[ReorderModal] Error fetching reorderable items', err);
-          this.errorMsg = err?.error?.message || 'Failed to fetch reorderable items.';
+          this.errorMsg.set(err?.error?.message || 'Failed to fetch reorderable items.');
           this.isReorderModalOpen = false;
           this.reorderLoading = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -422,9 +478,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       this.cart.addItem(mockItem, item.suggestedQuantity);
     });
 
-    this.successMsg = 'Reorder items added to cart! Redirecting...';
+    this.successMsg.set('Reorder items added to cart! Redirecting...');
+    this.cdr.markForCheck();
     setTimeout(() => {
-      this.successMsg = '';
+      this.successMsg.set('');
       this.router.navigate(['/user-dashboard/cart']);
     }, 1500);
   }
@@ -459,7 +516,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   editRequest(requestId: number): void {
     // Validate request ID before navigation
     if (!requestId || requestId <= 0) {
-      this.errorMsg = 'Invalid request ID. Cannot edit request.';
+      this.errorMsg.set('Invalid request ID. Cannot edit request.');
+      this.cdr.markForCheck();
       return;
     }
     this.router.navigate(['/user-dashboard/edit-request', requestId]);
@@ -472,14 +530,18 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          // ✅ Reload from API instead of mutating the local array to guarantee
-          //    the displayed data matches the database.
+          // Reload from API instead of mutating the local array
           this.loadRequests();
-          this.successMsg = 'Item marked as received.';
-          setTimeout(() => { this.successMsg = ''; }, 3000);
+          this.successMsg.set('Item marked as received.');
+          this.cdr.markForCheck();
+          setTimeout(() => { 
+            this.successMsg.set('');
+            this.cdr.markForCheck();
+          }, 3000);
         },
         error: (err: any) => {
-          this.errorMsg = err?.error?.message || 'Failed to mark item as received.';
+          this.errorMsg.set(err?.error?.message || 'Failed to mark item as received.');
+          this.cdr.markForCheck();
         }
       });
   }
@@ -524,22 +586,16 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   getItemStatusClass  = (s: string) => this.getStatusClass(s);
   getItemStatusLabel  = (s: string) => this.getStatusLabel(s);
 
-  // ── Counters ──────────────────────────────────────────────────────────────
-
-  get pendingCount(): number {
-    return this.requests.filter(r => {
-      const s = this.normalizeStatus(r.status);
-      return s === 'pendingwithissuer' || s === 'pendingadminapproval';
-    }).length;
+  // ── TrackBy Functions for ngFor ───────────────────────────────────────────────
+  
+  trackByRequestId(index: number, req: any): number {
+    return req.id;
   }
-  get requestedCount(): number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingwithissuer').length; }
-  get issuedCount():    number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'pendingadminapproval').length; }
-  get approvedCount():  number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'approved').length; }
-  get receivedCount():  number { return this.requests.filter(r => this.normalizeStatus(r.status) === 'received').length; }
-  get rejectedCount():  number {
-    return this.requests.filter(r => {
-      const s = this.normalizeStatus(r.status);
-      return s === 'rejected' || s === 'notissued';
-    }).length;
+  
+  trackByItemId(index: number, item: any): number {
+    return item.id || item.itemId || index;
   }
+  
+  // ── Counters (now using computed signals) ───────────────────────────────────────
+  // Counters are now computed signals defined in constructor
 }

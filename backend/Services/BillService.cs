@@ -52,7 +52,7 @@ namespace invmgmt.web.Services
                     // Validate all items exist
                     var itemIds = dto.Items.Select(i => i.ItemId).Distinct().ToList();
                     var items = await _context.Items
-                        .Where(i => itemIds.Contains(i.Id))
+                        .Where(i => itemIds.Contains(i.ItemId))
                         .ToListAsync();
 
                     if (items.Count != itemIds.Count)

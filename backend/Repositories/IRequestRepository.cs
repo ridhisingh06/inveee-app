@@ -16,7 +16,7 @@ namespace invmgmt.web.Repositories
         Task AddRequestItemsAsync(IEnumerable<RequestItem> items);
         Task UpdateRequestAsync(Request request);
         Task<bool> IsEditableAsync(int requestId);
-        Task<bool> ItemsExistAsync(IEnumerable<int> itemIds);
+        Task<bool> ItemsExistAsync(IEnumerable<string> itemIds);
         void DeleteRequest(Request request);
 
         /// <summary>

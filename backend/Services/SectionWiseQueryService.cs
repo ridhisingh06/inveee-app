@@ -148,9 +148,9 @@ namespace invmgmt.web.Services
                 }
             }
 
-            if (filter.ItemId.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.ItemId))
             {
-                query = query.Where(ri => ri.ItemId == filter.ItemId.Value);
+                query = query.Where(ri => ri.ItemId == filter.ItemId);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.ItemName))

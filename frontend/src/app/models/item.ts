@@ -2,6 +2,7 @@ export type ItemCategory = string;
 
 export interface Item {
   id: string | number;
+  itemId: string;
   name: string;
   category: ItemCategory;
   description?: string;

@@ -127,7 +127,7 @@ namespace invmgmt.web.Controllers
                 // Validate each item
                 foreach (var item in dto.Items)
                 {
-                    if (item.ItemId <= 0)
+                    if (string.IsNullOrWhiteSpace(item.ItemId))
                         return BadRequest(new { message = "Valid item ID is required" });
 
                     if (item.Quantity <= 0)

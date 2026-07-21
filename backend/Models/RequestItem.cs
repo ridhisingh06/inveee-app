@@ -1,5 +1,6 @@
 using invmgmt.web.Models.Enums;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace invmgmt.web.Models
 {
@@ -10,7 +11,7 @@ namespace invmgmt.web.Models
         public int RequestId { get; set; }
         public Request Request { get; set; }
 
-        public int ItemId { get; set; }
+        public string ItemId { get; set; } = string.Empty;
         public Item Item { get; set; }
 
         // Original fields (backward compatibility)

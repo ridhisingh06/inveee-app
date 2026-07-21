@@ -8,7 +8,7 @@ namespace invmgmt.web.Models
         public int RoleId { get; set; }
         public Role Role { get; set; }
 
-        public int ItemId { get; set; }
+        public string ItemId { get; set; } = string.Empty;
         public Item Item { get; set; }
 
         public int MaxLimit { get; set; }

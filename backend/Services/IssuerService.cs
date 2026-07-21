@@ -145,7 +145,7 @@ namespace invmgmt.web.Services
                 }
 
                 // STEP 4: Validate quantities and prepare inventory operations
-                var inventoryOps = new List<(int itemId, int deductQuantity, int itemName)>();
+                var inventoryOps = new List<(string itemId, int deductQuantity, int itemName)>();
 
                 foreach (var dtoItem in dto.Items)
                 {

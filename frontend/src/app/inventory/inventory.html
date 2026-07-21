@@ -83,6 +83,15 @@
     </h2>
     <div class="inventory-form">
       <div class="form-group">
+        <label>Item ID</label>
+        <input type="text" placeholder="Enter Item ID..." [(ngModel)]="itemId" [disabled]="isEditing()">
+        <!-- ✅ Show duplicate warning if ItemId already exists -->
+        <div class="duplicate-warning" *ngIf="getDuplicateItemIdWarning()">
+          {{ getDuplicateItemIdWarning() }}
+        </div>
+      </div>
+
+      <div class="form-group">
         <label>Item Name</label>
         <input type="text" placeholder="Enter item name..." [(ngModel)]="itemName">
         <!-- ✅ Show duplicate warning if item name already exists -->
@@ -110,7 +119,7 @@
         <button 
           class="btn-primary" 
           (click)="isEditing() ? updateItem() : addItem()"
-          [disabled]="loading || isSubmitDisabledByDuplicate()"
+          [disabled]="loading || isSubmitDisabledByDuplicate() || isSubmitDisabledByDuplicateItemId()"
         >
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12"></polyline>
@@ -184,7 +193,7 @@
             <td>
               <div class="item-name-cell">
                 <span class="name">{{ item.name }}</span>
-                <span class="sub">ID: #{{ item.id }}</span>
+                <span class="sub">ID: #{{ item.itemId }}</span>
               </div>
             </td>
 

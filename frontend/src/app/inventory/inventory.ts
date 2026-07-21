@@ -37,6 +37,7 @@ export class InventoryComponent implements OnInit, DoCheck {
   categories: Category[] = [];
 
   // Form state
+  itemId = '';
   itemName = '';
   selectedCategoryId: number | null = null;
   quantity = 0;
@@ -177,6 +178,18 @@ export class InventoryComponent implements OnInit, DoCheck {
     // Validation
     if (!this.validateForm()) return;
 
+    // ✅ Check for duplicate ItemId
+    const trimmedItemId = this.itemId.trim();
+    const duplicateItemIdExists = this.items.some(item => 
+      item.itemId === trimmedItemId
+    );
+    
+    if (duplicateItemIdExists) {
+      this.errorMsg = 'Item ID already exists. Please enter a unique Item ID.';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return;
+    }
+
     // ✅ Check for duplicates (case-insensitive)
     const normalizedName = this.normalizeItemName(this.itemName);
     const duplicateExists = this.items.some(item => 
@@ -197,6 +210,7 @@ export class InventoryComponent implements OnInit, DoCheck {
     }
 
     const newItem = {
+      itemId: trimmedItemId,
       name: this.itemName.trim(),
       categoryId: this.selectedCategoryId!,
       totalQuantity: this.quantity,
@@ -227,6 +241,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    */
   editItem(item: InventoryItem): void {
     this.editingItemId = item.id;
+    this.itemId = item.itemId;
     this.itemName = item.name;
     this.selectedCategoryId = item.categoryId || null;
     this.quantity = item.availableQuantity || 0;
@@ -434,6 +449,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    * Reset form to initial state
    */
   resetForm(): void {
+    this.itemId = '';
     this.itemName = '';
     this.selectedCategoryId = null;
     this.quantity = 0;
@@ -458,6 +474,12 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns true if valid, false otherwise
    */
   private validateForm(): boolean {
+    if (!this.itemId.trim()) {
+      this.errorMsg = 'Please enter an Item ID';
+      setTimeout(() => this.errorMsg = '', 5000);
+      return false;
+    }
+
     if (!this.normalizeItemName(this.itemName)) {
       this.errorMsg = 'Please enter an item name';
       setTimeout(() => this.errorMsg = '', 5000);
@@ -549,6 +571,28 @@ export class InventoryComponent implements OnInit, DoCheck {
   }
 
   /**
+   * ✅ Get duplicate ItemId warning message
+   * @returns Error message if duplicate exists, empty string otherwise
+   */
+  getDuplicateItemIdWarning(): string {
+    if (!this.itemId.trim()) return '';
+    
+    const trimmedItemId = this.itemId.trim();
+    const isDuplicate = this.items.some(item => {
+      if (this.editingItemId !== null && item.id === this.editingItemId) {
+        return false;
+      }
+      return item.itemId === trimmedItemId;
+    });
+    
+    if (isDuplicate) {
+      return '⚠️ Item ID already exists. Please enter a unique Item ID.';
+    }
+    
+    return '';
+  }
+
+  /**
    * ✅ Check if submit button should be disabled due to duplicate
    * @returns true if submit should be disabled
    */
@@ -556,6 +600,22 @@ export class InventoryComponent implements OnInit, DoCheck {
     if (!this.normalizeItemName(this.itemName)) return false;
     
     return this.isDuplicateItemName(this.itemName, this.editingItemId);
+  }
+
+  /**
+   * ✅ Check if submit button should be disabled due to duplicate ItemId
+   * @returns true if submit should be disabled
+   */
+  isSubmitDisabledByDuplicateItemId(): boolean {
+    if (!this.itemId.trim()) return false;
+    
+    const trimmedItemId = this.itemId.trim();
+    return this.items.some(item => {
+      if (this.editingItemId !== null && item.id === this.editingItemId) {
+        return false;
+      }
+      return item.itemId === trimmedItemId;
+    });
   }
 
 }

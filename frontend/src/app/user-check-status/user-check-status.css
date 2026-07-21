@@ -6,12 +6,13 @@
 }
 
 /* ── Header ── */
-.status-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.status-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; will-change: transform; }
 .status-header h1 {
   font-size: var(--text-3xl); font-weight: 900;
   background: var(--grad-main);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   letter-spacing: -0.04em;
+  contain: content;
 }
 .status-header p { color: var(--text-secondary); font-size: var(--text-sm); margin-top: 4px; }
 
@@ -24,15 +25,17 @@
 .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
 
 /* ── Mini stats ── */
-.mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.mini-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; contain: layout; }
 .mini-stat {
   background: var(--bg-secondary); border: 1px solid var(--border);
   border-radius: 20px; padding: 1.25rem;
   display: flex; flex-direction: column; gap: 0.25rem;
-  transition: var(--transition-base);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+  contain: layout;
 }
 .mini-stat:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.ms-value { font-size: 2rem; font-weight: 900; letter-spacing: -0.04em; }
+.ms-value { font-size: 2rem; font-weight: 900; letter-spacing: -0.04em; contain: content; }
 .ms-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
 .mini-stat.amber  .ms-value { color: #f59e0b; } .mini-stat.amber  .ms-label { color: #92400e; }
 .mini-stat.blue   .ms-value { color: #6366f1; } .mini-stat.blue   .ms-label { color: #3730a3; }
@@ -62,12 +65,13 @@
 .empty-state h3 { font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
 
 /* ── Timeline ── */
-.timeline { display: flex; flex-direction: column; gap: 1rem; }
-.timeline-item { display: flex; align-items: flex-start; gap: 1.25rem; }
+.timeline { display: flex; flex-direction: column; gap: 1rem; contain: layout; }
+.timeline-item { display: flex; align-items: flex-start; gap: 1.25rem; contain: layout; }
 .timeline-dot {
   width: 44px; height: 44px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.1rem; flex-shrink: 0;
+  contain: content;
 }
 .timeline-dot.status-requested  { background: #fff7ed; }
 .timeline-dot.status-pending    { background: #fff7ed; }
@@ -80,7 +84,9 @@
   flex: 1; background: var(--bg-secondary);
   padding: 1.25rem 1.5rem; border-radius: 18px;
   border: 1px solid var(--border); border-left-width: 3px;
-  transition: var(--transition-base);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+  contain: layout;
 }
 .timeline-card:hover { transform: translateX(6px); box-shadow: var(--shadow-md); }
 .timeline-card.status-requested  { border-left-color: #f97316; }
@@ -107,6 +113,7 @@
 .request-items {
   margin: 0.85rem 0 0; padding: 0; list-style: none;
   display: grid; gap: 0.5rem;
+  contain: layout;
 }
 .request-items li {
   display: flex; flex-wrap: wrap;
@@ -114,6 +121,7 @@
   font-size: 0.82rem; color: var(--text-secondary);
   padding: 0.35rem 0;
   border-bottom: 1px solid var(--border-light);
+  contain: layout;
 }
 .request-items li:last-child { border-bottom: none; }
 
@@ -177,7 +185,10 @@
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 0, 0, 0.6); z-index: 2000;
   display: flex; align-items: center; justify-content: center;
-  padding: 20px; animation: fadeIn 0.2s ease-out;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+  contain: strict;
+  will-change: opacity;
 }
 
 @keyframes fadeIn {
@@ -191,6 +202,8 @@
   overflow-y: auto; position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   animation: slideUp 0.3s ease-out;
+  contain: strict;
+  will-change: transform;
 }
 
 .receipt-close-btn {
@@ -306,10 +319,12 @@
 .items-table-wrapper {
   overflow-x: auto; border: 1px solid var(--border);
   border-radius: 8px; margin-bottom: 1.5rem;
+  contain: layout;
 }
 
 .items-table {
   width: 100%; border-collapse: collapse; font-size: 0.9rem;
+  contain: layout;
 }
 
 .items-table thead {
@@ -512,6 +527,8 @@
   background: rgba(0, 0, 0, 0.5); z-index: 1000;
   display: flex; align-items: center; justify-content: center;
   animation: fadeIn 0.2s ease-out;
+  contain: strict;
+  will-change: opacity;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -521,6 +538,8 @@
   max-width: 400px; width: 90%;
   box-shadow: var(--shadow-lg);
   animation: slideUp 0.3s ease-out;
+  contain: strict;
+  will-change: transform;
 }
 
 .dialog-header {

@@ -186,10 +186,10 @@ namespace invmgmt.web.Repositories
             _context.Requests.Update(request);
         }
 
-        public async Task<bool> ItemsExistAsync(IEnumerable<int> itemIds)
+        public async Task<bool> ItemsExistAsync(IEnumerable<string> itemIds)
         {
             var existingItemsCount = await _context.Items
-                .Where(i => itemIds.Contains(i.Id))
+                .Where(i => itemIds.Contains(i.ItemId))
                 .CountAsync();
             return existingItemsCount == itemIds.Count();
         }
