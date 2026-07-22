@@ -106,21 +106,7 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# KMS Key for RDS Encryption
-resource "aws_kms_key" "rds_key" {
-  description             = "KMS key for RDS encryption"
-  deletion_window_in_days = 10
-  enable_key_rotation     = true
 
-  tags = {
-    Name = "inveee-rds-key"
-  }
-}
-
-resource "aws_kms_alias" "rds_key_alias" {
-  name          = "alias/inveee-rds"
-  target_key_id = aws_kms_key.rds_key.key_id
-}
 
 # IAM Role for RDS Monitoring
 resource "aws_iam_role" "rds_monitoring_role" {
@@ -193,13 +179,16 @@ resource "aws_db_instance" "postgres" {
   monitoring_role_arn             = aws_iam_role.rds_monitoring_role.arn
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
-  # Encryption
-  storage_encrypted = true
-  kms_key_id        = aws_kms_key.rds_key.arn
-
   # Performance Insights
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
+
+  deletion_protection = true
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes  = [password]
+  }
 
   tags = {
     Name = "inveee-postgres-prod"
@@ -355,6 +344,10 @@ resource "aws_lb" "main" {
   subnets            = data.aws_subnets.default.ids
 
   enable_deletion_protection = false
+
+  lifecycle {
+    prevent_destroy = true
+  }
 
   tags = {
     Name = "inveee-alb"
