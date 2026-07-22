@@ -11,7 +11,7 @@
   "containerDefinitions": [
     {
       "name": "app",
-      "image": "PLACEHOLDER_IMAGE",
+      "image": "${IMAGE}",
       "essential": true,
       "portMappings": [
         {
@@ -32,10 +32,7 @@
           "name": "FRONTEND_URL",
           "value": "https://inveee-app.vercel.app"
         },
-        {
-          "name": "ConnectionStrings__DefaultConnection",
-          "value": "PLACEHOLDER_CONNECTION_STRING"
-        },
+
         {
           "name": "Jwt__Key",
           "value": "THIS_IS_MY_SECRET_KEY_12345_ABCDEF_2026"
@@ -47,12 +44,24 @@
         {
           "name": "Jwt__Audience",
           "value": "invmgmt_user"
+        },
+        {
+          "name": "COMPlus_DbgEnableMiniDump",
+          "value": "1"
+        },
+        {
+          "name": "COMPlus_DbgMiniDumpName",
+          "value": "/tmp/dump.%p.dmp"
+        },
+        {
+          "name": "COMPlus_DbgMiniDumpType",
+          "value": "4"
         }
       ],
       "healthCheck": {
         "command": [
           "CMD-SHELL",
-          "curl -f http://localhost:5000/health || exit 1"
+          "dotnet /app/invmgmt.web.dll --info || exit 1"
         ],
         "interval": 30,
         "timeout": 10,
