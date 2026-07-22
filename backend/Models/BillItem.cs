@@ -18,7 +18,7 @@ namespace invmgmt.web.Models
         [StringLength(50)]
         public string ItemId { get; set; } = string.Empty;
 
-        [ForeignKey("ItemId")]
+
         public Item Item { get; set; } = null!;
 
         [Required]

@@ -73,11 +73,11 @@ namespace invmgmt.web.Data
             modelBuilder.Entity<Item>()
                 .HasIndex(i => i.ItemId).IsUnique();
 
-            modelBuilder.Entity<Item>()
-                .HasOne(i => i.InventoryStock)
-                .WithOne(s => s.Item)
-                .HasPrincipalKey<Item>(i => i.ItemId)
+            modelBuilder.Entity<InventoryStock>()
+                .HasOne(s => s.Item)
+                .WithOne(i => i.InventoryStock)
                 .HasForeignKey<InventoryStock>(s => s.ItemId)
+                .HasPrincipalKey<Item>(i => i.ItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<RequestItem>()
@@ -128,7 +128,7 @@ namespace invmgmt.web.Data
             // BillItem relationships
             modelBuilder.Entity<BillItem>()
                 .HasOne(bi => bi.Item)
-                .WithMany()
+                                .WithMany(i => i.BillItems)
                 .HasForeignKey(bi => bi.ItemId)
                 .HasPrincipalKey(i => i.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -144,12 +144,7 @@ namespace invmgmt.web.Data
                 .HasPrincipalKey(i => i.ItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<RequestItem>()
-                .HasOne(ri => ri.Item)
-                .WithMany(i => i.RequestItems)
-                .HasPrincipalKey<Item>(i => i.ItemId)
-                .HasForeignKey(ri => ri.ItemId)
-                .OnDelete(DeleteBehavior.Cascade);
+
 
             // ========== ORDER SUMMARY RELATIONSHIPS (NEW) ==========
 
@@ -190,9 +185,11 @@ namespace invmgmt.web.Data
 
             // OrderSummaryItem to Item
             modelBuilder.Entity<OrderSummaryItem>()
-                                .HasPrincipalKey(i => i.ItemId)
-                .HasForeignKey(osi => osi.ItemId)
-                .OnDelete(DeleteBehavior.Restrict);
+    .HasOne(osi => osi.Item)
+    .WithMany()
+    .HasForeignKey(osi => osi.ItemId)
+    .HasPrincipalKey(i => i.ItemId)
+    .OnDelete(DeleteBehavior.Restrict);
 
             // OrderSummaryItem to RequestItem (reference to original request item)
             modelBuilder.Entity<OrderSummaryItem>()

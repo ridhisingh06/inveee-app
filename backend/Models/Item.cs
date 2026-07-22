@@ -35,10 +35,13 @@ namespace invmgmt.web.Models
 
         public InventoryStock? InventoryStock { get; set; }
 
+        // Navigation collections for related entities using ItemId as principal key
+        public ICollection<BillItem>? BillItems { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<RequestItem>? RequestItems { get; set; }
-        public ICollection<RoleItemLimit>? RoleItemLimits { get; set; }
+
         
     }
 }
