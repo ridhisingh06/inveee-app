@@ -129,8 +129,17 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: false
 
-      - name: Get ECS service events
-        id: service-events
+      - name: Wait for ECS service stability
+        run: |
+          echo "Waiting for ECS service to become stable..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --no-cli-pager
+          echo "ECS service is now stable!"
+
+      - name: Diagnostic - ECS Service Events
         if: failure()
         run: |
           echo "=== ECS Service Events ==="
@@ -141,8 +150,7 @@ jobs:
             --query 'services[0].events' \
             --output table
 
-      - name: Get stopped tasks
-        id: stopped-tasks
+      - name: Diagnostic - Failed/Stopped Tasks
         if: failure()
         run: |
           echo "=== Stopped Tasks ==="
@@ -165,39 +173,36 @@ jobs:
                 --output table
             fi
           done
+          
+          echo "=== Running Tasks ==="
+          aws ecs list-tasks \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service-name ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --desired-status RUNNING \
+            --output table
 
-      - name: Get CloudWatch logs
-        id: cloudwatch-logs
+      - name: Diagnostic - Task Definition
         if: failure()
         run: |
-          echo "=== CloudWatch Logs (Last 100 lines) ==="
-          LOG_STREAM=$(aws logs describe-log-streams \
-            --log-group-name /ecs/inveee-app \
+          echo "=== Task Definition ==="
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_SERVICE }} \
             --region ${{ env.AWS_REGION }} \
-            --order-by LastEventTime \
-            --descending \
-            --max-items 1 \
-            --query 'logStreams[0].logStreamName' \
-            --output text)
-          
-          if [ -n "$LOG_STREAM" ]; then
-            aws logs get-log-events \
-              --log-group-name /ecs/inveee-app \
-              --log-stream-name $LOG_STREAM \
-              --region ${{ env.AWS_REGION }} \
-              --limit 100 \
-              --query 'events[*].[timestamp,message]' \
-              --output table
-          else
-            echo "No log streams found"
-          fi
+            --output json || true
 
-      - name: Wait for ECS service stability
+      - name: Diagnostic - Target Health
+        if: failure()
         run: |
-          echo "Waiting for ECS service to become stable..."
-          aws ecs wait services-stable \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.ECS_SERVICE }} \
+          echo "=== Target Health ==="
+          TG_ARN=$(aws elbv2 describe-target-groups --names inveee-tg --region ${{ env.AWS_REGION }} --query 'TargetGroups[0].TargetGroupArn' --output text)
+          aws elbv2 describe-target-health \
+            --target-group-arn $TG_ARN \
             --region ${{ env.AWS_REGION }} \
-            --no-cli-pager
-          echo "ECS service is now stable!"
+            --output table || true
+
+      - name: Diagnostic - CloudWatch Logs
+        if: failure()
+        run: |
+          echo "=== CloudWatch Logs ==="
+          aws logs tail /ecs/inveee-app --region ${{ env.AWS_REGION }} --format short || true

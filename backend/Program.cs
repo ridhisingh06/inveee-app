@@ -89,9 +89,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             maxRetryDelay:TimeSpan.FromSeconds(30),
             errorCodesToAdd: null);
         npgsqlOptions.CommandTimeout(30);
-        
-        // Add timeout settings
-        npgsqlOptions.ProvideClientCertificatesCallback(null);
     });
 });
 

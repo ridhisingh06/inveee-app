@@ -23,10 +23,10 @@ RUN dotnet publish invmgmt.web.csproj -c Release -o /app/publish --no-restore
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
-# Install system dependencies for Npgsql and Kerberos authentication
+# Install system dependencies for Npgsql TLS connection and health checks
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    libgssapi-krb5-2 curl && \
+    ca-certificates curl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
