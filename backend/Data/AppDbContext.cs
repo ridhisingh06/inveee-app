@@ -74,14 +74,14 @@ namespace invmgmt.web.Data
                 .HasOne(i => i.InventoryStock)
                 .WithOne(s => s.Item)
                 .HasForeignKey<InventoryStock>(s => s.ItemId)
-                                .HasPrincipalKey(i => i.ItemId)
+                                .HasPrincipalKey(nameof(Item.ItemId))
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<RequestItem>()
                 .HasOne(ri => ri.Item)
                 .WithMany(i => i.RequestItems)
                 .HasForeignKey(ri => ri.ItemId)
-                .HasPrincipalKey(i => i.ItemId);
+                .HasPrincipalKey(nameof(Item.ItemId));
 
             // Add indexes on RequestItems to improve query/filter performance
             modelBuilder.Entity<RequestItem>()
@@ -127,7 +127,7 @@ namespace invmgmt.web.Data
                 .HasOne(bi => bi.Item)
                 .WithMany()
                 .HasForeignKey(bi => bi.ItemId)
-                                .HasPrincipalKey(i => i.ItemId)
+                                .HasPrincipalKey(nameof(Item.ItemId))
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<BillItem>()
@@ -138,7 +138,7 @@ namespace invmgmt.web.Data
                 .HasOne(rl => rl.Item)
                 .WithMany()
                 .HasForeignKey(rl => rl.ItemId)
-                                .HasPrincipalKey(i => i.ItemId)
+                                .HasPrincipalKey(nameof(Item.ItemId))
                 .OnDelete(DeleteBehavior.Cascade);
 
             // ========== ORDER SUMMARY RELATIONSHIPS (NEW) ==========
@@ -183,7 +183,7 @@ namespace invmgmt.web.Data
                 .HasOne(osi => osi.Item)
                 .WithMany()
                 .HasForeignKey(osi => osi.ItemId)
-                                .HasPrincipalKey(i => i.ItemId)
+                                .HasPrincipalKey(nameof(Item.ItemId))
                 .OnDelete(DeleteBehavior.Restrict);
 
             // OrderSummaryItem to RequestItem (reference to original request item)
