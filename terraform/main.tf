@@ -256,6 +256,24 @@ resource "aws_iam_role_policy" "ecs_task_execution_role_logs" {
   })
 }
 
+# IAM Role for ECS Task (for application-level permissions)
+resource "aws_iam_role" "ecs_task_role" {
+  name = "inveee-app-task-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
 # ECS Task Definition
 resource "aws_ecs_task_definition" "app" {
   family                   = "inveee-app-task"
@@ -264,6 +282,7 @@ resource "aws_ecs_task_definition" "app" {
   cpu                      = 256
   memory                   = 512
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([
     {
@@ -280,7 +299,7 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         {
           name  = "ConnectionStrings__DefaultConnection"
-          value = "Host=${aws_db_instance.postgres.address};Port=5432;Database=inventorydb;Username=postgres;Password=${var.db_password};Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Prefer;Trust Server Certificate=true;"
+          value = "Host=${aws_db_instance.postgres.address};Port=5432;Database=inventorydb;Username=postgres;Password=${var.db_password};Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Require;"
         },
         {
           name  = "ASPNETCORE_ENVIRONMENT"
@@ -289,6 +308,22 @@ resource "aws_ecs_task_definition" "app" {
         {
           name  = "ASPNETCORE_URLS"
           value = "http://+:5000"
+        },
+        {
+          name  = "FRONTEND_URL"
+          value = "https://inveee-app.vercel.app"
+        },
+        {
+          name  = "Jwt__Key"
+          value = "THIS_IS_MY_SECRET_KEY_12345_ABCDEF_2026"
+        },
+        {
+          name  = "Jwt__Issuer"
+          value = "invmgmt"
+        },
+        {
+          name  = "Jwt__Audience"
+          value = "invmgmt_user"
         }
       ]
       healthCheck = {
@@ -311,6 +346,58 @@ resource "aws_ecs_task_definition" "app" {
   ])
 }
 
+# Application Load Balancer
+resource "aws_lb" "main" {
+  name               = "inveee-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.ecs_sg.id]
+  subnets            = data.aws_subnets.default.ids
+
+  enable_deletion_protection = false
+
+  tags = {
+    Name = "inveee-alb"
+  }
+}
+
+# ALB Target Group
+resource "aws_lb_target_group" "app" {
+  name        = "inveee-tg"
+  port        = 5000
+  protocol    = "HTTP"
+  vpc_id      = data.aws_vpc.default.id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 30
+    matcher             = "200"
+    path                = "/health"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
+    unhealthy_threshold = 3
+  }
+
+  tags = {
+    Name = "inveee-tg"
+  }
+}
+
+# ALB Listener
+resource "aws_lb_listener" "front_end" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
+  }
+}
+
 # ECS Service
 resource "aws_ecs_service" "app" {
   name            = "inveee-service"
@@ -318,12 +405,18 @@ resource "aws_ecs_service" "app" {
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 2
   launch_type     = "FARGATE"
-  depends_on      = [aws_db_instance.postgres]
+  depends_on      = [aws_db_instance.postgres, aws_lb_listener.front_end]
 
   network_configuration {
-    subnets          = ["subnet-021e42ebc310fde8f", "subnet-0a4a3b2d8b3e9f185"]
+    subnets          = data.aws_subnets.default.ids
     security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app.arn
+    container_name   = "app"
+    container_port   = 5000
   }
 }
 

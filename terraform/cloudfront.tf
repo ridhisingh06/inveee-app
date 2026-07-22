@@ -1,23 +1,11 @@
 # =============================================================================
 # CloudFront Distribution for inveee-app API
 #
-# This resource mirrors the manually-created distribution dh8mq54lnbssr.cloudfront.net
-# (Distribution ID: E3VRYF1FMD8JQX).
-#
-# Import command:
-#   terraform import aws_cloudfront_distribution.api_cdn E3VRYF1FMD8JQX
-#
-# Current config (verified via AWS CLI 2026-07-11):
-#   - Origin: inveee-alb-503765841.us-east-1.elb.amazonaws.com (HTTP-only)
-#   - Cache Policy: Managed-CachingDisabled (TTL=0) ✅
-#   - Origin Request Policy: Managed-AllViewerExceptHostHeader ✅
-#   - Allowed Methods: all 7 (GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS) ✅
-#   - Viewer Protocol: redirect-to-https ✅
+# This resource routes traffic to the ECS Fargate tasks via ALB.
 # =============================================================================
 
 # ── Managed Policy Data Sources ───────────────────────────────────────────────
-# Reference the AWS-managed policies already attached to the distribution.
-# These are the correct policies for an API backend that handles CORS itself.
+# Reference the AWS-managed policies for an API backend that handles CORS itself.
 
 data "aws_cloudfront_cache_policy" "caching_disabled" {
   name = "Managed-CachingDisabled"
@@ -38,8 +26,8 @@ resource "aws_cloudfront_distribution" "api_cdn" {
 
   # Origin: ALB in front of ECS Fargate tasks
   origin {
-    domain_name = "inveee-alb-503765841.us-east-1.elb.amazonaws.com"
-    origin_id   = "inveee-alb-503765841.us-east-1.elb.amazonaws.com-mr5btjrvaws"
+    domain_name = aws_lb.main.dns_name
+    origin_id   = aws_lb.main.dns_name
 
     custom_origin_config {
       http_port                = 80
@@ -55,7 +43,7 @@ resource "aws_cloudfront_distribution" "api_cdn" {
   default_cache_behavior {
     allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "inveee-alb-503765841.us-east-1.elb.amazonaws.com-mr5btjrvaws"
+    target_origin_id       = aws_lb.main.dns_name
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
 

@@ -99,6 +99,17 @@ jobs:
           docker push $IMAGE_LATEST
           echo "image=$IMAGE_SHA" >> $GITHUB_OUTPUT
 
+      - name: Get RDS endpoint from Terraform
+        id: rds-endpoint
+        run: |
+          RDS_ENDPOINT=$(aws rds describe-db-instances \
+            --db-instance-identifier inveee-postgres \
+            --region ${{ env.AWS_REGION }} \
+            --query 'DBInstances[0].Endpoint.Address' \
+            --output text)
+          echo "rds_endpoint=$RDS_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "RDS Endpoint: $RDS_ENDPOINT"
+
       - name: Render ECS task definition
         id: render-task
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -106,8 +117,11 @@ jobs:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            ConnectionStrings__DefaultConnection=Host=${{ steps.rds-endpoint.outputs.rds_endpoint }};Port=5432;Database=inventorydb;Username=postgres;Password=ridhisingh2003;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Require;
 
       - name: Deploy to ECS
+        id: deploy-ecs
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.render-task.outputs.task-definition }}
@@ -115,10 +129,75 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: false
 
+      - name: Get ECS service events
+        id: service-events
+        if: failure()
+        run: |
+          echo "=== ECS Service Events ==="
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'services[0].events' \
+            --output table
+
+      - name: Get stopped tasks
+        id: stopped-tasks
+        if: failure()
+        run: |
+          echo "=== Stopped Tasks ==="
+          TASK_ARNS=$(aws ecs list-tasks \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service-name ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --desired-status STOPPED \
+            --query 'taskArns' \
+            --output text)
+          
+          for TASK_ARN in $TASK_ARNS; do
+            if [ -n "$TASK_ARN" ]; then
+              echo "--- Task: $TASK_ARN ---"
+              aws ecs describe-tasks \
+                --cluster ${{ env.ECS_CLUSTER }} \
+                --tasks $TASK_ARN \
+                --region ${{ env.AWS_REGION }} \
+                --query 'tasks[0].{StoppedReason:stoppedReason,ExitCode:containers[0].exitCode,Reason:containers[0].reason}' \
+                --output table
+            fi
+          done
+
+      - name: Get CloudWatch logs
+        id: cloudwatch-logs
+        if: failure()
+        run: |
+          echo "=== CloudWatch Logs (Last 100 lines) ==="
+          LOG_STREAM=$(aws logs describe-log-streams \
+            --log-group-name /ecs/inveee-app \
+            --region ${{ env.AWS_REGION }} \
+            --order-by LastEventTime \
+            --descending \
+            --max-items 1 \
+            --query 'logStreams[0].logStreamName' \
+            --output text)
+          
+          if [ -n "$LOG_STREAM" ]; then
+            aws logs get-log-events \
+              --log-group-name /ecs/inveee-app \
+              --log-stream-name $LOG_STREAM \
+              --region ${{ env.AWS_REGION }} \
+              --limit 100 \
+              --query 'events[*].[timestamp,message]' \
+              --output table
+          else
+            echo "No log streams found"
+          fi
+
       - name: Wait for ECS service stability
         run: |
+          echo "Waiting for ECS service to become stable..."
           aws ecs wait services-stable \
             --cluster ${{ env.ECS_CLUSTER }} \
             --services ${{ env.ECS_SERVICE }} \
             --region ${{ env.AWS_REGION }} \
             --no-cli-pager
+          echo "ECS service is now stable!"

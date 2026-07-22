@@ -11,12 +11,11 @@
   "containerDefinitions": [
     {
       "name": "app",
-      "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:latest",
+      "image": "PLACEHOLDER_IMAGE",
       "essential": true,
       "portMappings": [
         {
           "containerPort": 5000,
-          "hostPort": 5000,
           "protocol": "tcp"
         }
       ],
@@ -35,7 +34,19 @@
         },
         {
           "name": "ConnectionStrings__DefaultConnection",
-          "value": "Host=inveee-postgres.citg4maasb05.us-east-1.rds.amazonaws.com;Port=5432;Database=inventorydb;Username=postgres;Password=ridhisingh2003;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Require"
+          "value": "PLACEHOLDER_CONNECTION_STRING"
+        },
+        {
+          "name": "Jwt__Key",
+          "value": "THIS_IS_MY_SECRET_KEY_12345_ABCDEF_2026"
+        },
+        {
+          "name": "Jwt__Issuer",
+          "value": "invmgmt"
+        },
+        {
+          "name": "Jwt__Audience",
+          "value": "invmgmt_user"
         }
       ],
       "healthCheck": {

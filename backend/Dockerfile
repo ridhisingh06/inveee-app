@@ -34,6 +34,12 @@ WORKDIR /app
 # Copy published application from build stage
 COPY --from=build /app/publish .
 
+# Set environment variable for ASP.NET Core
+ENV ASPNETCORE_URLS=http://+:5000
+
 EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
+  CMD curl -f http://localhost:5000/health || exit 1
 
 ENTRYPOINT ["dotnet", "invmgmt.web.dll"]
