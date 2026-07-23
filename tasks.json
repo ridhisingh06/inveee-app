@@ -1,0 +1,801 @@
+{
+    "tasks": [
+        {
+            "attachments": [
+                {
+                    "id": "a2210195-a82e-4140-bad5-2566397f72f8",
+                    "type": "ElasticNetworkInterface",
+                    "status": "DELETED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-021e42ebc310fde8f"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-014fcbbe4a39adf0c"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "02:de:35:d5:02:f9"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-4-188.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.4.188"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1a",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T03:37:46.313000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/072b51d46c7a43d48589ee241be4aec5/12428edc-842f-4143-aab4-b242837259e4",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/072b51d46c7a43d48589ee241be4aec5",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:e8e68c13d9b2e5be19bc0ee0909191874d4d05ba",
+                    "imageDigest": "sha256:d81a6186d34a45d1ca1ce9bad8ebb02951738a21548bcbdbc2b3f19477617b2e",
+                    "runtimeId": "072b51d46c7a43d48589ee241be4aec5-0527074092",
+                    "lastStatus": "STOPPED",
+                    "exitCode": 139,
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "a2210195-a82e-4140-bad5-2566397f72f8",
+                            "privateIpv4Address": "172.31.4.188"
+                        }
+                    ],
+                    "healthStatus": "UNKNOWN",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T03:37:42.420000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "executionStoppedAt": "2026-07-24T03:38:43.987000+05:30",
+            "group": "service:inveee-service",
+            "healthStatus": "UNKNOWN",
+            "lastStatus": "STOPPED",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T03:37:52.803000+05:30",
+            "pullStoppedAt": "2026-07-24T03:37:57.556000+05:30",
+            "startedAt": "2026-07-24T03:38:11.271000+05:30",
+            "startedBy": "ecs-svc/9114201152685913747",
+            "stopCode": "EssentialContainerExited",
+            "stoppedAt": "2026-07-24T03:44:12.668000+05:30",
+            "stoppedReason": "Essential container in task exited",
+            "stoppingAt": "2026-07-24T03:38:54.063000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/072b51d46c7a43d48589ee241be4aec5",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:128",
+            "version": 6,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        },
+        {
+            "attachments": [
+                {
+                    "id": "6cf8f62a-573a-4ef1-a112-e599077a60bf",
+                    "type": "ElasticNetworkInterface",
+                    "status": "DELETED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-021e42ebc310fde8f"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-0d4ef626a51c013db"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "02:60:23:d6:da:25"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-9-178.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.9.178"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1a",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T03:28:15.734000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/d3de6b0e17fa4775a89e4e3fbca44256/054972e0-62b8-4897-a67a-0f2ecd22a0ad",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/d3de6b0e17fa4775a89e4e3fbca44256",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:e8e68c13d9b2e5be19bc0ee0909191874d4d05ba",
+                    "imageDigest": "sha256:d81a6186d34a45d1ca1ce9bad8ebb02951738a21548bcbdbc2b3f19477617b2e",
+                    "runtimeId": "d3de6b0e17fa4775a89e4e3fbca44256-0527074092",
+                    "lastStatus": "STOPPED",
+                    "exitCode": 0,
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "6cf8f62a-573a-4ef1-a112-e599077a60bf",
+                            "privateIpv4Address": "172.31.9.178"
+                        }
+                    ],
+                    "healthStatus": "UNHEALTHY",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T03:28:10.556000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "executionStoppedAt": "2026-07-24T03:35:16.442000+05:30",
+            "group": "service:inveee-service",
+            "healthStatus": "UNHEALTHY",
+            "lastStatus": "STOPPED",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T03:28:26.353000+05:30",
+            "pullStoppedAt": "2026-07-24T03:28:31.109000+05:30",
+            "startedAt": "2026-07-24T03:28:47.416000+05:30",
+            "startedBy": "ecs-svc/9114201152685913747",
+            "stopCode": "ServiceSchedulerInitiated",
+            "stoppedAt": "2026-07-24T03:35:46.838000+05:30",
+            "stoppedReason": "Task failed ELB health checks in (target-group arn:aws:elasticloadbalancing:us-east-1:396287094524:targetgroup/inveee-tg/7e357b1eeeae0370)",
+            "stoppingAt": "2026-07-24T03:29:52.567000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/d3de6b0e17fa4775a89e4e3fbca44256",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:128",
+            "version": 9,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        },
+        {
+            "attachments": [
+                {
+                    "id": "e7077ea5-f61c-4598-b542-d71b3e8b5bc2",
+                    "type": "ElasticNetworkInterface",
+                    "status": "DETACHED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-0a4a3b2d8b3e9f185"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-07bc75c655dfed6b8"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "12:4b:ad:20:f4:6f"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-88-208.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.88.208"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1b",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T04:02:45.097000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/d92e2f8cb9b0486b9593bd73c3ba1b37/a2f8fa5c-cc4e-4386-9a4e-fa928ff5bb74",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/d92e2f8cb9b0486b9593bd73c3ba1b37",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:e8e68c13d9b2e5be19bc0ee0909191874d4d05ba",
+                    "imageDigest": "sha256:d81a6186d34a45d1ca1ce9bad8ebb02951738a21548bcbdbc2b3f19477617b2e",
+                    "runtimeId": "d92e2f8cb9b0486b9593bd73c3ba1b37-0527074092",
+                    "lastStatus": "STOPPED",
+                    "exitCode": 139,
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "e7077ea5-f61c-4598-b542-d71b3e8b5bc2",
+                            "privateIpv4Address": "172.31.88.208"
+                        }
+                    ],
+                    "healthStatus": "UNKNOWN",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T04:02:37.280000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "executionStoppedAt": "2026-07-24T04:03:49.211000+05:30",
+            "group": "service:inveee-service",
+            "healthStatus": "UNKNOWN",
+            "lastStatus": "DEPROVISIONING",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T04:02:56.977000+05:30",
+            "pullStoppedAt": "2026-07-24T04:03:01.886000+05:30",
+            "startedAt": "2026-07-24T04:03:21.171000+05:30",
+            "startedBy": "ecs-svc/9114201152685913747",
+            "stopCode": "EssentialContainerExited",
+            "stoppedReason": "Essential container in task exited",
+            "stoppingAt": "2026-07-24T04:03:59.274000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/d92e2f8cb9b0486b9593bd73c3ba1b37",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:128",
+            "version": 5,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        },
+        {
+            "attachments": [
+                {
+                    "id": "3612eec9-7db8-4f67-a738-d39b3982aaeb",
+                    "type": "ElasticNetworkInterface",
+                    "status": "DELETED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-0a4a3b2d8b3e9f185"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-0ca3b4ff6687c8d8a"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "12:6f:c3:39:6f:2f"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-95-110.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.95.110"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1b",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T03:35:56.634000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/daa63eaa48844b90b35b62b7f65a514b/29ba01c0-6cc2-47de-b785-32911ed54d80",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/daa63eaa48844b90b35b62b7f65a514b",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:e8e68c13d9b2e5be19bc0ee0909191874d4d05ba",
+                    "imageDigest": "sha256:d81a6186d34a45d1ca1ce9bad8ebb02951738a21548bcbdbc2b3f19477617b2e",
+                    "runtimeId": "daa63eaa48844b90b35b62b7f65a514b-0527074092",
+                    "lastStatus": "STOPPED",
+                    "exitCode": 0,
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "3612eec9-7db8-4f67-a738-d39b3982aaeb",
+                            "privateIpv4Address": "172.31.95.110"
+                        }
+                    ],
+                    "healthStatus": "UNHEALTHY",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T03:35:50.180000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "executionStoppedAt": "2026-07-24T03:51:41.470000+05:30",
+            "group": "service:inveee-service",
+            "healthStatus": "UNHEALTHY",
+            "lastStatus": "STOPPED",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T03:36:07.187000+05:30",
+            "pullStoppedAt": "2026-07-24T03:36:17.018000+05:30",
+            "startedAt": "2026-07-24T03:36:36.681000+05:30",
+            "startedBy": "ecs-svc/9114201152685913747",
+            "stopCode": "ServiceSchedulerInitiated",
+            "stoppedAt": "2026-07-24T03:52:12.114000+05:30",
+            "stoppedReason": "Task failed ELB health checks in (target-group arn:aws:elasticloadbalancing:us-east-1:396287094524:targetgroup/inveee-tg/7e357b1eeeae0370)",
+            "stoppingAt": "2026-07-24T03:46:01.659000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/daa63eaa48844b90b35b62b7f65a514b",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:128",
+            "version": 9,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        },
+        {
+            "attachments": [
+                {
+                    "id": "897844b6-876a-4845-bfb5-7ff12a0d2fcc",
+                    "type": "ElasticNetworkInterface",
+                    "status": "DELETED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-021e42ebc310fde8f"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-0fc961281053deebb"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "02:d0:6a:5f:56:f3"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-5-64.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.5.64"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1a",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T03:44:24.621000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/dc433ef4786e4e96a644b37b44de9c9d/044ba86c-134a-442e-b284-896a314a2beb",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/dc433ef4786e4e96a644b37b44de9c9d",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:e8e68c13d9b2e5be19bc0ee0909191874d4d05ba",
+                    "imageDigest": "sha256:d81a6186d34a45d1ca1ce9bad8ebb02951738a21548bcbdbc2b3f19477617b2e",
+                    "runtimeId": "dc433ef4786e4e96a644b37b44de9c9d-0527074092",
+                    "lastStatus": "STOPPED",
+                    "exitCode": 0,
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "897844b6-876a-4845-bfb5-7ff12a0d2fcc",
+                            "privateIpv4Address": "172.31.5.64"
+                        }
+                    ],
+                    "healthStatus": "UNHEALTHY",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T03:44:19.587000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "executionStoppedAt": "2026-07-24T03:53:47.561000+05:30",
+            "group": "service:inveee-service",
+            "healthStatus": "UNHEALTHY",
+            "lastStatus": "STOPPED",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T03:44:35.206000+05:30",
+            "pullStoppedAt": "2026-07-24T03:44:40.099000+05:30",
+            "startedAt": "2026-07-24T03:44:55.896000+05:30",
+            "startedBy": "ecs-svc/9114201152685913747",
+            "stopCode": "ServiceSchedulerInitiated",
+            "stoppedAt": "2026-07-24T03:54:15.022000+05:30",
+            "stoppedReason": "Task failed ELB health checks in (target-group arn:aws:elasticloadbalancing:us-east-1:396287094524:targetgroup/inveee-tg/7e357b1eeeae0370)",
+            "stoppingAt": "2026-07-24T03:48:23.938000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/dc433ef4786e4e96a644b37b44de9c9d",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:128",
+            "version": 8,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        },
+        {
+            "attachments": [
+                {
+                    "id": "89abf380-6300-4dbe-8962-5b56b06e2e20",
+                    "type": "ElasticNetworkInterface",
+                    "status": "DELETED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-021e42ebc310fde8f"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-0f0c854a2320bb232"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "02:96:46:6c:74:7b"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-9-234.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.9.234"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1a",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T03:54:29.125000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/f87e36afa5e94fe5bcfb8a85aa8d48cf/1aed393a-d0c7-4ebe-b310-9c88b60ec0a6",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/f87e36afa5e94fe5bcfb8a85aa8d48cf",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:e8e68c13d9b2e5be19bc0ee0909191874d4d05ba",
+                    "imageDigest": "sha256:d81a6186d34a45d1ca1ce9bad8ebb02951738a21548bcbdbc2b3f19477617b2e",
+                    "runtimeId": "f87e36afa5e94fe5bcfb8a85aa8d48cf-0527074092",
+                    "lastStatus": "STOPPED",
+                    "exitCode": 0,
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "89abf380-6300-4dbe-8962-5b56b06e2e20",
+                            "privateIpv4Address": "172.31.9.234"
+                        }
+                    ],
+                    "healthStatus": "UNHEALTHY",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T03:54:17.703000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "executionStoppedAt": "2026-07-24T04:01:53.276000+05:30",
+            "group": "service:inveee-service",
+            "healthStatus": "UNHEALTHY",
+            "lastStatus": "STOPPED",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T03:54:39.948000+05:30",
+            "pullStoppedAt": "2026-07-24T03:54:51.666000+05:30",
+            "startedAt": "2026-07-24T03:55:10.128000+05:30",
+            "startedBy": "ecs-svc/9114201152685913747",
+            "stopCode": "ServiceSchedulerInitiated",
+            "stoppedAt": "2026-07-24T04:02:18.106000+05:30",
+            "stoppedReason": "Task failed ELB health checks in (target-group arn:aws:elasticloadbalancing:us-east-1:396287094524:targetgroup/inveee-tg/7e357b1eeeae0370)",
+            "stoppingAt": "2026-07-24T03:56:12.318000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/f87e36afa5e94fe5bcfb8a85aa8d48cf",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:128",
+            "version": 9,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        },
+        {
+            "attachments": [
+                {
+                    "id": "78c589d8-4ec5-43ea-92fc-4272a351124a",
+                    "type": "ElasticNetworkInterface",
+                    "status": "DELETED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-0a4a3b2d8b3e9f185"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-01c227f15537c7096"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "12:ba:3c:8b:b4:4b"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-80-35.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.80.35"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1b",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T03:52:23.783000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/4cfec59586854859ab00ab48bb094621/f5da8773-4dd9-4a68-88e7-87b470988f89",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/4cfec59586854859ab00ab48bb094621",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:f882783f7cf0487e6406f2938f92ba2b38da9a40",
+                    "imageDigest": "sha256:664c610b1ac7616ac0e78b746734b12702965a6ecf1dd87558075f6b88e456f2",
+                    "runtimeId": "4cfec59586854859ab00ab48bb094621-0527074092",
+                    "lastStatus": "STOPPED",
+                    "exitCode": 0,
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "78c589d8-4ec5-43ea-92fc-4272a351124a",
+                            "privateIpv4Address": "172.31.80.35"
+                        }
+                    ],
+                    "healthStatus": "UNHEALTHY",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T03:52:18.231000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "executionStoppedAt": "2026-07-24T03:59:59.436000+05:30",
+            "group": "service:inveee-service",
+            "healthStatus": "UNHEALTHY",
+            "lastStatus": "STOPPED",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T03:52:32.038000+05:30",
+            "pullStoppedAt": "2026-07-24T03:52:55.949000+05:30",
+            "startedAt": "2026-07-24T03:53:18.860000+05:30",
+            "startedBy": "ecs-svc/9558491232506282823",
+            "stopCode": "ServiceSchedulerInitiated",
+            "stoppedAt": "2026-07-24T04:00:24.565000+05:30",
+            "stoppedReason": "Task failed ELB health checks in (target-group arn:aws:elasticloadbalancing:us-east-1:396287094524:targetgroup/inveee-tg/7e357b1eeeae0370)",
+            "stoppingAt": "2026-07-24T03:54:26.307000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/4cfec59586854859ab00ab48bb094621",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:129",
+            "version": 9,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        },
+        {
+            "attachments": [
+                {
+                    "id": "0708e67f-fab1-44d8-82c2-22e2e5b44d44",
+                    "type": "ElasticNetworkInterface",
+                    "status": "ATTACHED",
+                    "details": [
+                        {
+                            "name": "subnetId",
+                            "value": "subnet-0a4a3b2d8b3e9f185"
+                        },
+                        {
+                            "name": "networkInterfaceId",
+                            "value": "eni-0fb15cbb239621c22"
+                        },
+                        {
+                            "name": "macAddress",
+                            "value": "12:92:20:78:24:ff"
+                        },
+                        {
+                            "name": "privateDnsName",
+                            "value": "ip-172-31-86-10.ec2.internal"
+                        },
+                        {
+                            "name": "privateIPv4Address",
+                            "value": "172.31.86.10"
+                        }
+                    ]
+                }
+            ],
+            "attributes": [
+                {
+                    "name": "ecs.cpu-architecture",
+                    "value": "x86_64"
+                }
+            ],
+            "availabilityZone": "us-east-1b",
+            "clusterArn": "arn:aws:ecs:us-east-1:396287094524:cluster/inveee-cluster",
+            "connectivity": "CONNECTED",
+            "connectivityAt": "2026-07-24T04:00:35.699000+05:30",
+            "containers": [
+                {
+                    "containerArn": "arn:aws:ecs:us-east-1:396287094524:container/inveee-cluster/650b86d381ec41d3bb68bfa05f1c6185/b4d4dab6-79d5-441d-ad76-81423780d9ac",
+                    "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/650b86d381ec41d3bb68bfa05f1c6185",
+                    "name": "app",
+                    "image": "396287094524.dkr.ecr.us-east-1.amazonaws.com/inveee-app:f882783f7cf0487e6406f2938f92ba2b38da9a40",
+                    "imageDigest": "sha256:664c610b1ac7616ac0e78b746734b12702965a6ecf1dd87558075f6b88e456f2",
+                    "runtimeId": "650b86d381ec41d3bb68bfa05f1c6185-0527074092",
+                    "lastStatus": "RUNNING",
+                    "networkBindings": [],
+                    "networkInterfaces": [
+                        {
+                            "attachmentId": "0708e67f-fab1-44d8-82c2-22e2e5b44d44",
+                            "privateIpv4Address": "172.31.86.10"
+                        }
+                    ],
+                    "healthStatus": "UNHEALTHY",
+                    "cpu": "0"
+                }
+            ],
+            "cpu": "256",
+            "createdAt": "2026-07-24T04:00:31.720000+05:30",
+            "desiredStatus": "STOPPED",
+            "enableExecuteCommand": false,
+            "group": "service:inveee-service",
+            "healthStatus": "UNHEALTHY",
+            "lastStatus": "DEACTIVATING",
+            "launchType": "FARGATE",
+            "memory": "512",
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": "app"
+                    }
+                ],
+                "inferenceAcceleratorOverrides": []
+            },
+            "platformVersion": "1.4.0",
+            "platformFamily": "Linux",
+            "pullStartedAt": "2026-07-24T04:00:48.748000+05:30",
+            "pullStoppedAt": "2026-07-24T04:00:53.633000+05:30",
+            "startedAt": "2026-07-24T04:01:13.139000+05:30",
+            "startedBy": "ecs-svc/9558491232506282823",
+            "stopCode": "ServiceSchedulerInitiated",
+            "stoppedReason": "Task failed ELB health checks in (target-group arn:aws:elasticloadbalancing:us-east-1:396287094524:targetgroup/inveee-tg/7e357b1eeeae0370)",
+            "stoppingAt": "2026-07-24T04:02:16.901000+05:30",
+            "tags": [],
+            "taskArn": "arn:aws:ecs:us-east-1:396287094524:task/inveee-cluster/650b86d381ec41d3bb68bfa05f1c6185",
+            "taskDefinitionArn": "arn:aws:ecs:us-east-1:396287094524:task-definition/inveee-app-task:129",
+            "version": 6,
+            "ephemeralStorage": {
+                "sizeInGiB": 20
+            },
+            "fargateEphemeralStorage": {
+                "sizeInGiB": 20
+            }
+        }
+    ],
+    "failures": []
+}
