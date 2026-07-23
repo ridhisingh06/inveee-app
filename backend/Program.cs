@@ -13,16 +13,7 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------------------------------------------------------------
-// Kestrel – listen on every interface, HTTP port 5000
-// ---------------------------------------------------------------
-builder.WebHost.ConfigureKestrel(options =>
-{
-    // Bind to 0.0.0.0:5000  (accessible from any NIC)
-    options.ListenAnyIP(5000);
-    // When you have a cert you can enable HTTPS on 5001:
-    // options.ListenAnyIP(5001, o => o.UseHttps("path/to/cert.pfx", "password"));
-});
+
 builder.Configuration.AddEnvironmentVariables(); // Load env vars, including Docker secrets
 var config = builder.Configuration;
 

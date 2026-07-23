@@ -29,7 +29,7 @@ services:
   # ===================================
   backend:
     build:
-      context: ./invmgmt.web
+      context: ./backend
       dockerfile: Dockerfile
     container_name: invmgmt-backend
     environment:
@@ -59,7 +59,7 @@ services:
   # ===================================
   frontend:
     build:
-      context: ./Invmgmt-master
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: invmgmt-frontend
     ports:
