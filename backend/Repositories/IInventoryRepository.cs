@@ -11,25 +11,25 @@ namespace invmgmt.web.Repositories
     public interface IInventoryRepository
     {
         /// <summary>Get inventory stock for an item by item ID</summary>
-        Task<InventoryStock?> GetByItemIdAsync(string itemId);
+        Task<InventoryStock?> GetByItemCodeAsync(string itemCode);
 
         /// <summary>Get inventory stock by ID</summary>
         Task<InventoryStock?> GetByIdAsync(int id);
 
         /// <summary>Lock and retrieve inventory for an item (pessimistic locking with FOR UPDATE)</summary>
-        Task<InventoryStock?> LockAndGetAsync(string itemId);
+        Task<InventoryStock?> LockAndGetAsync(string itemCode);
 
         /// <summary>Deduct quantity from inventory (assumes already locked)</summary>
-        Task<bool> TryDeductAsync(string itemId, int quantity);
+        Task<bool> TryDeductAsync(string itemCode, int quantity);
 
         /// <summary>Restore quantity back to inventory (for rejected items)</summary>
-        Task<bool> RestoreAsync(string itemId, int quantity);
+        Task<bool> RestoreAsync(string itemCode, int quantity);
 
         /// <summary>Get available quantity for an item</summary>
-        Task<int> GetAvailableQuantityAsync(string itemId);
+        Task<int> GetAvailableQuantityAsync(string itemCode);
 
         /// <summary>Get total quantity for an item</summary>
-        Task<int> GetTotalQuantityAsync(string itemId);
+        Task<int> GetTotalQuantityAsync(string itemCode);
 
         /// <summary>Add new inventory stock</summary>
         Task AddAsync(InventoryStock stock);
@@ -38,7 +38,7 @@ namespace invmgmt.web.Repositories
         Task UpdateAsync(InventoryStock stock);
 
         /// <summary>Check if inventory exists for item</summary>
-        Task<bool> ExistsAsync(string itemId);
+        Task<bool> ExistsAsync(string itemCode);
 
         /// <summary>Get all inventory stocks (for admin view)</summary>
         Task<IEnumerable<InventoryStock>> GetAllAsync();

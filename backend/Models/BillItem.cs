@@ -16,7 +16,7 @@ namespace invmgmt.web.Models
 
         [Required]
         [StringLength(50)]
-        public int ItemId { get; set; }
+        public string ItemCode { get; set; } = string.Empty;
 
 
         public Item Item { get; set; } = null!;

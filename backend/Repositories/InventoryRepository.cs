@@ -22,11 +22,11 @@ namespace invmgmt.web.Repositories
             _logger = logger;
         }
 
-        public async Task<InventoryStock?> GetByItemIdAsync(string itemId)
+        public async Task<InventoryStock?> GetByItemIdAsync(string itemCode)
         {
             return await _context.InventoryStocks
                 .Include(s => s.Item)
-                .FirstOrDefaultAsync(s => s.ItemId == itemId);
+                .FirstOrDefaultAsync(s => s.ItemCode == itemCode);
         }
 
         public async Task<InventoryStock?> GetByIdAsync(int id)
@@ -40,12 +40,12 @@ namespace invmgmt.web.Repositories
         /// Lock and retrieve inventory using PostgreSQL FOR UPDATE (pessimistic locking)
         /// This prevents other transactions from modifying this row until current transaction completes
         /// </summary>
-        public async Task<InventoryStock?> LockAndGetAsync(string itemId)
+        public async Task<InventoryStock?> LockAndGetAsync(string itemCode)
         {
             var inventory = await _context.InventoryStocks
                 .FromSqlInterpolated<InventoryStock>($@"
                     SELECT * FROM ""InventoryStocks"" 
-                    WHERE ""ItemId"" = {itemId}
+                    WHERE ""ItemCode"" = {itemCode}
                     FOR UPDATE
                 ")
                 .Include(s => s.Item)
@@ -54,8 +54,8 @@ namespace invmgmt.web.Repositories
             if (inventory != null)
             {
                 _logger.LogInformation(
-                    "Inventory locked for ItemId={ItemId}, AvailableQuantity={Available}",
-                    itemId, inventory.AvailableQuantity);
+                    "Inventory locked for ItemCode={ItemCode}, AvailableQuantity={Available}",
+                    itemCode, inventory.AvailableQuantity);
             }
 
             return inventory;
@@ -66,20 +66,20 @@ namespace invmgmt.web.Repositories
         /// Assumes inventory is already locked via LockAndGetAsync
         /// Returns false if available quantity is insufficient
         /// </summary>
-        public async Task<bool> TryDeductAsync(string itemId, int quantity)
+        public async Task<bool> TryDeductAsync(string itemCode, int quantity)
         {
-            var inventory = await _context.InventoryStocks.FirstOrDefaultAsync(s => s.ItemId == itemId);
+            var inventory = await _context.InventoryStocks.FirstOrDefaultAsync(s => s.ItemCode == itemCode);
             if (inventory == null)
             {
-                _logger.LogWarning("Inventory not found for deduction: ItemId={ItemId}", itemId);
+                _logger.LogWarning("Inventory not found for deduction: ItemCode={ItemCode}", itemCode);
                 return false;
             }
 
             if (inventory.AvailableQuantity < quantity)
             {
                 _logger.LogWarning(
-                    "Insufficient inventory: ItemId={ItemId}, Available={Available}, Requested={Requested}",
-                    itemId, inventory.AvailableQuantity, quantity);
+                    "Insufficient inventory: ItemCode={ItemCode}, Available={Available}, Requested={Requested}",
+                    itemCode, inventory.AvailableQuantity, quantity);
                 return false;
             }
 
@@ -90,8 +90,8 @@ namespace invmgmt.web.Repositories
             _context.InventoryStocks.Update(inventory);
 
             _logger.LogInformation(
-                "Inventory deducted: ItemId={ItemId}, Quantity={Quantity}, NewAvailable={NewAvailable}",
-                itemId, quantity, inventory.AvailableQuantity);
+                "Inventory deducted: ItemCode={ItemCode}, Quantity={Quantity}, NewAvailable={NewAvailable}",
+                itemCode, quantity, inventory.AvailableQuantity);
 
             return true;
         }
@@ -107,12 +107,12 @@ namespace invmgmt.web.Repositories
         /// always fired true for any non-zero rejection, blocking every restore
         /// and causing HTTP 400 on approve-partially.
         /// </summary>
-        public async Task<bool> RestoreAsync(string itemId, int quantity)
+        public async Task<bool> RestoreAsync(string itemCode, int quantity)
         {
-            var inventory = await LockAndGetAsync(itemId);
+            var inventory = await LockAndGetAsync(itemCode);
             if (inventory == null)
             {
-                _logger.LogWarning("Inventory not found for restoration: ItemId={ItemId}", itemId);
+                _logger.LogWarning("Inventory not found for restoration: ItemCode={ItemCode}", itemCode);
                 return false;
             }
 
@@ -123,9 +123,9 @@ namespace invmgmt.web.Repositories
             if (restored != quantity)
             {
                 _logger.LogWarning(
-                    "RestoreAsync capped: ItemId={ItemId}, Requested={Requested}, Actual={Actual}, " +
+                    "RestoreAsync capped: ItemCode={ItemCode}, Requested={Requested}, Actual={Actual}, " +
                     "Available={Available}, Total={Total}. Possible double-restore.",
-                    itemId, quantity, restored,
+                    itemCode, quantity, restored,
                     inventory.AvailableQuantity, inventory.TotalQuantity);
             }
 
@@ -135,26 +135,26 @@ namespace invmgmt.web.Repositories
             _context.InventoryStocks.Update(inventory);
 
             _logger.LogInformation(
-                "Inventory restored: ItemId={ItemId}, RestoredQuantity={Restored}, NewAvailable={NewAvailable}",
-                itemId, restored, inventory.AvailableQuantity);
+                "Inventory restored: ItemCode={ItemCode}, RestoredQuantity={Restored}, NewAvailable={NewAvailable}",
+                itemCode, restored, inventory.AvailableQuantity);
 
             return true;
         }
 
-        public async Task<int> GetAvailableQuantityAsync(string itemId)
+        public async Task<int> GetAvailableQuantityAsync(string itemCode)
         {
             var inventory = await _context.InventoryStocks
-                .Where(s => s.ItemId == itemId)
+                .Where(s => s.ItemCode == itemCode)
                 .Select(s => s.AvailableQuantity)
                 .FirstOrDefaultAsync();
 
             return inventory;
         }
 
-        public async Task<int> GetTotalQuantityAsync(string itemId)
+        public async Task<int> GetTotalQuantityAsync(string itemCode)
         {
             var inventory = await _context.InventoryStocks
-                .Where(s => s.ItemId == itemId)
+                .Where(s => s.ItemCode == itemCode)
                 .Select(s => s.TotalQuantity)
                 .FirstOrDefaultAsync();
 
@@ -164,21 +164,21 @@ namespace invmgmt.web.Repositories
         public async Task AddAsync(InventoryStock stock)
         {
             await _context.InventoryStocks.AddAsync(stock);
-            _logger.LogInformation("InventoryStock added: ItemId={ItemId}, Quantity={Quantity}",
-                stock.ItemId, stock.TotalQuantity);
+            _logger.LogInformation("InventoryStock added: ItemCode={ItemCode}, Quantity={Quantity}",
+                stock.ItemCode, stock.TotalQuantity);
         }
 
         public async Task UpdateAsync(InventoryStock stock)
         {
             stock.UpdatedAt = DateTime.UtcNow;
             _context.InventoryStocks.Update(stock);
-            _logger.LogInformation("InventoryStock updated: ItemId={ItemId}, Available={Available}",
-                stock.ItemId, stock.AvailableQuantity);
+            _logger.LogInformation("InventoryStock updated: ItemCode={ItemCode}, Available={Available}",
+                stock.ItemCode, stock.AvailableQuantity);
         }
 
-        public async Task<bool> ExistsAsync(string itemId)
+        public async Task<bool> ExistsAsync(string itemCode)
         {
-            return await _context.InventoryStocks.AnyAsync(s => s.ItemId == itemId);
+            return await _context.InventoryStocks.AnyAsync(s => s.ItemCode == itemCode);
         }
 
         public async Task<IEnumerable<InventoryStock>> GetAllAsync()

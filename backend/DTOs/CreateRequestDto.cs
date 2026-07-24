@@ -7,6 +7,6 @@ public class CreateRequestDto
 
 public class RequestItemDto
 {
-	public int ItemId { get; set; }
+	public string ItemCode { get; set; } = string.Empty;
 	public int QuantityRequested { get; set; }
 }
