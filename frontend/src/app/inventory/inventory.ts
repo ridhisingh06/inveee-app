@@ -37,21 +37,21 @@ export class InventoryComponent implements OnInit, DoCheck {
   categories: Category[] = [];
 
   // Form state
-  itemId = '';
+  itemCode = '';
   itemName = '';
   selectedCategoryId: number | null = null;
   quantity = 0;
 
   // UI state
   searchText = '';
-  editingItemId: number | string | null = null;
+  editingItemCode: string | null = null;
   role: string = '';
   loading = false;
   errorMsg = '';
   successMsg = '';
 
   // For stock operations
-  operatingItemId: number | string | null = null;
+  operatingItemCode: string | null = null;
   operatingAction: 'increase' | 'decrease' | null = null;
   
   private searchSubject = new Subject<string>();
@@ -179,9 +179,9 @@ export class InventoryComponent implements OnInit, DoCheck {
     if (!this.validateForm()) return;
 
     // ✅ Check for duplicate ItemId
-    const trimmedItemId = this.itemId.trim();
+    const trimmedItemCode = this.itemCode.trim();
     const duplicateItemIdExists = this.items.some(item => 
-      item.itemCode === trimmedItemId
+      item.itemCode === trimmedItemCode
     );
     
     if (duplicateItemIdExists) {
@@ -210,7 +210,7 @@ export class InventoryComponent implements OnInit, DoCheck {
     }
 
     const newItem = {
-      itemCode: trimmedItemId,
+      itemCode: trimmedItemCode,
       name: this.itemName.trim(),
       categoryId: this.selectedCategoryId!,
       totalQuantity: this.quantity,
@@ -240,8 +240,8 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @param item - Item to edit
    */
   editItem(item: InventoryItem): void {
-    this.editingItemId = item.id;
-    this.itemId = item.itemCode;
+    this.editingItemCode = item.itemCode;
+    this.itemCode = item.itemCode;
     this.itemName = item.name;
     this.selectedCategoryId = item.categoryId || null;
     this.quantity = item.availableQuantity || 0;
@@ -257,7 +257,7 @@ export class InventoryComponent implements OnInit, DoCheck {
     // ✅ Check for duplicate on name change (excluding self)
     const normalizedName = this.normalizeItemName(this.itemName);
     const duplicateExists = this.items.some(item => 
-      item.id !== this.editingItemId && 
+      item.itemCode !== this.editingItemCode && 
       this.normalizeItemName(item.name) === normalizedName
     );
     
@@ -281,7 +281,7 @@ export class InventoryComponent implements OnInit, DoCheck {
       description: 'Updated Item'
     };
 
-    this.inventoryService.updateItem(this.editingItemId!, updates)
+    this.inventoryService.updateItem(this.editingItemCode!, updates)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -297,9 +297,9 @@ export class InventoryComponent implements OnInit, DoCheck {
 
   /**
    * Delete inventory item
-   * @param id - Item ID
+   * @param itemCode - Item Code (business identifier)
    */
-  deleteItem(id: number | string): void {
+  deleteItem(itemCode: string): void {
     // Check role
     if (!this.hasInventoryPermission()) {
       this.errorMsg = 'Only Admins and Issuers can delete inventory items';
@@ -308,7 +308,7 @@ export class InventoryComponent implements OnInit, DoCheck {
     }
 
     if (confirm('Are you sure you want to delete this item?')) {
-      this.inventoryService.deleteItem(id)
+      this.inventoryService.deleteItem(itemCode)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -338,18 +338,18 @@ export class InventoryComponent implements OnInit, DoCheck {
       return;
     }
 
-    this.operatingItemId = item.id;
+    this.operatingItemCode = item.itemCode;
     this.operatingAction = 'increase';
 
-    this.inventoryService.increaseStock(item.id, 1)
+    this.inventoryService.increaseStock(item.itemCode, 1)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.operatingItemId = null;
+          this.operatingItemCode = null;
           this.operatingAction = null;
         },
         error: (err) => {
-          this.operatingItemId = null;
+          this.operatingItemCode = null;
           this.operatingAction = null;
           console.error('Error increasing stock:', err);
         }
@@ -373,18 +373,18 @@ export class InventoryComponent implements OnInit, DoCheck {
       return;
     }
 
-    this.operatingItemId = item.id;
+    this.operatingItemCode = item.itemCode;
     this.operatingAction = 'decrease';
 
-    this.inventoryService.decreaseStock(item.id, 1)
+    this.inventoryService.decreaseStock(item.itemCode, 1)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.operatingItemId = null;
+          this.operatingItemCode = null;
           this.operatingAction = null;
         },
         error: (err) => {
-          this.operatingItemId = null;
+          this.operatingItemCode = null;
           this.operatingAction = null;
           console.error('Error decreasing stock:', err);
         }
@@ -449,11 +449,11 @@ export class InventoryComponent implements OnInit, DoCheck {
    * Reset form to initial state
    */
   resetForm(): void {
-    this.itemId = '';
+    this.itemCode = '';
     this.itemName = '';
     this.selectedCategoryId = null;
     this.quantity = 0;
-    this.editingItemId = null;
+    this.editingItemCode = null;
   }
 
   /**
@@ -474,7 +474,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns true if valid, false otherwise
    */
   private validateForm(): boolean {
-    if (!this.itemId.trim()) {
+    if (!this.itemCode.trim()) {
       this.errorMsg = 'Please enter an Item ID';
       setTimeout(() => this.errorMsg = '', 5000);
       return false;
@@ -516,37 +516,37 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns true if editing an item
    */
   isEditing(): boolean {
-    return this.editingItemId !== null;
+    return this.editingItemCode !== null;
   }
 
   /**
    * Check if operation is in progress for item
-   * @param itemId - Item ID
+   * @param itemCode - Item Code
    * @param action - Action type
    * @returns true if operation is in progress
    */
-  isOperating(itemId: number | string, action: 'increase' | 'decrease'): boolean {
-    return this.operatingItemId === itemId && this.operatingAction === action;
+  isOperating(itemCode: string, action: 'increase' | 'decrease'): boolean {
+    return this.operatingItemCode === itemCode && this.operatingAction === action;
   }
 
   /**
    * ✅ Check if item name already exists (case-insensitive)
    * Used for real-time validation feedback
    * @param itemName - Item name to check
-   * @param excludeItemId - Item ID to exclude from check (for updates)
+   * @param excludeItemCode - Item Code to exclude from check (for updates)
    * @returns true if duplicate exists
    */
   private normalizeItemName(value?: string): string {
     return (value ?? '').trim().toLowerCase();
   }
 
-  isDuplicateItemName(itemName: string, excludeItemId?: number | string | null): boolean {
+  isDuplicateItemName(itemName: string, excludeItemCode?: string | null): boolean {
     const normalizedName = this.normalizeItemName(itemName);
     if (!normalizedName) return false;
     
     return this.items.some(item => {
       // Exclude the item being edited
-      if (excludeItemId !== undefined && excludeItemId !== null && item.id === excludeItemId) {
+      if (excludeItemCode !== undefined && excludeItemCode !== null && item.itemCode === excludeItemCode) {
         return false;
       }
       
@@ -561,7 +561,7 @@ export class InventoryComponent implements OnInit, DoCheck {
   getDuplicateItemWarning(): string {
     if (!this.normalizeItemName(this.itemName)) return '';
     
-    const isDuplicate = this.isDuplicateItemName(this.itemName, this.editingItemId);
+    const isDuplicate = this.isDuplicateItemName(this.itemName, this.editingItemCode);
     
     if (isDuplicate) {
       return `⚠️ An item named "${this.itemName}" already exists`;
@@ -575,14 +575,14 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns Error message if duplicate exists, empty string otherwise
    */
   getDuplicateItemIdWarning(): string {
-    if (!this.itemId.trim()) return '';
+    if (!this.itemCode.trim()) return '';
     
-    const trimmedItemId = this.itemId.trim();
+    const trimmedItemCode = this.itemCode.trim();
     const isDuplicate = this.items.some(item => {
-      if (this.editingItemId !== null && item.id === this.editingItemId) {
+      if (this.editingItemCode !== null && item.itemCode === this.editingItemCode) {
         return false;
       }
-      return item.itemCode === trimmedItemId;
+      return item.itemCode === trimmedItemCode;
     });
     
     if (isDuplicate) {
@@ -599,7 +599,7 @@ export class InventoryComponent implements OnInit, DoCheck {
   isSubmitDisabledByDuplicate(): boolean {
     if (!this.normalizeItemName(this.itemName)) return false;
     
-    return this.isDuplicateItemName(this.itemName, this.editingItemId);
+    return this.isDuplicateItemName(this.itemName, this.editingItemCode);
   }
 
   /**
@@ -607,14 +607,14 @@ export class InventoryComponent implements OnInit, DoCheck {
    * @returns true if submit should be disabled
    */
   isSubmitDisabledByDuplicateItemId(): boolean {
-    if (!this.itemId.trim()) return false;
+    if (!this.itemCode.trim()) return false;
     
-    const trimmedItemId = this.itemId.trim();
+    const trimmedItemCode = this.itemCode.trim();
     return this.items.some(item => {
-      if (this.editingItemId !== null && item.id === this.editingItemId) {
+      if (this.editingItemCode !== null && item.itemCode === this.editingItemCode) {
         return false;
       }
-      return item.itemCode === trimmedItemId;
+      return item.itemCode === trimmedItemCode;
     });
   }
 

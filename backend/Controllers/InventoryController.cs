@@ -159,13 +159,16 @@ public class InventoryController : ControllerBase
     //  UPDATE ITEM + STOCK
     [Authorize(Roles = "ADMIN,ISSUER")]
     
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateItem(int id, [FromBody] AddItemDto dto)
+    [HttpPut("{itemCode}")]
+    public async Task<IActionResult> UpdateItem(string itemCode, [FromBody] AddItemDto dto)
     {
         if (dto == null) return BadRequest("Invalid item data.");
         
-        _logger.LogInformation("Update item requested: Id={Id}", id);
-        var item = await _context.Items.FindAsync(id);
+        if (string.IsNullOrWhiteSpace(itemCode))
+            return BadRequest("Item Code is required.");
+        
+        _logger.LogInformation("Update item requested: ItemCode={ItemCode}", itemCode);
+        var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemCode == itemCode);
 
         if (item == null)
             return NotFound("Item not found");
@@ -178,7 +181,7 @@ public class InventoryController : ControllerBase
 
         var normalizedName = dto.Name.Trim().ToLower();
         var existingItem = await _context.Items
-            .FirstOrDefaultAsync(i => i.Id != id && i.Name != null && i.Name.ToLower() == normalizedName);
+            .FirstOrDefaultAsync(i => i.ItemCode != itemCode && i.Name != null && i.Name.ToLower() == normalizedName);
         
         if (existingItem != null)
         {
@@ -220,7 +223,7 @@ public class InventoryController : ControllerBase
             return BadRequest(new { message = "Unable to update the item – check data constraints." });
         }
 
-        _logger.LogInformation("Item updated: Id={Id}", id);
+        _logger.LogInformation("Item updated: ItemCode={ItemCode}", itemCode);
 
         // Load category name for the response
         var categoryName = "Uncategorized";
@@ -247,11 +250,14 @@ public class InventoryController : ControllerBase
 
     //  DELETE ITEM
     [Authorize(Roles="ADMIN,ISSUER")]
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteItem(int id)
+    [HttpDelete("{itemCode}")]
+    public async Task<IActionResult> DeleteItem(string itemCode)
     {
-        _logger.LogInformation("Delete item requested: Id={Id}", id);
-        var item = await _context.Items.FindAsync(id);
+        if (string.IsNullOrWhiteSpace(itemCode))
+            return BadRequest("Item Code is required.");
+        
+        _logger.LogInformation("Delete item requested: ItemCode={ItemCode}", itemCode);
+        var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemCode == itemCode);
 
         if (item == null)
             return NotFound("Item not found");
@@ -259,21 +265,24 @@ public class InventoryController : ControllerBase
         _context.Items.Remove(item);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Item deleted: Id={Id}", id);
+        _logger.LogInformation("Item deleted: ItemCode={ItemCode}", itemCode);
         return Ok(new { message = "Item Deleted" });
     }
 
     //  INCREASE STOCK
     [Authorize(Roles = "ADMIN,ISSUER")]
-    [HttpPatch("{id}/increase-stock")]
-    public async Task<IActionResult> IncreaseStock(int id, [FromBody] StockChangeDto dto)
+    [HttpPatch("{itemCode}/increase-stock")]
+    public async Task<IActionResult> IncreaseStock(string itemCode, [FromBody] StockChangeDto dto)
     {
         if (dto == null || dto.Quantity <= 0)
             return BadRequest("Quantity must be greater than 0");
 
-        _logger.LogInformation("Increase stock requested: Id={Id}, Quantity={Qty}", id, dto.Quantity);
+        if (string.IsNullOrWhiteSpace(itemCode))
+            return BadRequest("Item Code is required.");
 
-        var item = await _context.Items.FindAsync(id);
+        _logger.LogInformation("Increase stock requested: ItemCode={ItemCode}, Quantity={Qty}", itemCode, dto.Quantity);
+
+        var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemCode == itemCode);
         if (item == null)
             return NotFound("Item not found");
 
@@ -291,7 +300,7 @@ public class InventoryController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Stock increased: ItemId={ItemId}, NewAvailable={Available}", item.Id, stock.AvailableQuantity);
+        _logger.LogInformation("Stock increased: ItemCode={ItemCode}, NewAvailable={Available}", item.ItemCode, stock.AvailableQuantity);
 
         return Ok(new
         {
@@ -310,15 +319,18 @@ public class InventoryController : ControllerBase
 
     //  DECREASE STOCK
     [Authorize(Roles = "ADMIN,ISSUER")]
-    [HttpPatch("{id}/decrease-stock")]
-    public async Task<IActionResult> DecreaseStock(int id, [FromBody] StockChangeDto dto)
+    [HttpPatch("{itemCode}/decrease-stock")]
+    public async Task<IActionResult> DecreaseStock(string itemCode, [FromBody] StockChangeDto dto)
     {
         if (dto == null || dto.Quantity <= 0)
             return BadRequest("Quantity must be greater than 0");
 
-        _logger.LogInformation("Decrease stock requested: Id={Id}, Quantity={Qty}", id, dto.Quantity);
+        if (string.IsNullOrWhiteSpace(itemCode))
+            return BadRequest("Item Code is required.");
 
-        var item = await _context.Items.FindAsync(id);
+        _logger.LogInformation("Decrease stock requested: ItemCode={ItemCode}, Quantity={Qty}", itemCode, dto.Quantity);
+
+        var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemCode == itemCode);
         if (item == null)
             return NotFound("Item not found");
 
@@ -339,7 +351,7 @@ public class InventoryController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Stock decreased: ItemId={ItemId}, NewAvailable={Available}", item.Id, stock.AvailableQuantity);
+        _logger.LogInformation("Stock decreased: ItemCode={ItemCode}, NewAvailable={Available}", item.ItemCode, stock.AvailableQuantity);
 
         return Ok(new
         {
@@ -356,17 +368,20 @@ public class InventoryController : ControllerBase
         });
     }
 
-    //  GET ITEM BY ID (for detailed view)
+    //  GET ITEM BY ITEM CODE (for detailed view)
     [Authorize(Roles = "ADMIN,USER,ISSUER")]
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetItem(int id)
+    [HttpGet("{itemCode}")]
+    public async Task<IActionResult> GetItem(string itemCode)
     {
-        _logger.LogInformation("Get item requested: Id={Id}", id);
+        if (string.IsNullOrWhiteSpace(itemCode))
+            return BadRequest("Item Code is required.");
+        
+        _logger.LogInformation("Get item requested: ItemCode={ItemCode}", itemCode);
 
         var item = await _context.Items
             .Include(i => i.Category)
             .Include(i => i.InventoryStock)
-            .Where(i => i.Id == id)
+            .Where(i => i.ItemCode == itemCode)
             .Select(i => new
             {
                 id = i.Id,

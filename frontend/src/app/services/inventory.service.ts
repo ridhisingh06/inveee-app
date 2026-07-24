@@ -146,14 +146,14 @@ export class InventoryService {
   /**
    * Update an existing inventory item
    * 
-   * @param id - Item ID
+   * @param itemCode - Item Code (business identifier)
    * @param item - Updated item data
    * @returns Observable<InventoryItem>
    */
-  updateItem(id: number | string, item: Partial<InventoryItem>): Observable<InventoryItem> {
+  updateItem(itemCode: string, item: Partial<InventoryItem>): Observable<InventoryItem> {
     // Check for duplicate on name change (excluding self)
     if (item.name) {
-      const duplicateError = this.validateNoDuplicate(item.name, id);
+      const duplicateError = this.validateNoDuplicate(item.name, itemCode);
       if (duplicateError) {
         this.errorSubject.next(duplicateError);
         return throwError(() => new Error(duplicateError));
@@ -169,16 +169,16 @@ export class InventoryService {
       description: item.description
     };
     
-    return this.http.put<InventoryItem>(`${this.apiUrl}/${id}`, payload)
+    return this.http.put<InventoryItem>(`${this.apiUrl}/${itemCode}`, payload)
       .pipe(
         tap(updatedItem => {
           const current = this.inventorySubject.value;
-          const index = current.findIndex(i => i.id === id);
+          const index = current.findIndex(i => i.itemCode === itemCode);
           if (index !== -1) {
             current[index] = updatedItem;
             this.inventorySubject.next([...current]);
           }
-          this.itemsCache.set(id, updatedItem);
+          this.itemsCache.set(updatedItem.itemCode, updatedItem);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
           // ✅ Notify subscribers that an item was updated.
@@ -196,18 +196,18 @@ export class InventoryService {
   /**
    * Delete an inventory item
    * 
-   * @param id - Item ID
+   * @param itemCode - Item Code (business identifier)
    * @returns Observable<any>
    */
-  deleteItem(id: number | string): Observable<any> {
+  deleteItem(itemCode: string): Observable<any> {
     this.loadingSubject.next(true);
     
-    return this.http.delete(`${this.apiUrl}/${id}`)
+    return this.http.delete(`${this.apiUrl}/${itemCode}`)
       .pipe(
         tap(() => {
           const current = this.inventorySubject.value;
-          this.inventorySubject.next(current.filter(i => i.id !== id));
-          this.itemsCache.delete(id);
+          this.inventorySubject.next(current.filter(i => i.itemCode !== itemCode));
+          this.itemsCache.delete(itemCode);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
           // ✅ Notify subscribers that an item was deleted.
@@ -225,11 +225,11 @@ export class InventoryService {
   /**
    * Increase stock for an item
    * 
-   * @param id - Item ID
+   * @param itemCode - Item Code (business identifier)
    * @param quantity - Amount to increase
    * @returns Observable<InventoryItem>
    */
-  increaseStock(id: number | string, quantity: number): Observable<InventoryItem> {
+  increaseStock(itemCode: string, quantity: number): Observable<InventoryItem> {
     if (quantity <= 0) {
       const error = 'Stock increase quantity must be positive';
       this.errorSubject.next(error);
@@ -238,7 +238,7 @@ export class InventoryService {
 
     this.loadingSubject.next(true);
 
-    return this.http.patch<any>(`${this.apiUrl}/${id}/increase-stock`, { quantity })
+    return this.http.patch<any>(`${this.apiUrl}/${itemCode}/increase-stock`, { quantity })
       .pipe(
         tap((response) => {
           const updatedItem: InventoryItem = {
@@ -254,12 +254,12 @@ export class InventoryService {
           };
           
           const current = this.inventorySubject.value;
-          const index = current.findIndex(i => i.id === id);
+          const index = current.findIndex(i => i.itemCode === itemCode);
           if (index !== -1) {
             current[index] = updatedItem;
             this.inventorySubject.next([...current]);
           }
-          this.itemsCache.set(id, updatedItem);
+          this.itemsCache.set(itemCode, updatedItem);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
           // ✅ Notify subscribers after stock increase.
@@ -274,14 +274,14 @@ export class InventoryService {
       );
   }
   
-  decreaseStock(id: number | string, quantity: number): Observable<InventoryItem> {
+  decreaseStock(itemCode: string, quantity: number): Observable<InventoryItem> {
     if (quantity <= 0) {
       const error = 'Stock decrease quantity must be positive';
       this.errorSubject.next(error);
       return throwError(() => new Error(error));
     }
 
-    const currentItem = this.itemsCache.get(id);
+    const currentItem = this.itemsCache.get(itemCode);
     if (!currentItem) {
       const error = 'Item not found';
       this.errorSubject.next(error);
@@ -297,7 +297,7 @@ export class InventoryService {
 
     this.loadingSubject.next(true);
 
-    return this.http.patch<any>(`${this.apiUrl}/${id}/decrease-stock`, { quantity })
+    return this.http.patch<any>(`${this.apiUrl}/${itemCode}/decrease-stock`, { quantity })
       .pipe(
         tap((response) => {
           const updatedItem: InventoryItem = {
@@ -313,12 +313,12 @@ export class InventoryService {
           };
           
           const current = this.inventorySubject.value;
-          const index = current.findIndex(i => i.id === id);
+          const index = current.findIndex(i => i.itemCode === itemCode);
           if (index !== -1) {
             current[index] = updatedItem;
             this.inventorySubject.next([...current]);
           }
-          this.itemsCache.set(id, updatedItem);
+          this.itemsCache.set(itemCode, updatedItem);
           this.errorSubject.next('');
           this.loadingSubject.next(false);
           // ✅ Notify subscribers after stock decrease.
@@ -401,17 +401,17 @@ export class InventoryService {
    * Returns error message if duplicate found, empty string if valid
    * 
    * @param itemCode - Item Code to check
-   * @param excludeId - ID to exclude from check (for updates)
+   * @param excludeItemCode - Item Code to exclude from check (for updates)
    * @returns Error message or empty string
    */
-  private validateNoDuplicateItemCode(itemCode: string, excludeId: number | string | null): string {
+  private validateNoDuplicateItemCode(itemCode: string, excludeItemCode: string | null): string {
     const trimmedItemCode = itemCode.trim();
     
     const currentItems = this.inventorySubject.value;
     
     const isDuplicate = currentItems.some(item => {
       // If this is an update, exclude the current item
-      if (excludeId !== null && item.id === excludeId) {
+      if (excludeItemCode !== null && item.itemCode === excludeItemCode) {
         return false;
       }
       
@@ -433,7 +433,7 @@ export class InventoryService {
   private updateCache(items: InventoryItem[]): void {
     this.itemsCache.clear();
     items.forEach(item => {
-      this.itemsCache.set(item.id, item);
+      this.itemsCache.set(item.itemCode, item);
     });
   }
   
@@ -486,13 +486,13 @@ export class InventoryService {
   /**
    * Check if an ItemCode already exists
    * @param itemCode - Item Code to check
-   * @param excludeId - ID to exclude from check (for updates)
+   * @param excludeItemCode - Item Code to exclude from check (for updates)
    * @returns boolean
    */
-  itemCodeExists(itemCode: string, excludeId?: number | string | null): boolean {
+  itemCodeExists(itemCode: string, excludeItemCode?: string | null): boolean {
     const trimmedItemCode = itemCode.trim();
     return this.inventorySubject.value.some(item => {
-      if (excludeId !== undefined && excludeId !== null && item.id === excludeId) {
+      if (excludeItemCode !== undefined && excludeItemCode !== null && item.itemCode === excludeItemCode) {
         return false;
       }
       return item.itemCode === trimmedItemCode;

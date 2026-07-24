@@ -67,7 +67,7 @@ namespace invmgmt.web.Controllers
                         items = r.RequestItems.Select(ri => new
                         {
                             id = ri.Id,
-                            itemId = ri.ItemId,
+                            itemCode = ri.Item != null ? ri.Item.ItemCode : string.Empty,
                             itemName = ri.Item != null ? ri.Item.Name : string.Empty,
                             quantityRequested = ri.QuantityRequested
                         }).ToList()

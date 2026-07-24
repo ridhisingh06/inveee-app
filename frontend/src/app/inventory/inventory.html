@@ -84,7 +84,7 @@
     <div class="inventory-form">
       <div class="form-group">
         <label>Item ID</label>
-        <input type="text" placeholder="Enter Item ID..." [(ngModel)]="itemId" [disabled]="isEditing()">
+        <input type="text" placeholder="Enter Item ID..." [(ngModel)]="itemCode" [disabled]="isEditing()">
         <!-- ✅ Show duplicate warning if ItemId already exists -->
         <div class="duplicate-warning" *ngIf="getDuplicateItemIdWarning()">
           {{ getDuplicateItemIdWarning() }}
@@ -249,14 +249,14 @@
                   class="btn-action decrease-btn" 
                   title="Decrease Stock"
                   (click)="decreaseStock(item)"
-                  [disabled]="isOperating(item.id, 'decrease') || (item.availableQuantity || 0) <= 0"
-                  [class.loading]="isOperating(item.id, 'decrease')"
+                  [disabled]="isOperating(item.itemCode, 'decrease') || (item.availableQuantity || 0) <= 0"
+                  [class.loading]="isOperating(item.itemCode, 'decrease')"
                 >
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
                   <span>Decrease</span>
-                  <span *ngIf="isOperating(item.id, 'decrease')" class="spinner-mini"></span>
+                  <span *ngIf="isOperating(item.itemCode, 'decrease')" class="spinner-mini"></span>
                 </button>
 
                 <!-- Stock Increase Button -->
@@ -264,15 +264,15 @@
                   class="btn-action increase-btn" 
                   title="Increase Stock"
                   (click)="increaseStock(item)"
-                  [disabled]="isOperating(item.id, 'increase')"
-                  [class.loading]="isOperating(item.id, 'increase')"
+                  [disabled]="isOperating(item.itemCode, 'increase')"
+                  [class.loading]="isOperating(item.itemCode, 'increase')"
                 >
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
                   <span>Increase</span>
-                  <span *ngIf="isOperating(item.id, 'increase')" class="spinner-mini"></span>
+                  <span *ngIf="isOperating(item.itemCode, 'increase')" class="spinner-mini"></span>
                 </button>
 
                 <!-- Edit Button -->
@@ -292,7 +292,7 @@
                 <button 
                   class="btn-action delete-btn" 
                   title="Delete Item"
-                  (click)="deleteItem(item.id)"
+                  (click)="deleteItem(item.itemCode)"
                 >
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"></polyline>
