@@ -425,7 +425,7 @@ app.UseExceptionHandler(errApp =>
 
         var response = new ApiResponse
         {
-            Message = "An internal server error occurred.",
+            Message = ex?.Message ?? "An internal server error occurred.",
             TraceId = ctx.TraceIdentifier,
             Timestamp = DateTime.UtcNow.ToString("o")
         };

@@ -19,7 +19,7 @@
       "environment": [
         {
           "name": "ConnectionStrings__DefaultConnection",
-          "value": "Host=inveee-postgres.citg4maasb05.us-east-1.rds.amazonaws.com;Port=5432;Database=inventorydb;Username=postgres;Password=ridhisingh2003;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=20;Connection Idle Lifetime=30;SSL Mode=Require;"
+          "value": ""
         },
         { "name": "ASPNETCORE_ENVIRONMENT", "value": "Production" },
         { "name": "ASPNETCORE_URLS", "value": "http://+:5000" },
