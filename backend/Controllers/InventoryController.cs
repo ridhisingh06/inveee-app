@@ -46,6 +46,7 @@ public class InventoryController : ControllerBase
                 category = i.Category != null ? i.Category.Name : "Uncategorized",
                 availableQuantity = i.InventoryStock != null ? i.InventoryStock.AvailableQuantity : 0,
                 totalQuantity = i.InventoryStock != null ? i.InventoryStock.TotalQuantity : 0,
+                minimumQuantity = i.InventoryStock != null ? i.InventoryStock.MinimumQuantity : 0,
                 description = i.Description,
                 createdDate = i.CreatedAt
             })
@@ -133,6 +134,7 @@ public class InventoryController : ControllerBase
             ItemId = item.Id,
             TotalQuantity = dto.TotalQuantity,
             AvailableQuantity = dto.TotalQuantity,
+            MinimumQuantity = dto.MinimumQuantity,
             UpdatedAt = DateTime.UtcNow
         };
 
@@ -202,8 +204,9 @@ public class InventoryController : ControllerBase
 
         if (stock != null)
         {
-            stock.TotalQuantity = dto.TotalQuantity;        //  FIX
-            stock.AvailableQuantity = dto.TotalQuantity;    //  FIX
+            stock.TotalQuantity = dto.TotalQuantity;
+            stock.AvailableQuantity = dto.TotalQuantity;
+            stock.MinimumQuantity = dto.MinimumQuantity;
             stock.UpdatedAt = DateTime.UtcNow;
         }
 
@@ -236,6 +239,7 @@ public class InventoryController : ControllerBase
             category = categoryName,
             availableQuantity = stock?.AvailableQuantity ?? dto.TotalQuantity,
             totalQuantity = stock?.TotalQuantity ?? dto.TotalQuantity,
+            minimumQuantity = stock?.MinimumQuantity ?? dto.MinimumQuantity,
             description = item.Description,
             createdDate = item.CreatedAt
         });
@@ -299,6 +303,7 @@ public class InventoryController : ControllerBase
             category = stock.Item.Category != null ? stock.Item.Category.Name : "Uncategorized",
             availableQuantity = stock.AvailableQuantity,
             totalQuantity = stock.TotalQuantity,
+            minimumQuantity = stock.MinimumQuantity,
             description = stock.Item.Description
         });
     }
@@ -346,6 +351,7 @@ public class InventoryController : ControllerBase
             category = stock.Item.Category != null ? stock.Item.Category.Name : "Uncategorized",
             availableQuantity = stock.AvailableQuantity,
             totalQuantity = stock.TotalQuantity,
+            minimumQuantity = stock.MinimumQuantity,
             description = stock.Item.Description
         });
     }
@@ -370,6 +376,7 @@ public class InventoryController : ControllerBase
                 category = i.Category != null ? i.Category.Name : "Uncategorized",
                 availableQuantity = i.InventoryStock != null ? i.InventoryStock.AvailableQuantity : 0,
                 totalQuantity = i.InventoryStock != null ? i.InventoryStock.TotalQuantity : 0,
+                minimumQuantity = i.InventoryStock != null ? i.InventoryStock.MinimumQuantity : 0,
                 description = i.Description,
                 createdAt = i.CreatedAt
             })
@@ -379,6 +386,37 @@ public class InventoryController : ControllerBase
             return NotFound("Item not found");
 
         return Ok(item);
+    }
+
+    //  GET LOW STOCK ITEMS (items below minimum quantity)
+    [Authorize(Roles = "ADMIN,ISSUER")]
+    [HttpGet("low-stock")]
+    public async Task<IActionResult> GetLowStockItems()
+    {
+        _logger.LogInformation("Low stock items requested");
+
+        var lowStockItems = await _context.Items
+            .Include(i => i.Category)
+            .Include(i => i.InventoryStock)
+            .Where(i => i.InventoryStock != null && 
+                        i.InventoryStock.AvailableQuantity <= i.InventoryStock.MinimumQuantity)
+            .Select(i => new
+            {
+                id = i.Id,
+                itemCode = i.ItemCode,
+                name = i.Name,
+                categoryId = i.CategoryId,
+                category = i.Category != null ? i.Category.Name : "Uncategorized",
+                availableQuantity = i.InventoryStock.AvailableQuantity,
+                totalQuantity = i.InventoryStock.TotalQuantity,
+                minimumQuantity = i.InventoryStock.MinimumQuantity,
+                shortage = i.InventoryStock.MinimumQuantity - i.InventoryStock.AvailableQuantity,
+                description = i.Description
+            })
+            .OrderBy(i => i.shortage)
+            .ToListAsync();
+
+        return Ok(lowStockItems);
     }
 }
 

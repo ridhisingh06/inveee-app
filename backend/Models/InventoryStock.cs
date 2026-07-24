@@ -15,6 +15,7 @@ namespace invmgmt.web.Models
 
         public int TotalQuantity { get; set; }
         public int AvailableQuantity { get; set; }
+        public int MinimumQuantity { get; set; }
 
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
     }

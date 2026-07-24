@@ -56,7 +56,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ApprovalLogs");
+                    b.ToTable("ApprovalLogs", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.AuditLog", b =>
@@ -94,7 +94,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuditLogs");
+                    b.ToTable("AuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Bill", b =>
@@ -139,7 +139,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("Bills");
+                    b.ToTable("Bills", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.BillItem", b =>
@@ -174,7 +174,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("BillItems");
+                    b.ToTable("BillItems", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Category", b =>
@@ -191,7 +191,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Department", b =>
@@ -208,7 +208,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
 
                     b.HasData(
                         new
@@ -258,7 +258,7 @@ namespace invmgmt.web.Migrations
                     b.HasIndex("ItemId")
                         .IsUnique();
 
-                    b.ToTable("InventoryStocks");
+                    b.ToTable("InventoryStocks", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.IssueLog", b =>
@@ -287,7 +287,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("IssueLogs");
+                    b.ToTable("IssueLogs", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Item", b =>
@@ -402,7 +402,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("OrderSummaries");
+                    b.ToTable("OrderSummaries", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.OrderSummaryItem", b =>
@@ -451,7 +451,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("RequestItemId");
 
-                    b.ToTable("OrderSummaryItems");
+                    b.ToTable("OrderSummaryItems", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Personnel", b =>
@@ -534,7 +534,7 @@ namespace invmgmt.web.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Personnel");
+                    b.ToTable("Personnel", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.ReceivedLog", b =>
@@ -563,7 +563,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ReceivedLogs");
+                    b.ToTable("ReceivedLogs", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.RegistrationRequest", b =>
@@ -626,7 +626,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("Status", "CreatedAt");
 
-                    b.ToTable("RegistrationRequests");
+                    b.ToTable("RegistrationRequests", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Request", b =>
@@ -675,7 +675,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("UserId", "Status");
 
-                    b.ToTable("Requests");
+                    b.ToTable("Requests", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.RequestItem", b =>
@@ -743,7 +743,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("RequestId", "Status");
 
-                    b.ToTable("RequestItems");
+                    b.ToTable("RequestItems", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.Role", b =>
@@ -760,7 +760,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -803,7 +803,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("RoleItemLimits");
+                    b.ToTable("RoleItemLimits", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.User", b =>
@@ -852,7 +852,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("IsApproved", "CreatedAt");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.UserRole", b =>
@@ -875,7 +875,7 @@ namespace invmgmt.web.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("invmgmt.web.Models.ApprovalLog", b =>

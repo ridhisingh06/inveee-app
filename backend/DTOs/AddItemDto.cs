@@ -19,5 +19,8 @@ namespace invmgmt.web.DTOs
 
         [Range(0, int.MaxValue, ErrorMessage = "TotalQuantity must be non‑negative.")]
         public int TotalQuantity { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "MinimumQuantity must be non‑negative.")]
+        public int MinimumQuantity { get; set; }
     }
 }
