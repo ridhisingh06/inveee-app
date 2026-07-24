@@ -47,7 +47,7 @@ describe('SectionWiseQueryService', () => {
       fromDate: '2023-01-01',
       toDate: '2023-12-31',
       bhawan: 'A',
-      itemId: 2,
+      itemCode: '2',
       itemName: 'Pencil',
       pageNumber: 2,
       pageSize: 50
@@ -59,7 +59,7 @@ describe('SectionWiseQueryService', () => {
         request.params.get('fromDate') === '2023-01-01' &&
         request.params.get('toDate') === '2023-12-31' &&
         request.params.get('bhawan') === 'A' &&
-        request.params.get('itemId') === '2' &&
+        request.params.get('itemCode') === '2' &&
         request.params.get('itemName') === 'Pencil' &&
         request.params.get('pageNumber') === '2' &&
         request.params.get('pageSize') === '50'

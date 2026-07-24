@@ -40,7 +40,7 @@ public class InventoryController : ControllerBase
             .Select(i => new
             {
                 id = i.Id,
-                itemId = i.ItemId,
+                itemCode = i.ItemCode,
                 name = i.Name,
                 categoryId = i.CategoryId,
                 category = i.Category != null ? i.Category.Name : "Uncategorized",
@@ -62,12 +62,12 @@ public class InventoryController : ControllerBase
     {
         if (dto == null) return BadRequest("Invalid item data.");
         
-        _logger.LogInformation("Add item requested: {ItemId}, {Name} (CategoryId={CategoryId}, Qty={Qty})", dto.ItemId, dto.Name, dto.CategoryId, dto.TotalQuantity);
+        _logger.LogInformation("Add item requested: {ItemCode}, {Name} (CategoryId={CategoryId}, Qty={Qty})", dto.ItemCode, dto.Name, dto.CategoryId, dto.TotalQuantity);
         
-        // ✅ Validate ItemId is provided
-        if (string.IsNullOrWhiteSpace(dto.ItemId))
+        // ✅ Validate ItemCode is provided
+        if (string.IsNullOrWhiteSpace(dto.ItemCode))
         {
-            return BadRequest(new { message = "Item ID is required." });
+            return BadRequest(new { message = "Item Code is required." });
         }
 
         // ✅ Validate name and check for duplicate item name (case-insensitive)
@@ -76,16 +76,16 @@ public class InventoryController : ControllerBase
             return BadRequest(new { message = "Item name is required." });
         }
 
-        // ✅ Check for duplicate ItemId
-        var normalizedItemId = dto.ItemId.Trim();
-        var existingByItemId = await _context.Items
-            .FirstOrDefaultAsync(i => i.ItemId == normalizedItemId);
+        // ✅ Check for duplicate ItemCode
+        var normalizedItemCode = dto.ItemCode.Trim();
+        var existingByItemCode = await _context.Items
+            .FirstOrDefaultAsync(i => i.ItemCode == normalizedItemCode);
         
-        if (existingByItemId != null)
+        if (existingByItemCode != null)
         {
-            _logger.LogWarning("Duplicate ItemId attempted: {ItemId}", dto.ItemId);
+            _logger.LogWarning("Duplicate ItemCode attempted: {ItemCode}", dto.ItemCode);
             return BadRequest(new { 
-                message = $"An item with the Item ID \"{dto.ItemId}\" already exists. Please enter a unique Item ID." 
+                message = $"An item with the Item Code \"{dto.ItemCode}\" already exists. Please enter a unique Item Code." 
             });
         }
 
@@ -110,7 +110,7 @@ public class InventoryController : ControllerBase
 
         var item = new Item
         {
-            ItemId = normalizedItemId,
+            ItemCode = normalizedItemCode,
             Name = dto.Name,
             CategoryId = dto.CategoryId,
             Description = dto.Description,
@@ -124,13 +124,13 @@ public class InventoryController : ControllerBase
         }
         catch (DbUpdateException dbEx)
         {
-            _logger.LogError(dbEx, "AddItem: DB error while inserting ItemId {ItemId}", dto.ItemId);
+            _logger.LogError(dbEx, "AddItem: DB error while inserting ItemCode {ItemCode}", dto.ItemCode);
             return BadRequest(new { message = "Unable to save the item – check data constraints." });
         }
 
         var stock = new InventoryStock
         {
-            ItemId = item.ItemId,
+            ItemId = item.Id,
             TotalQuantity = dto.TotalQuantity,
             AvailableQuantity = dto.TotalQuantity,
             UpdatedAt = DateTime.UtcNow
@@ -143,14 +143,14 @@ public class InventoryController : ControllerBase
         }
         catch (DbUpdateException dbEx)
         {
-            _logger.LogError(dbEx, "AddItem: DB error while inserting stock for ItemId {ItemId}", item.ItemId);
+            _logger.LogError(dbEx, "AddItem: DB error while inserting stock for ItemCode {ItemCode}", item.ItemCode);
             // Roll back previously added item to keep DB consistent
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
             return BadRequest(new { message = "Unable to save the stock record – check data constraints." });
         }
 
-        _logger.LogInformation("Item added: ItemId={ItemId}", item.ItemId);
+        _logger.LogInformation("Item added: ItemCode={ItemCode}", item.ItemCode);
         return Ok(new { message = "Item Added Successfully" });
     }
 
@@ -198,7 +198,7 @@ public class InventoryController : ControllerBase
         item.Description = dto.Description;
 
         var stock = await _context.InventoryStocks
-            .FirstOrDefaultAsync(s => s.ItemId == item.ItemId);
+            .FirstOrDefaultAsync(s => s.ItemId == item.Id);
 
         if (stock != null)
         {
@@ -213,7 +213,7 @@ public class InventoryController : ControllerBase
         }
         catch (DbUpdateException dbEx)
         {
-            _logger.LogError(dbEx, "UpdateItem: DB error while updating ItemId {ItemId}", item.ItemId);
+            _logger.LogError(dbEx, "UpdateItem: DB error while updating ItemCode {ItemCode}", item.ItemCode);
             return BadRequest(new { message = "Unable to update the item – check data constraints." });
         }
 
@@ -230,7 +230,7 @@ public class InventoryController : ControllerBase
         return Ok(new
         {
             id = item.Id,
-            itemId = item.ItemId,
+            itemCode = item.ItemCode,
             name = item.Name,
             categoryId = item.CategoryId,
             category = categoryName,
@@ -276,7 +276,7 @@ public class InventoryController : ControllerBase
         var stock = await _context.InventoryStocks
             .Include(s => s.Item)
             .ThenInclude(i => i.Category)
-            .FirstOrDefaultAsync(s => s.ItemId == item.ItemId);
+            .FirstOrDefaultAsync(s => s.ItemId == item.Id);
 
         if (stock == null)
             return NotFound("Item stock not found");
@@ -287,13 +287,13 @@ public class InventoryController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Stock increased: ItemId={ItemId}, NewAvailable={Available}", item.ItemId, stock.AvailableQuantity);
+        _logger.LogInformation("Stock increased: ItemId={ItemId}, NewAvailable={Available}", item.Id, stock.AvailableQuantity);
 
         return Ok(new
         {
             message = "Stock increased successfully",
             id = stock.Item.Id,
-            itemId = stock.Item.ItemId,
+            itemCode = stock.Item.ItemCode,
             name = stock.Item.Name,
             categoryId = stock.Item.CategoryId,
             category = stock.Item.Category != null ? stock.Item.Category.Name : "Uncategorized",
@@ -320,7 +320,7 @@ public class InventoryController : ControllerBase
         var stock = await _context.InventoryStocks
             .Include(s => s.Item)
             .ThenInclude(i => i.Category)
-            .FirstOrDefaultAsync(s => s.ItemId == item.ItemId);
+            .FirstOrDefaultAsync(s => s.ItemId == item.Id);
 
         if (stock == null)
             return NotFound("Item stock not found");
@@ -334,13 +334,13 @@ public class InventoryController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Stock decreased: ItemId={ItemId}, NewAvailable={Available}", item.ItemId, stock.AvailableQuantity);
+        _logger.LogInformation("Stock decreased: ItemId={ItemId}, NewAvailable={Available}", item.Id, stock.AvailableQuantity);
 
         return Ok(new
         {
             message = "Stock decreased successfully",
             id = stock.Item.Id,
-            itemId = stock.Item.ItemId,
+            itemCode = stock.Item.ItemCode,
             name = stock.Item.Name,
             categoryId = stock.Item.CategoryId,
             category = stock.Item.Category != null ? stock.Item.Category.Name : "Uncategorized",
@@ -364,7 +364,7 @@ public class InventoryController : ControllerBase
             .Select(i => new
             {
                 id = i.Id,
-                itemId = i.ItemId,
+                itemCode = i.ItemCode,
                 name = i.Name,
                 categoryId = i.CategoryId,
                 category = i.Category != null ? i.Category.Name : "Uncategorized",

@@ -66,25 +66,23 @@ namespace invmgmt.web.Data
                 .WithMany(c => c.Items)
                 .HasForeignKey(i => i.CategoryId);
 
-            // Configure alternate (unique) key for Item.ItemId to be used as principal key in related entities
+            // Configure alternate (unique) key for Item.ItemCode to be used as principal key in related entities
             modelBuilder.Entity<Item>()
-                .HasAlternateKey(i => i.ItemId);
+                .HasAlternateKey(i => i.ItemCode);
 
             modelBuilder.Entity<Item>()
-                .HasIndex(i => i.ItemId).IsUnique();
+                .HasIndex(i => i.ItemCode).IsUnique();
 
             modelBuilder.Entity<InventoryStock>()
                 .HasOne(s => s.Item)
                 .WithOne(i => i.InventoryStock)
                 .HasForeignKey<InventoryStock>(s => s.ItemId)
-                .HasPrincipalKey<Item>(i => i.ItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<RequestItem>()
                 .HasOne(ri => ri.Item)
                 .WithMany(i => i.RequestItems)
-                .HasForeignKey(ri => ri.ItemId)
-                .HasPrincipalKey(i => i.ItemId);
+                .HasForeignKey(ri => ri.ItemId);
 
             // Add indexes on RequestItems to improve query/filter performance
             modelBuilder.Entity<RequestItem>()
@@ -125,23 +123,19 @@ namespace invmgmt.web.Data
             modelBuilder.Entity<Bill>()
                 .HasIndex(b => b.CreatedAt);
 
-            // BillItem relationships
             modelBuilder.Entity<BillItem>()
                 .HasOne(bi => bi.Item)
-                                .WithMany(i => i.BillItems)
+                .WithMany(i => i.BillItems)
                 .HasForeignKey(bi => bi.ItemId)
-                .HasPrincipalKey(i => i.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<BillItem>()
                 .HasIndex(bi => bi.BillId);
 
-            // RoleItemLimit to Item relationship
             modelBuilder.Entity<RoleItemLimit>()
                 .HasOne(rl => rl.Item)
                 .WithMany()
                 .HasForeignKey(rl => rl.ItemId)
-                .HasPrincipalKey(i => i.ItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 
@@ -185,11 +179,10 @@ namespace invmgmt.web.Data
 
             // OrderSummaryItem to Item
             modelBuilder.Entity<OrderSummaryItem>()
-    .HasOne(osi => osi.Item)
-    .WithMany()
-    .HasForeignKey(osi => osi.ItemId)
-    .HasPrincipalKey(i => i.ItemId)
-    .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(osi => osi.Item)
+                .WithMany()
+                .HasForeignKey(osi => osi.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // OrderSummaryItem to RequestItem (reference to original request item)
             modelBuilder.Entity<OrderSummaryItem>()

@@ -6,7 +6,7 @@ import { LoggerService } from './logger.service';
 
 export interface IssuedRequestItem {
   id: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   quantityRequested: number;
   quantityIssued: number;

@@ -63,25 +63,25 @@ export class CartService {
     this.setLines(lines);
   }
 
-  updateQuantity(itemId: string | number, qty: number) {
+  updateQuantity(itemCode: string | number, qty: number) {
     const lines = [...this.linesSubject.value];
-    const idx = lines.findIndex((l) => l.item.id === itemId);
+    const idx = lines.findIndex((l) => l.item.id === itemCode);
     if (idx >= 0) {
       if (qty <= 0) {
-        this.logger.log(CTX, `Quantity <= 0 for item id="${itemId}" — removing`);
-        this.removeItem(itemId);
+        this.logger.log(CTX, `Quantity <= 0 for item id="${itemCode}" — removing`);
+        this.removeItem(itemCode);
       } else {
         lines[idx] = { ...lines[idx], qty };
-        this.logger.log(CTX, `Updated qty for item id="${itemId}" → ${qty}`);
+        this.logger.log(CTX, `Updated qty for item id="${itemCode}" → ${qty}`);
         this.setLines(lines);
       }
     }
   }
 
-  removeItem(itemId: string | number) {
+  removeItem(itemCode: string | number) {
     const current = this.linesSubject.value;
-    const updated = current.filter((l) => l.item.id !== itemId);
-    this.logger.log(CTX, `Removed item id="${itemId}" from cart`);
+    const updated = current.filter((l) => l.item.id !== itemCode);
+    this.logger.log(CTX, `Removed item id="${itemCode}" from cart`);
     this.linesSubject.next(updated);
     writeCartToStorage(updated, this.logger);
   }

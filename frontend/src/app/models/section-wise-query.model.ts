@@ -6,6 +6,7 @@ export interface SectionWiseQueryOfficer {
 
 export interface SectionWiseQueryItem {
   id: number;
+  itemCode: string;
   name: string;
   category?: string;
   availableQuantity: number;
@@ -16,7 +17,7 @@ export interface SectionWiseQueryFilter {
   fromDate?: string;
   toDate?: string;
   bhawan?: string;
-  itemId?: number;
+  itemCode?: string;
   itemName?: string;
   pageNumber?: number;
   pageSize?: number;
@@ -27,7 +28,7 @@ export interface SectionWiseQueryRow {
   requestId: number;
   officerName: string;
   bhawan?: string;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   quantityRequested: number;
   quantityApproved: number;

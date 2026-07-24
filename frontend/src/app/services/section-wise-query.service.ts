@@ -87,8 +87,8 @@ export class SectionWiseQueryService {
     if (filter.bhawan) {
       params = params.set('bhawan', filter.bhawan);
     }
-    if (filter.itemId != null) {
-      params = params.set('itemId', filter.itemId.toString());
+    if (filter.itemCode != null) {
+      params = params.set('itemCode', filter.itemCode.toString());
     }
     if (filter.itemName) {
       params = params.set('itemName', filter.itemName);
@@ -118,7 +118,7 @@ export class SectionWiseQueryService {
     if (filter.fromDate) params = params.set('fromDate', filter.fromDate);
     if (filter.toDate) params = params.set('toDate', filter.toDate);
     if (filter.bhawan) params = params.set('bhawan', filter.bhawan);
-    if (filter.itemId != null) params = params.set('itemId', filter.itemId.toString());
+    if (filter.itemCode != null) params = params.set('itemCode', filter.itemCode.toString());
     if (filter.itemName) params = params.set('itemName', filter.itemName);
     params = params.set('pageNumber', (filter.pageNumber ?? 1).toString());
     params = params.set('pageSize', (filter.pageSize ?? 10000).toString());

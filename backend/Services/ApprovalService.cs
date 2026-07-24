@@ -143,7 +143,7 @@ namespace invmgmt.web.Services
                 }
 
                 // STEP 4: Validate quantities and prepare restoration operations
-                var restorationOps = new List<(string itemId, int restoreQuantity)>();
+                var restorationOps = new List<(string itemCode, int restoreQuantity)>();
 
                 foreach (var dtoItem in dto.Items)
                 {
@@ -182,7 +182,7 @@ namespace invmgmt.web.Services
                     // Track items to restore
                     if (dtoItem.RejectQuantity > 0)
                     {
-                        restorationOps.Add((requestItem.ItemId, dtoItem.RejectQuantity));
+                        restorationOps.Add((requestItem.Item?.ItemCode ?? string.Empty, dtoItem.RejectQuantity));
                     }
                 }
 
@@ -194,7 +194,7 @@ namespace invmgmt.web.Services
                 // IMPORTANT: Do NOT set response fields and `return` inside the lambda —
                 // `return` only exits the lambda, not this method. Any failure inside the
                 // transaction must throw so the outer catch can handle it correctly.
-                restorationOps = restorationOps.OrderBy(op => op.itemId).ToList();
+                restorationOps = restorationOps.OrderBy(op => op.itemCode).ToList();
                 var strategy = _context.Database.CreateExecutionStrategy();
 
                 await strategy.ExecuteAsync(async () =>
@@ -205,15 +205,15 @@ namespace invmgmt.web.Services
                         _logger.LogInformation("Restoring inventory for {Count} items", restorationOps.Count);
 
                         // Restore rejected quantities back to inventory
-                        foreach (var (itemId, restoreQty) in restorationOps)
+                        foreach (var (itemCode, restoreQty) in restorationOps)
                         {
-                            var success = await _inventoryRepo.RestoreAsync(itemId, restoreQty);
+                            var success = await _inventoryRepo.RestoreAsync(itemCode, restoreQty);
                             if (!success)
                             {
                                 // Throw — not return — so the catch below rolls back and
                                 // the outer catch sets response.Success = false correctly.
                                 throw new InvalidOperationException(
-                                    $"Failed to restore inventory for ItemId {itemId}. " +
+                                    $"Failed to restore inventory for ItemCode {itemCode}. " +
                                     "Inventory record not found.");
                             }
                         }
@@ -238,7 +238,7 @@ namespace invmgmt.web.Services
                             approvedItems.Add(new ApprovedItemDetailDto
                             {
                                 RequestItemId = dtoItem.RequestItemId,
-                                ItemId = requestItem.ItemId,
+                                ItemCode = requestItem.Item?.ItemCode ?? string.Empty,
                                 ItemName = requestItem.Item.Name,
                                 IssuerIssuedQuantity = requestItem.IssuerIssuedQuantity,
                                 ApprovedQuantity = dtoItem.ApproveQuantity,
@@ -330,7 +330,7 @@ namespace invmgmt.web.Services
             return new AdminPendingItemDto
             {
                 RequestItemId = requestItem.Id,
-                ItemId = requestItem.ItemId,
+                ItemCode = requestItem.Item?.ItemCode ?? string.Empty,
                 ItemName = requestItem.Item.Name,
                 RequestedQuantity = requestItem.QuantityRequested,
                 IssuerIssuedQuantity = requestItem.IssuerIssuedQuantity,

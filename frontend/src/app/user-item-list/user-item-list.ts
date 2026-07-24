@@ -42,7 +42,7 @@ export class UserItemListComponent implements OnInit {
         next: (items) => {
           this.allItems = items.map(i => ({
             id: i.id,
-            itemId: i.itemId,
+            itemCode: i.itemCode,
             name: i.name,
             category: i.category || 'Uncategorized',
             description: i.description

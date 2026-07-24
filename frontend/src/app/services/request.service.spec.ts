@@ -40,7 +40,7 @@ describe('RequestService', () => {
   });
 
   it('should create request', () => {
-    const payload: CreateRequestPayload = { categoryId: 1, items: [{ itemId: 1, quantity: 2 }] };
+    const payload: CreateRequestPayload = { categoryId: 1, items: [{ itemCode: '1', quantity: 2 }] };
     service.createRequest(payload).subscribe();
     const req = httpMock.expectOne(`${environment.apiUrl}/requests`);
     expect(req.request.method).toBe('POST');
@@ -72,7 +72,7 @@ describe('RequestService', () => {
   // ── updateRequest ─────────────────────────────────────────────────────────
 
   it('should PUT to /requests/:id on updateRequest', () => {
-    const payload = { items: [{ itemId: 1, quantity: 3 }] };
+    const payload = { items: [{ itemCode: '1', quantity: 3 }] };
     let result: any;
     service.updateRequest(42, payload).subscribe(r => (result = r));
 
@@ -86,7 +86,7 @@ describe('RequestService', () => {
   });
 
   it('should emit error from updateRequest when backend returns 400', () => {
-    const payload = { items: [{ itemId: 1, quantity: 3 }] };
+    const payload = { items: [{ itemCode: '1', quantity: 3 }] };
     let errorMsg = '';
     service.updateRequest(99, payload).subscribe({
       error: (e) => (errorMsg = e.message)

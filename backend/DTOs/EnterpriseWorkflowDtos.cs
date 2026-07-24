@@ -198,7 +198,7 @@ public sealed class AdminPendingItemDto
     public int RequestItemId { get; set; }
 
     /// <summary>Item ID</summary>
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
 
     /// <summary>Item name</summary>
     public string ItemName { get; set; } = string.Empty;
@@ -328,7 +328,7 @@ public sealed class OrderSummaryDto
 public sealed class OrderSummaryItemDto
 {
     /// <summary>Item ID</summary>
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
 
     /// <summary>Item name</summary>
     public string ItemName { get; set; } = string.Empty;
@@ -423,7 +423,7 @@ public sealed class RequestDetailEnhancedDto
 public sealed class RequestItemDetailEnhancedDto
 {
     public int Id { get; set; }
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
     public string ItemName { get; set; } = string.Empty;
     public string CategoryName { get; set; } = string.Empty;
 

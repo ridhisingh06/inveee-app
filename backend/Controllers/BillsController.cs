@@ -127,14 +127,14 @@ namespace invmgmt.web.Controllers
                 // Validate each item
                 foreach (var item in dto.Items)
                 {
-                    if (string.IsNullOrWhiteSpace(item.ItemId))
-                        return BadRequest(new { message = "Valid item ID is required" });
+                    if (string.IsNullOrWhiteSpace(item.ItemCode))
+                        return BadRequest(new { message = "Valid item Code is required" });
 
                     if (item.Quantity <= 0)
-                        return BadRequest(new { message = $"Quantity must be greater than 0 for item {item.ItemId}" });
+                        return BadRequest(new { message = $"Quantity must be greater than 0 for item {item.ItemCode}" });
 
                     if (item.UnitPrice < 0)
-                        return BadRequest(new { message = $"Unit price cannot be negative for item {item.ItemId}" });
+                        return BadRequest(new { message = $"Unit price cannot be negative for item {item.ItemCode}" });
                 }
 
                 var billDetail = await _billService.CreateBillAsync(dto, userId);

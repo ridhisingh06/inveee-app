@@ -112,7 +112,7 @@ export class SectionWiseQueryComponent implements OnInit {
       fromDate: this.fromDate || undefined,
       toDate: this.toDate || undefined,
       bhawan: this.selectedBhawan || undefined,
-      itemId: this.selectedItem?.id || undefined,
+      itemCode: this.selectedItem?.itemCode || undefined,
       itemName: this.selectedItem ? undefined : this.itemQuery || undefined,
       pageNumber: this.page(),
       pageSize: this.pageSize()
@@ -144,7 +144,7 @@ export class SectionWiseQueryComponent implements OnInit {
       fromDate: this.fromDate || undefined,
       toDate: this.toDate || undefined,
       bhawan: this.selectedBhawan || undefined,
-      itemId: this.selectedItem?.id || undefined,
+      itemCode: this.selectedItem?.itemCode || undefined,
       itemName: this.selectedItem ? undefined : this.itemQuery || undefined,
       pageNumber: 1,
       pageSize: 10000

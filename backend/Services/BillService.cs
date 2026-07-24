@@ -50,13 +50,15 @@ namespace invmgmt.web.Services
                         throw new InvalidOperationException($"Bill number '{dto.BillNo}' already exists");
 
                     // Validate all items exist
-                    var itemIds = dto.Items.Select(i => i.ItemId).Distinct().ToList();
+                    var itemCodes = dto.Items.Select(i => i.ItemCode).Distinct().ToList();
                     var items = await _context.Items
-                        .Where(i => itemIds.Contains(i.ItemId))
+                        .Where(i => itemCodes.Contains(i.ItemCode))
                         .ToListAsync();
 
-                    if (items.Count != itemIds.Count)
+                    if (items.Count != itemCodes.Count)
                         throw new ArgumentException("One or more items not found");
+                    
+                    var codeToIdMap = items.ToDictionary(i => i.ItemCode, i => i.Id);
 
                     // Calculate grand total and validate quantities/prices
                     decimal grandTotal = 0;
@@ -65,17 +67,17 @@ namespace invmgmt.web.Services
                     foreach (var itemDto in dto.Items)
                     {
                         if (itemDto.Quantity <= 0)
-                            throw new ArgumentException($"Quantity must be greater than 0 for item {itemDto.ItemId}");
+                            throw new ArgumentException($"Quantity must be greater than 0 for item {itemDto.ItemCode}");
 
                         if (itemDto.UnitPrice < 0)
-                            throw new ArgumentException($"Unit price cannot be negative for item {itemDto.ItemId}");
+                            throw new ArgumentException($"Unit price cannot be negative for item {itemDto.ItemCode}");
 
                         var amount = itemDto.Quantity * itemDto.UnitPrice;
                         grandTotal += amount;
 
                         billItems.Add(new BillItem
                         {
-                            ItemId = itemDto.ItemId,
+                            ItemId = codeToIdMap[itemDto.ItemCode],
                             Quantity = itemDto.Quantity,
                             UnitPrice = itemDto.UnitPrice,
                             Amount = amount
@@ -147,7 +149,7 @@ namespace invmgmt.web.Services
                 {
                     Id = bi.Id,
                     BillId = bi.BillId,
-                    ItemId = bi.ItemId,
+                    ItemCode = bi.Item?.ItemCode ?? string.Empty,
                     ItemName = bi.Item?.Name ?? "Unknown",
                     Quantity = bi.Quantity,
                     UnitPrice = bi.UnitPrice,

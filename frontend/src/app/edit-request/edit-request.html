@@ -143,7 +143,7 @@
 
       <!-- ── Item rows ──────────────────────────────────────────────── -->
       <ul class="cart-items" *ngIf="lines.length > 0">
-        <li *ngFor="let line of lines; trackBy: trackByItemId" class="cart-row fade-in">
+        <li *ngFor="let line of lines; trackBy: trackByItemCode" class="cart-row fade-in">
 
           <div class="item-details">
             <div class="item-name">{{ line.item.name }}</div>

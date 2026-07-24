@@ -26,11 +26,11 @@ namespace invmgmt.web.Repositories
         public async Task<RequestItem?> GetByIdWithDetailsAsync(int id)
         {
             return await _context.RequestItems
-                .Include(ri => ri.Item)
+                                .Include(ri => ri.Item)
                     .ThenInclude(i => i.Category)
-                .Include(ri => ri.Item)
+                                .Include(ri => ri.Item)
                     .ThenInclude(i => i.InventoryStock)
-                .Include(ri => ri.Request)
+                                .Include(ri => ri.Request)
                     .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(ri => ri.Id == id);
         }
@@ -39,9 +39,9 @@ namespace invmgmt.web.Repositories
         {
             return await _context.RequestItems
                 .Where(ri => ri.RequestId == requestId)
-                .Include(ri => ri.Item)
+                                .Include(ri => ri.Item)
                     .ThenInclude(i => i.Category)
-                .Include(ri => ri.Item)
+                                .Include(ri => ri.Item)
                     .ThenInclude(i => i.InventoryStock)
                 .AsNoTracking()
                 .ToListAsync();
@@ -50,7 +50,7 @@ namespace invmgmt.web.Repositories
         public async Task<RequestItem?> GetByIdWithInventoryAsync(int id)
         {
             return await _context.RequestItems
-                .Include(ri => ri.Item)
+                                .Include(ri => ri.Item)
                     .ThenInclude(i => i.InventoryStock)
                 .FirstOrDefaultAsync(ri => ri.Id == id);
         }

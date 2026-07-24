@@ -181,7 +181,7 @@ export class InventoryComponent implements OnInit, DoCheck {
     // ✅ Check for duplicate ItemId
     const trimmedItemId = this.itemId.trim();
     const duplicateItemIdExists = this.items.some(item => 
-      item.itemId === trimmedItemId
+      item.itemCode === trimmedItemId
     );
     
     if (duplicateItemIdExists) {
@@ -210,7 +210,7 @@ export class InventoryComponent implements OnInit, DoCheck {
     }
 
     const newItem = {
-      itemId: trimmedItemId,
+      itemCode: trimmedItemId,
       name: this.itemName.trim(),
       categoryId: this.selectedCategoryId!,
       totalQuantity: this.quantity,
@@ -241,7 +241,7 @@ export class InventoryComponent implements OnInit, DoCheck {
    */
   editItem(item: InventoryItem): void {
     this.editingItemId = item.id;
-    this.itemId = item.itemId;
+    this.itemId = item.itemCode;
     this.itemName = item.name;
     this.selectedCategoryId = item.categoryId || null;
     this.quantity = item.availableQuantity || 0;
@@ -582,7 +582,7 @@ export class InventoryComponent implements OnInit, DoCheck {
       if (this.editingItemId !== null && item.id === this.editingItemId) {
         return false;
       }
-      return item.itemId === trimmedItemId;
+      return item.itemCode === trimmedItemId;
     });
     
     if (isDuplicate) {
@@ -614,7 +614,7 @@ export class InventoryComponent implements OnInit, DoCheck {
       if (this.editingItemId !== null && item.id === this.editingItemId) {
         return false;
       }
-      return item.itemId === trimmedItemId;
+      return item.itemCode === trimmedItemId;
     });
   }
 

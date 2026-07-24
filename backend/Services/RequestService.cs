@@ -26,7 +26,7 @@ namespace invmgmt.web.Services
             if (dto == null || dto.Items == null || dto.Items.Count == 0)
                 return (false, "Cart is empty", null);
 
-            if (dto.Items.Any(i => string.IsNullOrWhiteSpace(i.ItemId) || i.Quantity <= 0))
+            if (dto.Items.Any(i => string.IsNullOrWhiteSpace(i.ItemCode) || i.Quantity <= 0))
                 return (false, "Invalid item or quantity", null);
 
             // Block if user already has an active request
@@ -34,8 +34,9 @@ namespace invmgmt.web.Services
             if (hasActive)
                 return (false, "You already have an active request. Please wait until it is processed.", null);
 
-            var itemIds = dto.Items.Select(i => i.ItemId).Distinct().ToList();
-            if (!await _requestRepo.ItemsExistAsync(itemIds))
+            var itemCodes = dto.Items.Select(i => i.ItemCode).Distinct().ToList();
+            var codeToIdMap = await _requestRepo.GetItemIdsByCodesAsync(itemCodes);
+            if (codeToIdMap.Count != itemCodes.Count)
                 return (false, "One or more items not found", null);
 
             var request = new Request
@@ -52,7 +53,7 @@ namespace invmgmt.web.Services
             var requestItems = dto.Items.Select(line => new RequestItem
             {
                 RequestId = request.Id,
-                ItemId = line.ItemId,
+                ItemId = codeToIdMap[line.ItemCode],
                 QuantityRequested = line.Quantity,
                 QuantityApproved = 0,
                 QuantityIssued = 0,
@@ -98,7 +99,7 @@ namespace invmgmt.web.Services
                 Items = request.RequestItems.Select(ri => new RequestItemDetailDto
                 {
                     id = ri.Id,
-                    ItemId = ri.ItemId,
+                    ItemCode = ri.Item?.ItemCode ?? string.Empty,
                     ItemName = ri.Item?.Name ?? string.Empty,
                     QuantityRequested = ri.QuantityRequested,
                     QuantityApproved = ri.QuantityApproved,
@@ -150,7 +151,7 @@ namespace invmgmt.web.Services
                 items = r.RequestItems.Select(ri => new
                 {
                     id = ri.Id,
-                    itemId = ri.ItemId,
+                    itemCode = ri.Item?.ItemCode ?? string.Empty,
                     itemName = ri.Item?.Name ?? string.Empty,
                     quantityRequested = ri.QuantityRequested,
                     quantityApproved = ri.QuantityApproved,
@@ -321,13 +322,14 @@ namespace invmgmt.web.Services
 
                 // ── 6. Merge duplicate ItemIds in payload ────────────────────────────────
                 var merged = dto.Items
-                    .GroupBy(i => i.ItemId)
-                    .Select(g => new UpdateRequestLineDto { ItemId = g.Key, Quantity = g.Sum(x => x.Quantity) })
+                    .GroupBy(i => i.ItemCode)
+                    .Select(g => new UpdateRequestLineDto { ItemCode = g.Key, Quantity = g.Sum(x => x.Quantity) })
                     .ToList();
 
                 // ── 7. Validate all ItemIds exist ────────────────────────────────────────
-                var incomingItemIds = merged.Select(i => i.ItemId).Distinct().ToList();
-                if (!await _requestRepo.ItemsExistAsync(incomingItemIds))
+                var incomingItemCodes = merged.Select(i => i.ItemCode).Distinct().ToList();
+                var codeToIdMap = await _requestRepo.GetItemIdsByCodesAsync(incomingItemCodes);
+                if (codeToIdMap.Count != incomingItemCodes.Count)
                 {
                     result.Success = false;
                     result.Message = "One or more items in the request do not exist.";
@@ -337,8 +339,8 @@ namespace invmgmt.web.Services
 
                 // ── 8. Apply item-level changes ──────────────────────────────────────────
                 var existingItems = request.RequestItems.ToList();
-                var existingItemIds = existingItems.Select(ri => ri.ItemId).ToHashSet();
-                var incomingSet = merged.ToDictionary(i => i.ItemId, i => i.Quantity);
+                var existingItemCodes = existingItems.Select(ri => ri.Item?.ItemCode).Where(c => c != null).ToHashSet();
+                var incomingSet = merged.ToDictionary(i => i.ItemCode, i => i.Quantity);
 
                 // 8a. Update or explicitly delete existing items.
                 //     IMPORTANT: We call _requestRepo.RemoveRequestItem() BEFORE
@@ -347,15 +349,16 @@ namespace invmgmt.web.Services
                 var itemsToRemove = new List<RequestItem>();
                 foreach (var existing in existingItems)
                 {
-                    if (incomingSet.TryGetValue(existing.ItemId, out var newQty))
+                    var code = existing.Item?.ItemCode;
+                    if (code != null && incomingSet.TryGetValue(code, out var newQty))
                     {
                         existing.QuantityRequested = newQty;
-                        _logger.LogInformation("UpdateRequest: Updated item {ItemId} qty -> {Qty} (ReqId={RequestId})", existing.ItemId, newQty, requestId);
+                        _logger.LogInformation("UpdateRequest: Updated item {ItemCode} qty -> {Qty} (ReqId={RequestId})", code, newQty, requestId);
                     }
                     else
                     {
                         itemsToRemove.Add(existing);
-                        _logger.LogInformation("UpdateRequest: Removed item {ItemId} from ReqId={RequestId}", existing.ItemId, requestId);
+                        _logger.LogInformation("UpdateRequest: Removed item {ItemCode} from ReqId={RequestId}", code, requestId);
                     }
                 }
 
@@ -368,19 +371,19 @@ namespace invmgmt.web.Services
                 }
 
                 // 8b. Insert new items not already in the request
-                foreach (var line in merged.Where(m => !existingItemIds.Contains(m.ItemId)))
+                foreach (var line in merged.Where(m => !existingItemCodes.Contains(m.ItemCode)))
                 {
                     var newItem = new RequestItem
                     {
                         RequestId = requestId,
-                        ItemId = line.ItemId,
+                        ItemId = codeToIdMap[line.ItemCode],
                         QuantityRequested = line.Quantity,
                         QuantityApproved = 0,
                         QuantityIssued = 0,
                         Status = RequestItemStatus.PendingWithIssuer
                     };
                     request.RequestItems.Add(newItem);
-                    _logger.LogInformation("UpdateRequest: Added new item {ItemId} qty={Qty} to ReqId={RequestId}", line.ItemId, line.Quantity, requestId);
+                    _logger.LogInformation("UpdateRequest: Added new item {ItemCode} qty={Qty} to ReqId={RequestId}", line.ItemCode, line.Quantity, requestId);
                 }
 
                 // ── 9. Update request audit fields ───────────────────────────────────────

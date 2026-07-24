@@ -8,7 +8,7 @@ namespace invmgmt.web.Models
     {
         public int Id { get; set; }
 
-        public string ItemCode { get; set; } = string.Empty;
+        public int ItemId { get; set; }
         public Item Item { get; set; }
 
        

@@ -168,7 +168,7 @@ export class RequestDetailModalComponent implements OnInit, OnDestroy {
   /**
    * Track by function
    */
-  trackByItemId(index: number, item: any): number {
-    return item.id;
+  trackByItemCode(index: number, item: any): string {
+    return item.itemCode;
   }
 }

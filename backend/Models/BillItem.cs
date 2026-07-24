@@ -14,9 +14,7 @@ namespace invmgmt.web.Models
         [ForeignKey("BillId")]
         public Bill Bill { get; set; } = null!;
 
-        [Required]
-        [StringLength(50)]
-        public string ItemCode { get; set; } = string.Empty;
+        public int ItemId { get; set; }
 
 
         public Item Item { get; set; } = null!;

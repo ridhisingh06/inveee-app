@@ -25,7 +25,7 @@
   <!-- CART CONTENT -->
   <div class="cart-content" *ngIf="lines.length > 0">
     <div class="cart-items">
-      <div class="cart-row fade-in" *ngFor="let line of lines; trackBy: trackByItemId">
+      <div class="cart-row fade-in" *ngFor="let line of lines; trackBy: trackByItemCode">
         <div class="cart-item-icon">
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>

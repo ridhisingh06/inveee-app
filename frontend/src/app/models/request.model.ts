@@ -5,7 +5,7 @@
 /** Mirrors backend RequestItemDetailDto */
 export interface RequestItemDetail {
   id: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   quantityRequested: number;
   quantityApproved: number;
@@ -34,7 +34,7 @@ export interface RequestDetail {
 /** Payload to create a request from the cart */
 export interface CreateRequestPayload {
   categoryId: number | null;
-  items: { itemId: number; quantity: number }[];
+  items: { itemCode: string; quantity: number }[];
 }
 
 // ============================================================
@@ -44,7 +44,7 @@ export interface CreateRequestPayload {
 /** One pending item shown to the issuer (from GET /api/issuer/pending) */
 export interface IssuerPendingItem {
   requestItemId: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   requestedQuantity: number;
   availableQuantity: number;
@@ -79,7 +79,7 @@ export interface IssuePartiallyPayload {
 /** Detail of an issued item (inside IssuePartiallyResponse) */
 export interface IssuedItemDetail {
   requestItemId: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   requestedQuantity: number;
   issuedQuantity: number;
@@ -102,7 +102,7 @@ export interface IssuePartiallyResponse {
 /** One pending item shown to the admin (from GET /api/admin/pending) */
 export interface AdminPendingItem {
   requestItemId: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   requestedQuantity: number;
   issuerIssuedQuantity: number;
@@ -138,7 +138,7 @@ export interface ApprovePartiallyPayload {
 /** Detail of an approved item */
 export interface ApprovedItemDetail {
   requestItemId: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   issuerIssuedQuantity: number;
   approvedQuantity: number;
@@ -173,7 +173,7 @@ export interface ReceiveItemsResponse {
 
 /** One line item in the order summary */
 export interface OrderSummaryItem {
-  itemId: number;
+  itemCode: string;
   itemName: string;
   categoryName: string;
   requestedQuantity: number;
@@ -252,7 +252,7 @@ export interface OrderStatistics {
 /** Enhanced request item detail showing all quantities */
 export interface RequestItemDetailEnhanced {
   id: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   categoryName: string;
   quantityRequested: number;
@@ -292,7 +292,7 @@ export interface RequestDetailEnhanced {
 
 /** Payload to update an existing PendingWithIssuer request */
 export interface UpdateRequestPayload {
-  items: { itemId: number; quantity: number }[];
+  items: { itemCode: string; quantity: number }[];
 }
 
 /** Response from PUT /api/requests/{id} */

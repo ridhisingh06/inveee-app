@@ -87,7 +87,7 @@ export class InventoryService {
   /**
    * Add a new inventory item with duplicate detection
    * 
-   * @param item - Item to add (itemId, name, categoryId, totalQuantity)
+   * @param item - Item to add (itemCode, name, categoryId, totalQuantity)
    * @returns Observable<InventoryItem>
    * @throws Error if duplicate item exists
    */
@@ -99,15 +99,15 @@ export class InventoryService {
       return throwError(() => new Error(duplicateError));
     }
 
-    // Validate for duplicate ItemId BEFORE API call
-    const duplicateItemIdError = this.validateNoDuplicateItemId(item.itemId, null);
+    // Validate for duplicate ItemCode BEFORE API call
+    const duplicateItemIdError = this.validateNoDuplicateItemCode(item.itemCode, null);
     if (duplicateItemIdError) {
       this.errorSubject.next(duplicateItemIdError);
       return throwError(() => new Error(duplicateItemIdError));
     }
     
     const payload = {
-      itemId: item.itemId,
+      itemCode: item.itemCode,
       name: item.name,
       categoryId: item.categoryId,
       totalQuantity: item.totalQuantity,
@@ -243,7 +243,7 @@ export class InventoryService {
         tap((response) => {
           const updatedItem: InventoryItem = {
             id: response.id,
-            itemId: response.itemId,
+            itemCode: response.itemCode,
             name: response.name,
             categoryId: response.categoryId,
             category: response.category,
@@ -302,7 +302,7 @@ export class InventoryService {
         tap((response) => {
           const updatedItem: InventoryItem = {
             id: response.id,
-            itemId: response.itemId,
+            itemCode: response.itemCode,
             name: response.name,
             categoryId: response.categoryId,
             category: response.category,
@@ -397,15 +397,15 @@ export class InventoryService {
   }
 
   /**
-   * Validate that no duplicate ItemId exists
+   * Validate that no duplicate ItemCode exists
    * Returns error message if duplicate found, empty string if valid
    * 
-   * @param itemId - Item ID to check
+   * @param itemCode - Item Code to check
    * @param excludeId - ID to exclude from check (for updates)
    * @returns Error message or empty string
    */
-  private validateNoDuplicateItemId(itemId: string, excludeId: number | string | null): string {
-    const trimmedItemId = itemId.trim();
+  private validateNoDuplicateItemCode(itemCode: string, excludeId: number | string | null): string {
+    const trimmedItemCode = itemCode.trim();
     
     const currentItems = this.inventorySubject.value;
     
@@ -415,12 +415,12 @@ export class InventoryService {
         return false;
       }
       
-      // Check if ItemId matches (case-sensitive)
-      return item.itemId === trimmedItemId;
+      // Check if ItemCode matches (case-sensitive)
+      return item.itemCode === trimmedItemCode;
     });
     
     if (isDuplicate) {
-      return `Item ID already exists. Please enter a unique Item ID.`;
+      return `Item Code already exists. Please enter a unique Item Code.`;
     }
     
     return '';
@@ -484,18 +484,18 @@ export class InventoryService {
   }
 
   /**
-   * Check if an ItemId already exists
-   * @param itemId - Item ID to check
+   * Check if an ItemCode already exists
+   * @param itemCode - Item Code to check
    * @param excludeId - ID to exclude from check (for updates)
    * @returns boolean
    */
-  itemIdExists(itemId: string, excludeId?: number | string | null): boolean {
-    const trimmedItemId = itemId.trim();
+  itemCodeExists(itemCode: string, excludeId?: number | string | null): boolean {
+    const trimmedItemCode = itemCode.trim();
     return this.inventorySubject.value.some(item => {
       if (excludeId !== undefined && excludeId !== null && item.id === excludeId) {
         return false;
       }
-      return item.itemId === trimmedItemId;
+      return item.itemCode === trimmedItemCode;
     });
   }
   
@@ -511,7 +511,7 @@ export class InventoryService {
     return this.inventorySubject.value.filter(item =>
       this.normalizeText(item.name).includes(term) ||
       item.id.toString().includes(term) ||
-      item.itemId.toLowerCase().includes(term)
+      item.itemCode.toLowerCase().includes(term)
     );
   }
 }

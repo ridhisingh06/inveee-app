@@ -148,9 +148,9 @@ namespace invmgmt.web.Services
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(filter.ItemId))
+            if (!string.IsNullOrWhiteSpace(filter.ItemCode))
             {
-                query = query.Where(ri => ri.ItemId == filter.ItemId);
+                query = query.Where(ri => ri.Item != null && ri.Item.ItemCode == filter.ItemCode);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.ItemName))
@@ -173,7 +173,7 @@ namespace invmgmt.web.Services
                     ri.RequestId,
                     OfficerName = ri.Request.User.Username,
                     RequestUserEmail = ri.Request.User.Email,
-                    ri.ItemId,
+                    ItemCode = ri.Item != null ? ri.Item.ItemCode : string.Empty,
                     ItemName = ri.Item != null ? ri.Item.Name : string.Empty,
                     ri.QuantityRequested,
                     ri.QuantityApproved,
@@ -208,7 +208,7 @@ namespace invmgmt.web.Services
                 Bhawan = !string.IsNullOrEmpty(r.RequestUserEmail) && bhawanLookup.TryGetValue(r.RequestUserEmail.ToLower(), out var bhawan)
                     ? bhawan
                     : null,
-                ItemId = r.ItemId,
+                ItemCode = r.ItemCode,
                 ItemName = r.ItemName,
                 QuantityRequested = r.QuantityRequested,
                 QuantityApproved = r.QuantityApproved,

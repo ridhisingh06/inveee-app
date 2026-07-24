@@ -11,7 +11,7 @@ namespace invmgmt.web.Models
         public int RequestId { get; set; }
         public Request Request { get; set; }
 
-        public string ItemCode { get; set; } = string.Empty;
+        public int ItemId { get; set; }
         public Item Item { get; set; } = null!;
 
         // Original fields (backward compatibility)

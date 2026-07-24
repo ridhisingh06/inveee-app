@@ -24,6 +24,7 @@ export enum RequestStatus {
  */
 export interface InventoryItem {
   id: number;
+  itemCode: string;
   name: string;
   category: string;
   categoryId: number;
@@ -46,7 +47,7 @@ export interface DraftItem extends InventoryItem {
  */
 export interface RequestItem {
   id: number;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   description?: string;
   quantityRequested: number;
@@ -89,7 +90,7 @@ export interface CreateRequestDto {
  * DTO for request line item during creation
  */
 export interface CreateRequestItemDto {
-  itemId: number;
+  itemCode: string;
   quantity: number;
 }
 

@@ -135,7 +135,7 @@ export class RequestService {
    * @param payload - Updated items list
    * @returns Observable with success result or typed error
    */
-  updateRequest(id: number, payload: { items: { itemId: number; quantity: number }[] }): Observable<any> {
+  updateRequest(id: number, payload: { items: { itemCode: string; quantity: number }[] }): Observable<any> {
     return this.http.put<any>(`${this.base}/${id}`, payload)
       .pipe(
         catchError(err => {

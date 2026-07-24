@@ -62,18 +62,18 @@ export class UserCartComponent implements OnInit, OnDestroy {
   }
 
   /** Single method handles both +1 and -1 delta — avoids duplicate logic */
-  changeQty(itemId: string | number, currentQty: number, delta: 1 | -1) {
+  changeQty(itemCode: string | number, currentQty: number, delta: 1 | -1) {
     const next = currentQty + delta;
     if (next < 1) return;
-    this.cart.updateQuantity(itemId, next);
+    this.cart.updateQuantity(itemCode, next);
   }
 
-  delete(itemId: string | number) {
-    this.cart.removeItem(itemId);
+  delete(itemCode: string | number) {
+    this.cart.removeItem(itemCode);
   }
 
   /** TrackBy prevents full list re-render; only the changed row updates */
-  trackByItemId(_idx: number, line: CartLine): string | number {
+  trackByItemCode(_idx: number, line: CartLine): string | number {
     return line.item.id;
   }
 
@@ -91,7 +91,7 @@ export class UserCartComponent implements OnInit, OnDestroy {
     const payload = {
       categoryId: null,
       items: this.lines.map(line => ({
-        itemId: Number(line.item.id),
+        itemCode: String(line.item.id),
         quantity: line.qty
       }))
     };

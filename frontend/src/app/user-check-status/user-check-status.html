@@ -78,7 +78,7 @@
 
         <!-- Item rows with partial-qty breakdown -->
         <ul class="request-items" *ngIf="req.items?.length">
-          <li *ngFor="let item of req.items; trackBy: trackByItemId">
+          <li *ngFor="let item of req.items; trackBy: trackByItemCode">
             <div class="item-row-top">
               <span class="item-name">{{ item.itemName }}</span>
               <span class="tc-badge" [ngClass]="getItemStatusClass(item.status)">
@@ -313,7 +313,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let item of currentReceipt.items; trackBy: trackByItemId">
+                <tr *ngFor="let item of currentReceipt.items; trackBy: trackByItemCode">
                   <td class="item-name">{{ item.itemName }}</td>
                   <td class="qty-col">{{ item.quantityRequested }}</td>
                   <td class="qty-col">{{ item.issuerIssuedQuantity ?? '-' }}</td>

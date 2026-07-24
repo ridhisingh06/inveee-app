@@ -104,7 +104,7 @@ namespace invmgmt.web.Controllers
                         r.RequestId,
                         (r.OfficerName ?? string.Empty).Replace("\"", "\"\""),
                         (r.Bhawan ?? string.Empty).Replace("\"", "\"\""),
-                        r.ItemId,
+                        r.ItemCode,
                         (r.ItemName ?? string.Empty).Replace("\"", "\"\""),
                         r.QuantityRequested,
                         r.QuantityApproved,

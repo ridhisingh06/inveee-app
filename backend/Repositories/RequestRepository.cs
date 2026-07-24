@@ -186,12 +186,11 @@ namespace invmgmt.web.Repositories
             _context.Requests.Update(request);
         }
 
-        public async Task<bool> ItemsExistAsync(IEnumerable<string> itemIds)
+        public async Task<Dictionary<string, int>> GetItemIdsByCodesAsync(IEnumerable<string> itemCodes)
         {
-            var existingItemsCount = await _context.Items
-                .Where(i => itemIds.Contains(i.ItemCode))
-                .CountAsync();
-            return existingItemsCount == itemIds.Count();
+            return await _context.Items
+                .Where(i => itemCodes.Contains(i.ItemCode))
+                .ToDictionaryAsync(i => i.ItemCode, i => i.Id);
         }
 
         public void DeleteRequest(Request request)

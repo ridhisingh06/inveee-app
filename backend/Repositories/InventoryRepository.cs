@@ -22,11 +22,11 @@ namespace invmgmt.web.Repositories
             _logger = logger;
         }
 
-        public async Task<InventoryStock?> GetByItemIdAsync(string itemCode)
+        public async Task<InventoryStock?> GetByItemCodeAsync(string itemCode)
         {
             return await _context.InventoryStocks
                 .Include(s => s.Item)
-                .FirstOrDefaultAsync(s => s.ItemCode == itemCode);
+                .FirstOrDefaultAsync(s => s.Item.ItemCode == itemCode);
         }
 
         public async Task<InventoryStock?> GetByIdAsync(int id)
@@ -44,8 +44,9 @@ namespace invmgmt.web.Repositories
         {
             var inventory = await _context.InventoryStocks
                 .FromSqlInterpolated<InventoryStock>($@"
-                    SELECT * FROM ""InventoryStocks"" 
-                    WHERE ""ItemCode"" = {itemCode}
+                    SELECT s.* FROM ""InventoryStocks"" s
+                    INNER JOIN ""Items"" i ON s.""ItemId"" = i.""Id""
+                    WHERE i.""ItemCode"" = {itemCode}
                     FOR UPDATE
                 ")
                 .Include(s => s.Item)
@@ -68,7 +69,7 @@ namespace invmgmt.web.Repositories
         /// </summary>
         public async Task<bool> TryDeductAsync(string itemCode, int quantity)
         {
-            var inventory = await _context.InventoryStocks.FirstOrDefaultAsync(s => s.ItemCode == itemCode);
+            var inventory = await _context.InventoryStocks.FirstOrDefaultAsync(s => s.Item.ItemCode == itemCode);
             if (inventory == null)
             {
                 _logger.LogWarning("Inventory not found for deduction: ItemCode={ItemCode}", itemCode);
@@ -144,7 +145,7 @@ namespace invmgmt.web.Repositories
         public async Task<int> GetAvailableQuantityAsync(string itemCode)
         {
             var inventory = await _context.InventoryStocks
-                .Where(s => s.ItemCode == itemCode)
+                .Where(s => s.Item.ItemCode == itemCode)
                 .Select(s => s.AvailableQuantity)
                 .FirstOrDefaultAsync();
 
@@ -154,7 +155,7 @@ namespace invmgmt.web.Repositories
         public async Task<int> GetTotalQuantityAsync(string itemCode)
         {
             var inventory = await _context.InventoryStocks
-                .Where(s => s.ItemCode == itemCode)
+                .Where(s => s.Item.ItemCode == itemCode)
                 .Select(s => s.TotalQuantity)
                 .FirstOrDefaultAsync();
 
@@ -164,21 +165,21 @@ namespace invmgmt.web.Repositories
         public async Task AddAsync(InventoryStock stock)
         {
             await _context.InventoryStocks.AddAsync(stock);
-            _logger.LogInformation("InventoryStock added: ItemCode={ItemCode}, Quantity={Quantity}",
-                stock.ItemCode, stock.TotalQuantity);
+            _logger.LogInformation("InventoryStock added: ItemId={ItemId}, Quantity={Quantity}",
+                stock.ItemId, stock.TotalQuantity);
         }
 
         public async Task UpdateAsync(InventoryStock stock)
         {
             stock.UpdatedAt = DateTime.UtcNow;
             _context.InventoryStocks.Update(stock);
-            _logger.LogInformation("InventoryStock updated: ItemCode={ItemCode}, Available={Available}",
-                stock.ItemCode, stock.AvailableQuantity);
+            _logger.LogInformation("InventoryStock updated: ItemId={ItemId}, Available={Available}",
+                stock.ItemId, stock.AvailableQuantity);
         }
 
         public async Task<bool> ExistsAsync(string itemCode)
         {
-            return await _context.InventoryStocks.AnyAsync(s => s.ItemCode == itemCode);
+            return await _context.InventoryStocks.AnyAsync(s => s.Item.ItemCode == itemCode);
         }
 
         public async Task<IEnumerable<InventoryStock>> GetAllAsync()

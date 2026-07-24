@@ -328,7 +328,7 @@ namespace invmgmt.web.Services
                 .Where(ri => ri.RequestId == requestId && ri.IssuerRejectedQuantity > 0)
                 .Select(ri => new ReorderSuggestion
                 {
-                    ItemId = ri.ItemId,
+                    ItemCode = ri.Item != null ? ri.Item.ItemCode : string.Empty,
                     ItemName = ri.Item != null ? ri.Item.Name : "Unknown",
                     SuggestedQuantity = ri.IssuerRejectedQuantity
                 })
@@ -366,7 +366,7 @@ namespace invmgmt.web.Services
                 Status = orderSummary.Status,
                 Items = orderSummary.Items?.Select(osi => new OrderSummaryItemDto
                 {
-                    ItemId = osi.ItemId,
+                    ItemCode = osi.Item != null ? osi.Item.ItemCode : string.Empty,
                     ItemName = osi.Item?.Name ?? "Unknown",
                     CategoryName = osi.Item?.Category?.Name ?? "Uncategorized",
                     RequestedQuantity = osi.RequestedQuantity,

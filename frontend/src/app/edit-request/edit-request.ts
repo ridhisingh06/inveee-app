@@ -141,6 +141,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
           this.lines = items.map((ri: any) => ({
             item: {
               id:       ri.itemId   ?? ri.ItemId   ?? 0,
+              itemCode: ri.itemCode ?? ri.ItemCode ?? String(ri.itemId ?? ''),
               name:     ri.itemName ?? ri.ItemName ?? 'Unknown',
               category: 'Unknown'
             } as Item,
@@ -177,6 +178,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
 
           this.allItems = raw.map((i: any) => ({
             id:       i.id   ?? i.Id   ?? 0,
+            itemCode: i.itemCode ?? i.ItemCode ?? String(i.id ?? ''),
             name:     i.name ?? i.Name ?? '',
             category: i.category ?? i.Category ?? 'Uncategorized'
           } as Item)).filter(i => i.id && i.name);
@@ -289,7 +291,7 @@ export class EditRequestComponent implements OnInit, OnDestroy {
     //   { items: [{ itemId: number, quantity: number }] }
     const payload = {
       items: this.lines.map(l => ({
-        itemId:   Number(l.item.id),
+        itemCode: String(l.item.itemCode || l.item.id),
         quantity: l.qty
       }))
     };
@@ -316,8 +318,8 @@ export class EditRequestComponent implements OnInit, OnDestroy {
       });
   }
 
-  trackByItemId(_idx: number, line: EditLine): string | number {
-    return line.item.id;
+  trackByItemCode(_idx: number, line: EditLine): string | number {
+    return line.item.itemCode || line.item.id;
   }
 
   cancel(): void {

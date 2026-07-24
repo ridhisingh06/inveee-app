@@ -3,7 +3,7 @@ export interface MonthlyRegisterRow {
   requestId: number;
   userId: number;
   userName: string;
-  itemId: number;
+  itemCode: string;
   itemName: string;
   status: string;
   requestDate: string;

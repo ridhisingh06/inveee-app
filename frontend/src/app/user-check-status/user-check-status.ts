@@ -468,7 +468,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     this.isReorderModalOpen = false;
     items.forEach(item => {
       const mockItem = {
-        id: item.itemId,
+        id: item.itemCode,
         name: item.itemName,
         stockLimit: 999,
         availableQuantity: 999,
@@ -525,8 +525,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
   // ── Per-item receive (legacy — kept for backward compat) ──────────────────
 
-  receiveItem(requestId: number, itemId: number) {
-    this.http.patch(`${environment.apiUrl}/requests/${requestId}/items/${itemId}/receive`, {})
+  receiveItem(requestId: number, itemCode: string) {
+    this.http.patch(`${environment.apiUrl}/requests/${requestId}/items/${itemCode}/receive`, {})
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -592,8 +592,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     return req.id;
   }
   
-  trackByItemId(index: number, item: any): number {
-    return item.id || item.itemId || index;
+  trackByItemCode(index: number, item: any): string | number {
+    return item.id || item.itemCode || index;
   }
   
   // ── Counters (now using computed signals) ───────────────────────────────────────

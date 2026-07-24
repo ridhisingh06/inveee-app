@@ -517,7 +517,7 @@ public class AdminController : ControllerBase
                     RequestId = ri.RequestId,
                     UserId = ri.Request.UserId,
                     UserName = ri.Request.User.Username ?? string.Empty,
-                    ItemId = ri.ItemId,
+                    ItemCode = ri.Item != null ? ri.Item.ItemCode : string.Empty,
                     ItemName = ri.Item != null ? ri.Item.Name : string.Empty,
                     Status = ri.Request.Status,
                     RequestDate = ri.Request.CreatedAt,

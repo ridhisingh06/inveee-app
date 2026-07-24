@@ -91,7 +91,7 @@
               <div class="col-qty">Issued</div>
             </div>
             <div class="table-body">
-              <div class="table-row" *ngFor="let item of request.items; trackBy: trackByItemId">
+              <div class="table-row" *ngFor="let item of request.items; trackBy: trackByItemCode">
                 <div class="col-name">{{ item.itemName }}</div>
                 <div class="col-qty">{{ item.quantityRequested }}</div>
                 <div class="col-qty">{{ item.quantityApproved }}</div>

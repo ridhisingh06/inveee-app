@@ -190,20 +190,20 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   /**
    * Remove item from draft
    */
-  removeFromDraft(itemId: number): void {
-    this.draftItems = this.draftItems.filter(item => item.id !== itemId);
+  removeFromDraft(itemCode: string): void {
+    this.draftItems = this.draftItems.filter(item => item.itemCode !== itemCode);
   }
 
   /**
    * Update quantity in draft
    */
-  updateDraftQuantity(itemId: number, quantity: number): void {
+  updateDraftQuantity(itemCode: string, quantity: number): void {
     if (quantity <= 0) {
-      this.removeFromDraft(itemId);
+      this.removeFromDraft(itemCode);
       return;
     }
 
-    const item = this.draftItems.find(d => d.id === itemId);
+    const item = this.draftItems.find(d => d.itemCode === itemCode);
     if (item) {
       item.quantity = Math.min(quantity, item.availableQuantity);
     }
@@ -227,7 +227,7 @@ export class RequestItemComponent implements OnInit, OnDestroy {
 
     const createRequestDto: CreateRequestDto = {
       items: this.draftItems.map(item => ({
-        itemId: item.id,
+        itemCode: item.itemCode,
         quantity: item.quantity
       }))
     };
@@ -304,7 +304,7 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   /**
    * Track by function for ngFor optimization
    */
-  trackByItemId(index: number, item: InventoryItem | DraftItem): number {
-    return item.id;
+  trackByItemCode(index: number, item: InventoryItem | DraftItem): string {
+    return item.itemCode;
   }
 }

@@ -145,7 +145,7 @@ namespace invmgmt.web.Services
                 }
 
                 // STEP 4: Validate quantities and prepare inventory operations
-                var inventoryOps = new List<(string itemId, int deductQuantity, int itemName)>();
+                var inventoryOps = new List<(string itemCode, int deductQuantity, int itemId)>();
 
                 foreach (var dtoItem in dto.Items)
                 {
@@ -172,7 +172,7 @@ namespace invmgmt.web.Services
 
                     if (dtoItem.IssueQuantity > 0)
                     {
-                        inventoryOps.Add((requestItem.ItemId, dtoItem.IssueQuantity, requestItem.Item.Id));
+                        inventoryOps.Add((requestItem.Item?.ItemCode ?? string.Empty, dtoItem.IssueQuantity, requestItem.ItemId));
                     }
                 }
 
@@ -180,7 +180,7 @@ namespace invmgmt.web.Services
                 // NpgsqlRetryingExecutionStrategy can replay the entire unit of work
                 // on transient failures without throwing the "does not support
                 // user-initiated transactions" exception.
-                inventoryOps = inventoryOps.OrderBy(op => op.itemId).ToList();
+                inventoryOps = inventoryOps.OrderBy(op => op.itemCode).ToList();
                 var strategy = _context.Database.CreateExecutionStrategy();
 
                 await strategy.ExecuteAsync(async () =>
@@ -191,14 +191,14 @@ namespace invmgmt.web.Services
                         _logger.LogInformation("Acquiring inventory locks for {Count} items", inventoryOps.Count);
 
                         // Lock and validate inventory availability
-                        foreach (var (itemId, deductQty, _) in inventoryOps)
+                        foreach (var (itemCode, deductQty, itemId) in inventoryOps)
                         {
-                            var inventory = await _inventoryRepo.LockAndGetAsync(itemId);
+                            var inventory = await _inventoryRepo.LockAndGetAsync(itemCode);
                             if (inventory == null)
                             {
-                                _logger.LogWarning("Inventory not found for ItemId={ItemId}", itemId);
+                                _logger.LogWarning("Inventory not found for ItemCode={ItemCode}", itemCode);
                                 response.Success = false;
-                                response.Message = $"Inventory not found for ItemId {itemId}.";
+                                response.Message = $"Inventory not found for ItemCode {itemCode}.";
                                 await transaction.RollbackAsync();
                                 return;
                             }
@@ -206,10 +206,10 @@ namespace invmgmt.web.Services
                             if (inventory.AvailableQuantity < deductQty)
                             {
                                 _logger.LogWarning(
-                                    "Insufficient inventory: ItemId={ItemId}, Available={Available}, Requested={Requested}",
-                                    itemId, inventory.AvailableQuantity, deductQty);
+                                    "Insufficient inventory: ItemCode={ItemCode}, Available={Available}, Requested={Requested}",
+                                    itemCode, inventory.AvailableQuantity, deductQty);
                                 response.Success = false;
-                                response.Message = $"Insufficient inventory for ItemId {itemId}. Available: {inventory.AvailableQuantity}, Requested: {deductQty}";
+                                response.Message = $"Insufficient inventory for ItemCode {itemCode}. Available: {inventory.AvailableQuantity}, Requested: {deductQty}";
                                 await transaction.RollbackAsync();
                                 return;
                             }
@@ -218,14 +218,14 @@ namespace invmgmt.web.Services
                         _logger.LogInformation("Inventory locks acquired successfully");
 
                         // STEP 6: Deduct quantities from inventory
-                        foreach (var (itemId, deductQty, _) in inventoryOps)
+                        foreach (var (itemCode, deductQty, itemId) in inventoryOps)
                         {
-                            var success = await _inventoryRepo.TryDeductAsync(itemId, deductQty);
+                            var success = await _inventoryRepo.TryDeductAsync(itemCode, deductQty);
                             if (!success)
                             {
-                                _logger.LogError("Failed to deduct inventory for ItemId={ItemId}", itemId);
+                                _logger.LogError("Failed to deduct inventory for ItemCode={ItemCode}", itemCode);
                                 response.Success = false;
-                                response.Message = $"Failed to deduct inventory for ItemId {itemId}.";
+                                response.Message = $"Failed to deduct inventory for ItemCode {itemCode}.";
                                 await transaction.RollbackAsync();
                                 return;
                             }
@@ -251,8 +251,8 @@ namespace invmgmt.web.Services
                             issuedItems.Add(new IssuedItemDetailDto
                             {
                                 RequestItemId = dtoItem.RequestItemId,
-                                ItemId = requestItem.ItemId,
-                                ItemName = requestItem.Item.Name,
+                                ItemCode = requestItem.Item?.ItemCode ?? string.Empty,
+                                ItemName = requestItem.Item?.Name ?? "Unknown",
                                 RequestedQuantity = requestItem.QuantityRequested,
                                 IssuedQuantity = dtoItem.IssueQuantity,
                                 RejectedQuantity = dtoItem.RejectQuantity
@@ -324,7 +324,7 @@ namespace invmgmt.web.Services
             return new IssuerPendingItemDto
             {
                 RequestItemId = requestItem.Id,
-                ItemId = requestItem.ItemId,
+                ItemCode = requestItem.Item?.ItemCode ?? string.Empty,
                 ItemName = requestItem.Item.Name,
                 RequestedQuantity = requestItem.QuantityRequested,
                 AvailableQuantity = requestItem.Item.InventoryStock?.AvailableQuantity ?? 0,
