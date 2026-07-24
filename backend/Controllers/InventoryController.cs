@@ -20,6 +20,13 @@ public class InventoryController : ControllerBase
         _logger = logger;
     }
 
+    // Helper to verify a category exists (0 = No category / uncategorized)
+    private async Task<bool> CategoryExistsAsync(int categoryId)
+    {
+        if (categoryId == 0) return true;
+        return await _context.Categories.AnyAsync(c => c.Id == categoryId);
+    }
+
     //  GET ALL ITEMS
     [Authorize(Roles = "ADMIN,USER,ISSUER")]
     
@@ -94,6 +101,13 @@ public class InventoryController : ControllerBase
             });
         }
         
+        // Verify CategoryId if provided
+        if (!await CategoryExistsAsync(dto.CategoryId))
+        {
+            _logger.LogWarning("AddItem: CategoryId {CategoryId} does not exist.", dto.CategoryId);
+            return BadRequest(new { message = $"Category with Id {dto.CategoryId} does not exist." });
+        }
+
         var item = new Item
         {
             ItemId = normalizedItemId,
@@ -103,8 +117,16 @@ public class InventoryController : ControllerBase
             IsActive = true
         };
 
-        _context.Items.Add(item);
-        await _context.SaveChangesAsync(); //  item.Id generate
+        try
+        {
+            _context.Items.Add(item);
+            await _context.SaveChangesAsync(); // generate Id
+        }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx, "AddItem: DB error while inserting ItemId {ItemId}", dto.ItemId);
+            return BadRequest(new { message = "Unable to save the item – check data constraints." });
+        }
 
         var stock = new InventoryStock
         {
@@ -114,8 +136,19 @@ public class InventoryController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        _context.InventoryStocks.Add(stock);
-        await _context.SaveChangesAsync();
+        try
+        {
+            _context.InventoryStocks.Add(stock);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx, "AddItem: DB error while inserting stock for ItemId {ItemId}", item.ItemId);
+            // Roll back previously added item to keep DB consistent
+            _context.Items.Remove(item);
+            await _context.SaveChangesAsync();
+            return BadRequest(new { message = "Unable to save the stock record – check data constraints." });
+        }
 
         _logger.LogInformation("Item added: ItemId={ItemId}", item.ItemId);
         return Ok(new { message = "Item Added Successfully" });
@@ -153,6 +186,13 @@ public class InventoryController : ControllerBase
             });
         }
 
+        // Verify CategoryId if provided
+        if (!await CategoryExistsAsync(dto.CategoryId))
+        {
+            _logger.LogWarning("UpdateItem: CategoryId {CategoryId} does not exist.", dto.CategoryId);
+            return BadRequest(new { message = $"Category with Id {dto.CategoryId} does not exist." });
+        }
+
         item.Name = dto.Name;
         item.CategoryId = dto.CategoryId;
         item.Description = dto.Description;
@@ -167,7 +207,15 @@ public class InventoryController : ControllerBase
             stock.UpdatedAt = DateTime.UtcNow;
         }
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx, "UpdateItem: DB error while updating ItemId {ItemId}", item.ItemId);
+            return BadRequest(new { message = "Unable to update the item – check data constraints." });
+        }
 
         _logger.LogInformation("Item updated: Id={Id}", id);
 
