@@ -6,16 +6,17 @@ namespace invmgmt.web.Models
 {
     [Table("Items", Schema = "public")]
     [Index(nameof(Name), IsUnique = true)] // ✅ Unique constraint on Name column (case-insensitive)
+    [Index(nameof(ItemCode), IsUnique = true)] // ✅ Unique constraint on ItemCode
     public class Item
     {
         public int Id { get; set; }
 
         /// <summary>
-        /// Item ID - manually entered, must be unique
+        /// Item Code – user‑entered, must be unique and not null.
         /// </summary>
-        [Required(ErrorMessage = "Item ID is required")]
-        [StringLength(50, MinimumLength = 1, ErrorMessage = "Item ID must be between 1 and 50 characters")]
-        public string ItemId { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Item Code is required")]
+        [StringLength(50, MinimumLength = 1, ErrorMessage = "Item Code must be between 1 and 50 characters")]
+        public string ItemCode { get; set; } = string.Empty;
 
         /// <summary>
         /// Item name - must be unique (case-insensitive)
@@ -41,7 +42,5 @@ namespace invmgmt.web.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<RequestItem>? RequestItems { get; set; }
-
-        
     }
 }

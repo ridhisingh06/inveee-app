@@ -6,7 +6,7 @@ namespace invmgmt.web.DTOs
     {
         [Required(ErrorMessage = "Item ID is required.")]
         [StringLength(50, MinimumLength = 1, ErrorMessage = "Item ID must be 1‑50 characters.")]
-        public string ItemId { get; set; } = string.Empty;
+        public string ItemCode { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Item name is required.")]
         [StringLength(255, MinimumLength = 1, ErrorMessage = "Item name must be 1‑255 characters.")]

@@ -1,4 +1,4 @@
-﻿using invmgmt.web.Models;
+using invmgmt.web.Models;
 
 using System;
 
@@ -8,7 +8,7 @@ namespace invmgmt.web.Models
     {
         public int Id { get; set; }
 
-        public string ItemId { get; set; } = string.Empty;
+        public int ItemId { get; set; }
         public Item Item { get; set; }
 
        

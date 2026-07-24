@@ -19,7 +19,7 @@ public sealed class CreateBillDto
 /// </summary>
 public sealed class CreateBillItemDto
 {
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
 
     public int Quantity { get; set; }
 
@@ -35,7 +35,7 @@ public sealed class BillItemDto
 
     public int BillId { get; set; }
 
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
 
     public string ItemName { get; set; } = string.Empty;
 

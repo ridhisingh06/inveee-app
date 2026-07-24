@@ -62,7 +62,7 @@ public sealed class IssuePartiallyResponseDto
 public sealed class IssuedItemDetailDto
 {
     public int RequestItemId { get; set; }
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
     public string ItemName { get; set; } = string.Empty;
     public int RequestedQuantity { get; set; }
     public int IssuedQuantity { get; set; }
@@ -82,7 +82,7 @@ public sealed class IssuerPendingItemDto
     public int RequestItemId { get; set; }
 
     /// <summary>Item ID</summary>
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
 
     /// <summary>Item name</summary>
     public string ItemName { get; set; } = string.Empty;
@@ -178,7 +178,7 @@ public sealed class ApprovePartiallyResponseDto
 public sealed class ApprovedItemDetailDto
 {
     public int RequestItemId { get; set; }
-    public string ItemId { get; set; } = string.Empty;
+    public string ItemCode { get; set; } = string.Empty;
     public string ItemName { get; set; } = string.Empty;
     public int IssuerIssuedQuantity { get; set; }
     public int ApprovedQuantity { get; set; }

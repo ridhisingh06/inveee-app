@@ -12,7 +12,7 @@ namespace invmgmt.web.Models
         public int OrderSummaryId { get; set; }
         public OrderSummary OrderSummary { get; set; }
 
-        public string ItemId { get; set; } = string.Empty;
+        public int ItemId { get; set; }
         public Item Item { get; set; }
 
         // Quantities at each stage

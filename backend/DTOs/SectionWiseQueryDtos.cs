@@ -16,7 +16,7 @@ namespace invmgmt.web.DTOs
 
         public string? Bhawan { get; set; }
 
-        public string? ItemId { get; set; }
+        public string? ItemCode { get; set; }
 
         public string? ItemName { get; set; }
 
@@ -46,7 +46,7 @@ namespace invmgmt.web.DTOs
         public int RequestId { get; set; }
         public string OfficerName { get; set; } = string.Empty;
         public string? Bhawan { get; set; }
-        public string ItemId { get; set; } = string.Empty;
+        public string ItemCode { get; set; } = string.Empty;
         public string ItemName { get; set; } = string.Empty;
         public int QuantityRequested { get; set; }
         public int QuantityApproved { get; set; }

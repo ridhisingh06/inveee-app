@@ -10,7 +10,7 @@ namespace invmgmt.web.DTOs
         public int RequestId { get; set; }
         public int UserId { get; set; }
         public string UserName { get; set; } = string.Empty;
-        public string ItemId { get; set; } = string.Empty;
+        public string ItemCode { get; set; } = string.Empty;
         public string ItemName { get; set; } = string.Empty;
         public RequestStatus Status { get; set; }
         public DateTime RequestDate { get; set; }
