@@ -5,18 +5,18 @@
 namespace invmgmt.web.Migrations
 {
     /// <inheritdoc />
-    public partial class AddItemCodeColumn : Migration
+    public partial class FixItemCodeColumn : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Drop the temporary ItemId column if it exists
+            // Drop the incorrectly renamed ItemCode column (which was actually ItemId)
             migrationBuilder.DropColumn(
-                name: "ItemId",
+                name: "ItemCode",
                 schema: "public",
                 table: "Items");
 
-            // Add the proper ItemCode column
+            // Add the proper ItemCode column as string
             migrationBuilder.AddColumn<string>(
                 name: "ItemCode",
                 schema: "public",
@@ -26,20 +26,13 @@ namespace invmgmt.web.Migrations
                 nullable: false,
                 defaultValue: "");
 
-            migrationBuilder.AddColumn<int>(
-                name: "MinimumQuantity",
-                table: "InventoryStocks",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
-            // First, update any duplicate or empty ItemCode values to ensure uniqueness
+            // Populate ItemCode with unique values based on Id
             migrationBuilder.Sql(
                 @"UPDATE ""Items"" 
                   SET ""ItemCode"" = 'ITEM' || ""Id""::text 
-                  WHERE ""ItemCode"" IS NULL OR ""ItemCode"" = '' OR ""ItemCode"" ~ '^[0-9]+$'");
+                  WHERE ""ItemCode"" = ''");
 
-            // Then add the unique constraint
+            // Add unique constraint
             migrationBuilder.AddUniqueConstraint(
                 name: "AK_Items_ItemCode",
                 schema: "public",
@@ -57,25 +50,7 @@ namespace invmgmt.web.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropUniqueConstraint(
-                name: "AK_Items_ItemCode",
-                schema: "public",
-                table: "Items");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Items_ItemCode",
-                schema: "public",
-                table: "Items");
-
-            migrationBuilder.DropColumn(
-                name: "MinimumQuantity",
-                table: "InventoryStocks");
-
-            migrationBuilder.RenameColumn(
-                name: "ItemCode",
-                schema: "public",
-                table: "Items",
-                newName: "ItemId");
         }
     }
 }
