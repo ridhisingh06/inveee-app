@@ -16,6 +16,7 @@ export interface InventoryItem extends Item {
   categoryId: number;
   totalQuantity: number;
   availableQuantity: number;
+  minimumQuantity?: number;
   createdDate: string;
 }
 

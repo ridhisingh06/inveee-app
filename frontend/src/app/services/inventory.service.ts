@@ -111,6 +111,7 @@ export class InventoryService {
       name: item.name,
       categoryId: item.categoryId,
       totalQuantity: item.totalQuantity,
+      minimumQuantity: item.minimumQuantity || 0,
       description: item.description || 'New Item'
     };
     

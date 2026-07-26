@@ -214,6 +214,7 @@ export class InventoryComponent implements OnInit, DoCheck {
       name: this.itemName.trim(),
       categoryId: this.selectedCategoryId!,
       totalQuantity: this.quantity,
+      minimumQuantity: 0,
       description: 'New Item',
       category: this.getCategoryName(this.selectedCategoryId!),
       availableQuantity: this.quantity,

@@ -13,11 +13,13 @@ public class InventoryController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly ILogger<InventoryController> _logger;
+    private readonly IWebHostEnvironment _env;
     
-    public InventoryController(AppDbContext context, ILogger<InventoryController> logger)
+    public InventoryController(AppDbContext context, ILogger<InventoryController> logger, IWebHostEnvironment env)
     {
         _context = context;
         _logger = logger;
+        _env = env;
     }
 
     // Helper to verify a category exists (0 = No category / uncategorized)
@@ -126,7 +128,24 @@ public class InventoryController : ControllerBase
         catch (DbUpdateException dbEx)
         {
             _logger.LogError(dbEx, "AddItem: DB error while inserting ItemCode {ItemCode}", dto.ItemCode);
-            return BadRequest(new { message = "Unable to save the item – check data constraints." });
+            
+            var errorMessage = $"Unable to save the item – check data constraints.";
+            var innerException = dbEx.InnerException?.Message;
+            var stackTrace = dbEx.StackTrace;
+            
+            _logger.LogError("AddItem: InnerException: {InnerException}", innerException);
+            _logger.LogError("AddItem: StackTrace: {StackTrace}", stackTrace);
+            
+            if (_env.IsDevelopment())
+            {
+                return BadRequest(new { 
+                    message = errorMessage,
+                    innerException = innerException,
+                    stackTrace = stackTrace
+                });
+            }
+            
+            return BadRequest(new { message = errorMessage });
         }
 
         var stock = new InventoryStock
@@ -146,10 +165,28 @@ public class InventoryController : ControllerBase
         catch (DbUpdateException dbEx)
         {
             _logger.LogError(dbEx, "AddItem: DB error while inserting stock for ItemCode {ItemCode}", item.ItemCode);
+            
+            var errorMessage = $"Unable to save the stock record – check data constraints.";
+            var innerException = dbEx.InnerException?.Message;
+            var stackTrace = dbEx.StackTrace;
+            
+            _logger.LogError("AddItem: Stock InnerException: {InnerException}", innerException);
+            _logger.LogError("AddItem: Stock StackTrace: {StackTrace}", stackTrace);
+            
             // Roll back previously added item to keep DB consistent
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
-            return BadRequest(new { message = "Unable to save the stock record – check data constraints." });
+            
+            if (_env.IsDevelopment())
+            {
+                return BadRequest(new { 
+                    message = errorMessage,
+                    innerException = innerException,
+                    stackTrace = stackTrace
+                });
+            }
+            
+            return BadRequest(new { message = errorMessage });
         }
 
         _logger.LogInformation("Item added: ItemCode={ItemCode}", item.ItemCode);
@@ -220,7 +257,24 @@ public class InventoryController : ControllerBase
         catch (DbUpdateException dbEx)
         {
             _logger.LogError(dbEx, "UpdateItem: DB error while updating ItemCode {ItemCode}", item.ItemCode);
-            return BadRequest(new { message = "Unable to update the item – check data constraints." });
+            
+            var errorMessage = $"Unable to update the item – check data constraints.";
+            var innerException = dbEx.InnerException?.Message;
+            var stackTrace = dbEx.StackTrace;
+            
+            _logger.LogError("UpdateItem: InnerException: {InnerException}", innerException);
+            _logger.LogError("UpdateItem: StackTrace: {StackTrace}", stackTrace);
+            
+            if (_env.IsDevelopment())
+            {
+                return BadRequest(new { 
+                    message = errorMessage,
+                    innerException = innerException,
+                    stackTrace = stackTrace
+                });
+            }
+            
+            return BadRequest(new { message = errorMessage });
         }
 
         _logger.LogInformation("Item updated: ItemCode={ItemCode}", itemCode);
