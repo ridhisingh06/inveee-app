@@ -1,6 +1,6 @@
 $body = @{
-    email = "ridhi@gmail.com"
-    password = "12345"
+    email = "admin@gmail.com"
+    password = "admin@123"
 } | ConvertTo-Json
 
 $response = Invoke-RestMethod -Uri "http://localhost:5181/api/auth/login" -Method Post -Body $body -ContentType "application/json"
@@ -12,7 +12,8 @@ $headers = @{
 }
 
 $payload = @{
-    name = "Pens"
+    itemCode = "PEN002"
+    name = "Blue Pens"
     categoryId = 1
     totalQuantity = 100
     description = "A box of blue pens"

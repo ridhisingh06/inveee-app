@@ -10,23 +10,14 @@ namespace invmgmt.web.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "ItemId",
-                schema: "public",
-                table: "Items",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "");
+            // This migration is no longer needed - ItemId column was removed in AddItemCodeColumn migration
+            // Leaving this empty to avoid conflicts
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ItemId",
-                schema: "public",
-                table: "Items");
+            // No-op since Up is now empty
         }
     }
 }

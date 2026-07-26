@@ -136,16 +136,11 @@ public class InventoryController : ControllerBase
             _logger.LogError("AddItem: InnerException: {InnerException}", innerException);
             _logger.LogError("AddItem: StackTrace: {StackTrace}", stackTrace);
             
-            if (_env.IsDevelopment())
-            {
-                return BadRequest(new { 
-                    message = errorMessage,
-                    innerException = innerException,
-                    stackTrace = stackTrace
-                });
-            }
-            
-            return BadRequest(new { message = errorMessage });
+            return BadRequest(new { 
+                message = dbEx.Message,
+                innerException = innerException,
+                stackTrace = stackTrace
+            });
         }
 
         var stock = new InventoryStock
@@ -177,20 +172,15 @@ public class InventoryController : ControllerBase
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();
             
-            if (_env.IsDevelopment())
-            {
-                return BadRequest(new { 
-                    message = errorMessage,
-                    innerException = innerException,
-                    stackTrace = stackTrace
-                });
-            }
-            
-            return BadRequest(new { message = errorMessage });
+            return BadRequest(new { 
+                message = dbEx.Message,
+                innerException = innerException,
+                stackTrace = stackTrace
+            });
         }
 
         _logger.LogInformation("Item added: ItemCode={ItemCode}", item.ItemCode);
-        return Ok(new { message = "Item Added Successfully" });
+        return CreatedAtAction(nameof(GetItem), new { itemCode = item.ItemCode }, new { message = "Item Added Successfully", itemCode = item.ItemCode, id = item.Id });
     }
 
     //  UPDATE ITEM + STOCK
@@ -265,16 +255,11 @@ public class InventoryController : ControllerBase
             _logger.LogError("UpdateItem: InnerException: {InnerException}", innerException);
             _logger.LogError("UpdateItem: StackTrace: {StackTrace}", stackTrace);
             
-            if (_env.IsDevelopment())
-            {
-                return BadRequest(new { 
-                    message = errorMessage,
-                    innerException = innerException,
-                    stackTrace = stackTrace
-                });
-            }
-            
-            return BadRequest(new { message = errorMessage });
+            return BadRequest(new { 
+                message = dbEx.Message,
+                innerException = innerException,
+                stackTrace = stackTrace
+            });
         }
 
         _logger.LogInformation("Item updated: ItemCode={ItemCode}", itemCode);
