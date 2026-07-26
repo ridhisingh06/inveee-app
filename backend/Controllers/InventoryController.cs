@@ -39,6 +39,7 @@ public class InventoryController : ControllerBase
         var items = await _context.Items
             .Include(i => i.Category)
             .Include(i => i.InventoryStock)
+            .Where(i => i.IsActive) // Only show active items
             .Select(i => new
             {
                 id = i.Id,
@@ -287,7 +288,7 @@ public class InventoryController : ControllerBase
         });
     }
 
-    //  DELETE ITEM
+    //  DELETE ITEM (SOFT DELETE)
     [Authorize(Roles="ADMIN,ISSUER")]
     [HttpDelete("{itemCode}")]
     public async Task<IActionResult> DeleteItem(string itemCode)
@@ -296,16 +297,89 @@ public class InventoryController : ControllerBase
             return BadRequest("Item Code is required.");
         
         _logger.LogInformation("Delete item requested: ItemCode={ItemCode}", itemCode);
-        var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemCode == itemCode);
+        var item = await _context.Items
+            .Include(i => i.InventoryStock)
+            .FirstOrDefaultAsync(i => i.ItemCode == itemCode);
 
         if (item == null)
             return NotFound("Item not found");
 
-        _context.Items.Remove(item);
-        await _context.SaveChangesAsync();
+        // Check if item has any historical references that would prevent deletion
+        var hasRequestItems = await _context.RequestItems.AnyAsync(ri => ri.ItemId == item.Id);
+        var hasBillItems = await _context.BillItems.AnyAsync(bi => bi.ItemId == item.Id);
+        var hasOrderSummaryItems = await _context.OrderSummaryItems.AnyAsync(osi => osi.ItemId == item.Id);
 
-        _logger.LogInformation("Item deleted: ItemCode={ItemCode}", itemCode);
-        return Ok(new { message = "Item Deleted" });
+        if (hasRequestItems || hasBillItems || hasOrderSummaryItems)
+        {
+            _logger.LogWarning("DeleteItem: Item {ItemCode} has historical references - performing soft delete", itemCode);
+            
+            // Soft delete: mark as inactive instead of physical deletion
+            item.IsActive = false;
+            
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Item soft deleted: ItemCode={ItemCode}", itemCode);
+                return Ok(new { message = "Item deactivated successfully. Historical data preserved." });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "DeleteItem: DB error during soft delete of ItemCode {ItemCode}", itemCode);
+                return BadRequest(new { 
+                    message = dbEx.Message,
+                    innerException = dbEx.InnerException?.Message,
+                    stackTrace = dbEx.StackTrace
+                });
+            }
+        }
+
+        // Item has no historical references - can be physically deleted
+        _logger.LogInformation("DeleteItem: Item {ItemCode} has no references - performing physical deletion", itemCode);
+        
+        try
+        {
+            // Delete associated inventory stock first (cascade)
+            if (item.InventoryStock != null)
+            {
+                _context.InventoryStocks.Remove(item.InventoryStock);
+            }
+            
+            _context.Items.Remove(item);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Item physically deleted: ItemCode={ItemCode}", itemCode);
+            return Ok(new { message = "Item Deleted" });
+        }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx, "DeleteItem: DB error while deleting ItemCode {ItemCode}", itemCode);
+            
+            var innerException = dbEx.InnerException?.Message;
+            var stackTrace = dbEx.StackTrace;
+            
+            _logger.LogError("DeleteItem: InnerException: {InnerException}", innerException);
+            _logger.LogError("DeleteItem: StackTrace: {StackTrace}", stackTrace);
+            
+            // If physical delete fails due to unexpected FK constraint, fall back to soft delete
+            _logger.LogWarning("DeleteItem: Physical delete failed, falling back to soft delete for ItemCode {ItemCode}", itemCode);
+            item.IsActive = true; // Reset since we're in a failed state
+            
+            try
+            {
+                item.IsActive = false;
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Item deactivated successfully. Physical deletion failed due to database constraints." });
+            }
+            catch (Exception fallbackEx)
+            {
+                _logger.LogError(fallbackEx, "DeleteItem: Soft delete fallback also failed for ItemCode {ItemCode}", itemCode);
+                return BadRequest(new { 
+                    message = "Unable to delete or deactivate item due to database constraints.",
+                    innerException = fallbackEx.InnerException?.Message,
+                    stackTrace = fallbackEx.StackTrace
+                });
+            }
+        }
     }
 
     //  INCREASE STOCK
@@ -420,7 +494,7 @@ public class InventoryController : ControllerBase
         var item = await _context.Items
             .Include(i => i.Category)
             .Include(i => i.InventoryStock)
-            .Where(i => i.ItemCode == itemCode)
+            .Where(i => i.ItemCode == itemCode && i.IsActive) // Only show active items
             .Select(i => new
             {
                 id = i.Id,
