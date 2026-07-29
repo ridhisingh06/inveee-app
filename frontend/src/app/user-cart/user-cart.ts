@@ -91,10 +91,12 @@ export class UserCartComponent implements OnInit, OnDestroy {
     const payload = {
       categoryId: null,
       items: this.lines.map(line => ({
-        itemCode: String(line.item.id),
+        itemCode: String(line.item.itemCode),
         quantity: line.qty
       }))
     };
+
+    console.log("Submitting Request", payload);
 
     this.http.post(`${environment.apiUrl}/requests`, payload)
       .pipe(takeUntil(this.destroy$))

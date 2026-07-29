@@ -37,7 +37,11 @@ namespace invmgmt.web.Services
             var itemCodes = dto.Items.Select(i => i.ItemCode).Distinct().ToList();
             var codeToIdMap = await _requestRepo.GetItemIdsByCodesAsync(itemCodes);
             if (codeToIdMap.Count != itemCodes.Count)
-                return (false, "One or more items not found", null);
+            {
+                var missingItems = itemCodes.Except(codeToIdMap.Keys).ToList();
+                _logger.LogError("CreateRequest: Items not found: {MissingItems}", string.Join(", ", missingItems));
+                return (false, $"Item(s) not found: {string.Join(", ", missingItems)}", null);
+            }
 
             var request = new Request
             {
