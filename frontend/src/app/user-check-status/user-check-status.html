@@ -199,7 +199,7 @@
   </app-reorder-modal>
 
   <!-- Receive Confirmation Dialog -->
-  <div class="dialog-overlay" *ngIf="isReceiveConfirmDialogOpen" (click)="closeReceiveConfirmDialog()">
+  <div class="dialog-overlay" *ngIf="isReceiveConfirmDialogOpen()" (click)="closeReceiveConfirmDialog()">
     <div class="dialog-box" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <h3>Confirm Receipt</h3>
@@ -210,7 +210,7 @@
         </button>
       </div>
       <div class="dialog-body">
-        <p>Have you received the items for Request #{{ receiveConfirmRequestId }}?</p>
+        <p>Have you received the items for Request #{{ receiveConfirmRequestId() }}?</p>
         <p class="dialog-subtext">This action will mark the request as received and generate your order receipt.</p>
       </div>
       <div class="dialog-footer">
@@ -225,18 +225,18 @@
   </div>
 
   <!-- Order Receipt Modal -->
-  <div class="receipt-modal-overlay" *ngIf="isReceiptModalOpen" (click)="closeReceiptModal()">
+  <div class="receipt-modal-overlay" *ngIf="isReceiptModalOpen()" (click)="closeReceiptModal()">
     <div class="receipt-modal-content" (click)="$event.stopPropagation()">
       <button class="receipt-close-btn" (click)="closeReceiptModal()">×</button>
       
       <!-- Loading State -->
-      <div class="receipt-loading" *ngIf="receiptLoading">
+      <div class="receipt-loading" *ngIf="receiptLoading()">
         <div class="spinner"></div>
         <p>Loading receipt details...</p>
       </div>
 
       <!-- Error State -->
-      <div class="receipt-error" *ngIf="receiptError() && !receiptLoading">
+      <div class="receipt-error" *ngIf="receiptError() && !receiptLoading()">
         <div class="error-alert">
           <span class="error-icon">!</span> {{ receiptError() }}
         </div>
@@ -244,7 +244,7 @@
       </div>
 
       <!-- Receipt Content -->
-      <div class="receipt-document" *ngIf="!receiptLoading && !receiptError() && currentReceipt">
+      <div class="receipt-document" *ngIf="!receiptLoading() && !receiptError() && currentReceipt()">
         <!-- Receipt Header -->
         <div class="receipt-header">
           <div class="company-info">
@@ -260,7 +260,7 @@
           </div>
           <div class="receipt-title">
             <div class="receipt-label">ORDER RECEIPT</div>
-            <div class="receipt-number">REQ-{{ currentReceipt.id }}</div>
+            <div class="receipt-number">REQ-{{ currentReceipt().id }}</div>
           </div>
         </div>
 
@@ -270,36 +270,36 @@
           <div class="info-grid">
             <div class="info-item">
               <label>Request ID:</label>
-              <span>{{ currentReceipt.id }}</span>
+              <span>{{ currentReceipt().id }}</span>
             </div>
             <div class="info-item">
               <label>Status:</label>
-              <span class="status-badge" [ngClass]="getStatusClass(currentReceipt.status)">
-                {{ getStatusLabel(currentReceipt.status) }}
+              <span class="status-badge" [ngClass]="getStatusClass(currentReceipt().status)">
+                {{ getStatusLabel(currentReceipt().status) }}
               </span>
             </div>
             <div class="info-item">
               <label>Requested Date:</label>
-              <span>{{ formatDate(currentReceipt.createdAt) }}</span>
+              <span>{{ formatDate(currentReceipt().createdAt) }}</span>
             </div>
             <div class="info-item">
               <label>Updated Date:</label>
-              <span>{{ formatDate(currentReceipt.updatedAt) }}</span>
+              <span>{{ formatDate(currentReceipt().updatedAt) }}</span>
             </div>
           </div>
         </div>
 
         <!-- Workflow Information -->
-        <div class="receipt-section" *ngIf="currentReceipt.issuerName || currentReceipt.adminName">
+        <div class="receipt-section" *ngIf="currentReceipt().issuerName || currentReceipt().adminName">
           <h3>Processed By</h3>
           <div class="info-grid">
-            <div class="info-item" *ngIf="currentReceipt.issuerName">
+            <div class="info-item" *ngIf="currentReceipt().issuerName">
               <label>Issuer:</label>
-              <span>{{ currentReceipt.issuerName }}</span>
+              <span>{{ currentReceipt().issuerName }}</span>
             </div>
-            <div class="info-item" *ngIf="currentReceipt.adminName">
+            <div class="info-item" *ngIf="currentReceipt().adminName">
               <label>Admin:</label>
-              <span>{{ currentReceipt.adminName }}</span>
+              <span>{{ currentReceipt().adminName }}</span>
             </div>
           </div>
         </div>
@@ -320,7 +320,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let item of currentReceipt.items; trackBy: trackByItemCode">
+                <tr *ngFor="let item of currentReceipt().items; trackBy: trackByItemCode">
                   <td class="item-name">{{ item.itemName }}</td>
                   <td class="qty-col">{{ item.quantityRequested }}</td>
                   <td class="qty-col">{{ item.issuerIssuedQuantity ?? '-' }}</td>
@@ -374,11 +374,11 @@
           <button 
             class="received-btn" 
             (click)="confirmReceiptFromModal()"
-            [disabled]="receivingFromModal">
-            <span *ngIf="receivingFromModal">
+            [disabled]="receivingFromModal()">
+            <span *ngIf="receivingFromModal()">
               <span class="btn-spinner"></span> Processing...
             </span>
-            <span *ngIf="!receivingFromModal">
+            <span *ngIf="!receivingFromModal()">
               ✓ Confirm Receipt
             </span>
           </button>

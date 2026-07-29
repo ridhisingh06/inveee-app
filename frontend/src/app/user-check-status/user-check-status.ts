@@ -73,20 +73,20 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   reorderLoading = false;
 
   // Receive Confirmation Dialog State
-  isReceiveConfirmDialogOpen = false;
-  receiveConfirmRequestId: number | null = null;
+  isReceiveConfirmDialogOpen = signal(false);
+  receiveConfirmRequestId = signal<number | null>(null);
 
   // Receipt Modal State
-  isReceiptModalOpen = false;
-  currentReceipt: any = null;
-  receiptLoading = false;
+  isReceiptModalOpen = signal(false);
+  currentReceipt = signal<any>(null);
+  receiptLoading = signal(false);
   receiptError = signal('');
-  receivingFromModal = false;
+  receivingFromModal = signal(false);
   generatedDate = new Date();
   
   // Memoized receipt totals
   private receiptTotals = computed(() => {
-    if (!this.currentReceipt?.items) return {
+    if (!this.currentReceipt()?.items) return {
       requested: 0,
       issued: 0,
       rejected: 0,
@@ -94,7 +94,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       received: 0
     };
     
-    const items = this.currentReceipt.items;
+    const items = this.currentReceipt().items;
     return {
       requested: items.reduce((sum: number, item: any) => sum + (item.quantityRequested || 0), 0),
       issued: items.reduce((sum: number, item: any) => sum + (item.issuerIssuedQuantity || 0), 0),
@@ -172,8 +172,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
 
   openReceiveConfirmDialog(requestId: number): void {
     console.log('[UserCheckStatus] openReceiveConfirmDialog called with requestId:', requestId);
-    this.receiveConfirmRequestId = requestId;
-    this.isReceiveConfirmDialogOpen = true;
+    this.receiveConfirmRequestId.set(requestId);
+    this.isReceiveConfirmDialogOpen.set(true);
     console.log('[UserCheckStatus] Receive confirm dialog opened for requestId:', requestId);
     this.cdr.markForCheck();
   }
@@ -182,20 +182,20 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     if (environment.production) {
       console.log('[UserCheckStatus] closeReceiveConfirmDialog called');
     }
-    this.isReceiveConfirmDialogOpen = false;
-    this.receiveConfirmRequestId = null;
+    this.isReceiveConfirmDialogOpen.set(false);
+    this.receiveConfirmRequestId.set(null);
     this.cdr.markForCheck();
   }
 
   confirmReceive(): void {
     console.log('[UserCheckStatus] Confirm Receipt button clicked');
     
-    if (!this.receiveConfirmRequestId) {
+    const requestIdToReceive = this.receiveConfirmRequestId();
+    if (!requestIdToReceive) {
       console.error('[UserCheckStatus] receiveConfirmRequestId is null/undefined in confirmReceive');
       return;
     }
     
-    const requestIdToReceive = this.receiveConfirmRequestId;
     console.log('[UserCheckStatus] Confirming receipt for requestId:', requestIdToReceive);
     this.closeReceiveConfirmDialog();
     this.receiveAll(requestIdToReceive);
@@ -314,10 +314,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     }
 
     console.log('[UserCheckStatus] Opening receipt modal for requestId:', requestId);
-    this.isReceiptModalOpen = true;
-    this.receiptLoading = true;
+    this.isReceiptModalOpen.set(true);
+    this.receiptLoading.set(true);
     this.receiptError.set('');
-    this.currentReceipt = null;
+    this.currentReceipt.set(null);
     this.generatedDate = new Date();
     this.cdr.markForCheck();
 
@@ -325,8 +325,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     const request = this.requests().find(r => r.id === requestId);
     
     if (request) {
-      this.currentReceipt = request;
-      this.receiptLoading = false;
+      this.currentReceipt.set(request);
+      this.receiptLoading.set(false);
       this.cdr.markForCheck();
     } else {
       // If not found locally, try to fetch from API
@@ -339,14 +339,14 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
               ...data,
               id: data.id || data.Id || data.requestId || data.RequestId || requestId
             };
-            this.currentReceipt = normalized;
-            this.receiptLoading = false;
+            this.currentReceipt.set(normalized);
+            this.receiptLoading.set(false);
             this.cdr.markForCheck();
           },
           error: (err) => {
             console.error('[UserCheckStatus] API error fetching request:', err);
             this.receiptError.set('Failed to load receipt details. Please try again.');
-            this.receiptLoading = false;
+            this.receiptLoading.set(false);
             this.cdr.markForCheck();
           }
         });
@@ -354,30 +354,30 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   closeReceiptModal(): void {
-    this.isReceiptModalOpen = false;
-    this.currentReceipt = null;
+    this.isReceiptModalOpen.set(false);
+    this.currentReceipt.set(null);
     this.receiptError.set('');
-    this.receivingFromModal = false;
+    this.receivingFromModal.set(false);
     this.cdr.markForCheck();
   }
 
   canShowReceivedButton(): boolean {
-    console.log('[UserCheckStatus] canShowReceivedButton check - currentReceipt:', this.currentReceipt);
-    if (!this.currentReceipt) {
+    console.log('[UserCheckStatus] canShowReceivedButton check - currentReceipt:', this.currentReceipt());
+    if (!this.currentReceipt()) {
       console.log('[UserCheckStatus] No current receipt, hiding button');
       return false;
     }
-    const isApproved = this.isRequestApproved(this.currentReceipt);
+    const isApproved = this.isRequestApproved(this.currentReceipt());
     console.log('[UserCheckStatus] Request approved status:', isApproved);
     return isApproved;
   }
 
   confirmReceiptFromModal(): void {
     console.log('[UserCheckStatus] confirmReceiptFromModal called');
-    if (!this.currentReceipt || this.receivingFromModal) return;
+    if (!this.currentReceipt() || this.receivingFromModal()) return;
 
-    this.receivingFromModal = true;
-    const requestId = this.currentReceipt.id;
+    this.receivingFromModal.set(true);
+    const requestId = this.currentReceipt().id;
     console.log('[UserCheckStatus] Confirming receipt from modal for requestId:', requestId);
     this.cdr.markForCheck();
 
@@ -385,7 +385,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     if (!requestId || requestId <= 0) {
       console.error('[UserCheckStatus] Invalid request ID from receipt:', requestId);
       this.receiptError.set('Invalid request ID. Cannot confirm receipt.');
-      this.receivingFromModal = false;
+      this.receivingFromModal.set(false);
       this.cdr.markForCheck();
       return;
     }
@@ -399,7 +399,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
             console.log('[UserCheckStatus] Order summary ID stored:', res.orderSummaryId);
           }
-          this.receivingFromModal = false;
+          this.receivingFromModal.set(false);
           this.successMsg.set(`Request #${requestId} received! Order receipt generated.`);
           console.log('[UserCheckStatus] Success message set, refreshing requests');
 
@@ -420,7 +420,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
           console.error('[UserCheckStatus] Receive API error from modal:', err);
           console.error('[UserCheckStatus] Error details:', JSON.stringify(err));
           this.receiptError.set(err?.message || 'Failed to confirm receipt. Please try again.');
-          this.receivingFromModal = false;
+          this.receivingFromModal.set(false);
           this.cdr.markForCheck();
         }
       });
