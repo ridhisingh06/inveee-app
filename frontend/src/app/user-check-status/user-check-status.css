@@ -527,18 +527,16 @@
   background: rgba(0, 0, 0, 0.5); z-index: 1000;
   display: flex; align-items: center; justify-content: center;
   animation: fadeIn 0.2s ease-out;
-  contain: strict;
   will-change: opacity;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .dialog-box {
-  background: var(--bg-primary); border: 1px solid var(--border);
+  background: var(--bg-primary, #ffffff); border: 1px solid var(--border, #e2e8f0);
   border-radius: 16px; padding: 1.5rem;
   max-width: 400px; width: 90%;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.1));
   animation: slideUp 0.3s ease-out;
-  contain: strict;
   will-change: transform;
 }
 
