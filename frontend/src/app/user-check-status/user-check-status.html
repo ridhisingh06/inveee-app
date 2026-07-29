@@ -1,6 +1,5 @@
 <div class="status-page">
-
-  <!-- ════════════════════ HEADER ════════════════════ -->
+  <!-- HEADER -->
   <header class="status-header">
     <div>
       <h1>Request Tracker</h1>
@@ -8,14 +7,15 @@
     </div>
     <button class="refresh-btn" (click)="loadRequests()" [disabled]="loading()">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M23 4v6h-6"/>
+        <path d="M1 20v-6h6"/>
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
       </svg>
       Refresh
     </button>
   </header>
 
-  <!-- ════════════════════ STATS ════════════════════ -->
+  <!-- STATS -->
   <div class="mini-stats" *ngIf="!loading() && requests().length > 0">
     <div class="mini-stat amber">
       <span class="ms-value">{{ pendingCount() }}</span>
@@ -35,179 +35,105 @@
     </div>
   </div>
 
-  <!-- ════════════════════ MESSAGES ════════════════════ -->
+  <!-- MESSAGES -->
   <div class="loading-state" *ngIf="loading()">
     <div class="spinner"></div>
     <p>Fetching your requests…</p>
   </div>
-  <div class="error-msg"   *ngIf="errorMsg()">{{ errorMsg() }}</div>
+  <div class="error-msg" *ngIf="errorMsg()">{{ errorMsg() }}</div>
   <div class="success-msg" *ngIf="successMsg()">{{ successMsg() }}</div>
 
-  <!-- ════════════════════ EMPTY ════════════════════ -->
+  <!-- EMPTY -->
   <div class="empty-state" *ngIf="!loading() && requests().length === 0 && !errorMsg()">
     <div class="empty-icon">📋</div>
     <h3>No requests yet</h3>
     <p>Head to the Item List to add items and submit your first request.</p>
   </div>
 
-  <!-- ════════════════════ TIMELINE ════════════════════ -->
+  <!-- TIMELINE -->
   <div class="timeline" *ngIf="!loading() && requests().length > 0">
-
     <div class="timeline-item fade-in" *ngFor="let req of requests(); trackBy: trackByRequestId">
-      <div class="timeline-dot" [ngClass]="getStatusClass(req.status)">
-        {{ getStatusIcon(req.status) }}
-      </div>
-
+      <div class="timeline-dot" [ngClass]="getStatusClass(req.status)">{{ getStatusIcon(req.status) }}</div>
       <div class="timeline-card" [ngClass]="getStatusClass(req.status)">
-
-        <!-- Card top: request ID + status badge -->
         <div class="tc-top">
           <span class="tc-id">REQ-{{ req.id }}</span>
-          <span class="tc-badge" [ngClass]="getStatusClass(req.status)">
-            {{ getStatusLabel(req.status) }}
-          </span>
+          <span class="tc-badge" [ngClass]="getStatusClass(req.status)">{{ getStatusLabel(req.status) }}</span>
         </div>
-
-        <!-- Dates -->
         <div class="tc-meta">
           <span>Submitted {{ req.createdAt | date:'mediumDate' }}</span>
-          <span *ngIf="req.updatedAt && req.updatedAt !== req.createdAt">
-            Updated {{ req.updatedAt | date:'mediumDate' }}
-          </span>
+          <span *ngIf="req.updatedAt && req.updatedAt !== req.createdAt">Updated {{ req.updatedAt | date:'mediumDate' }}</span>
         </div>
-
-        <!-- Item rows with partial-qty breakdown -->
         <ul class="request-items" *ngIf="req.items?.length">
           <li *ngFor="let item of req.items; trackBy: trackByItemCode">
             <div class="item-row-top">
               <span class="item-name">{{ item.itemName }}</span>
-              <span class="tc-badge" [ngClass]="getItemStatusClass(item.status)">
-                {{ getItemStatusLabel(item.status) }}
-              </span>
+              <span class="tc-badge" [ngClass]="getItemStatusClass(item.status)">{{ getItemStatusLabel(item.status) }}</span>
             </div>
-
-            <!-- Quantity breakdown -->
             <div class="qty-breakdown">
-              <span class="qty-chip requested">
-                Requested: <strong>{{ item.quantityRequested }}</strong>
-              </span>
+              <span class="qty-chip requested">Requested: <strong>{{ item.quantityRequested }}</strong></span>
               <ng-container *ngIf="item.issuerIssuedQuantity != null">
-                <span class="qty-chip issued">
-                  Issued: <strong>{{ item.issuerIssuedQuantity }}</strong>
-                </span>
-                <span class="qty-chip rejected" *ngIf="item.issuerRejectedQuantity > 0">
-                  Issuer Rejected: <strong>{{ item.issuerRejectedQuantity }}</strong>
-                </span>
+                <span class="qty-chip issued">Issued: <strong>{{ item.issuerIssuedQuantity }}</strong></span>
+                <span class="qty-chip rejected" *ngIf="item.issuerRejectedQuantity > 0">Issuer Rejected: <strong>{{ item.issuerRejectedQuantity }}</strong></span>
               </ng-container>
               <ng-container *ngIf="item.adminApprovedQuantity != null">
-                <span class="qty-chip approved">
-                  Approved: <strong>{{ item.adminApprovedQuantity }}</strong>
-                </span>
-                <span class="qty-chip admin-rej" *ngIf="item.adminRejectedQuantity > 0">
-                  Admin Rejected: <strong>{{ item.adminRejectedQuantity }}</strong>
-                </span>
+                <span class="qty-chip approved">Approved: <strong>{{ item.adminApprovedQuantity }}</strong></span>
+                <span class="qty-chip admin-rej" *ngIf="item.adminRejectedQuantity > 0">Admin Rejected: <strong>{{ item.adminRejectedQuantity }}</strong></span>
               </ng-container>
-              <span class="qty-chip received-chip" *ngIf="isItemReceived(item.status)">
-                Received: <strong>{{ item.adminApprovedQuantity ?? item.quantityRequested }}</strong>
-              </span>
+              <span class="qty-chip received-chip" *ngIf="isItemReceived(item.status)">Received: <strong>{{ item.adminApprovedQuantity ?? item.quantityRequested }}</strong></span>
             </div>
           </li>
         </ul>
-
-        <!-- ── PENDING WITH ISSUER: Edit Request button ── -->
         <div class="edit-section" *ngIf="isEditable(req)">
           <div class="edit-prompt">
-            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" class="edit-icon">
-              <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z"/>
-            </svg>
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" class="edit-icon"><path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z"/></svg>
             This request is pending. You can still modify it.
           </div>
-          <button class="edit-request-btn" (click)="editRequest(req.id)">
-            Edit Request
-          </button>
+          <button class="edit-request-btn" (click)="editRequest(req.id)">Edit Request</button>
         </div>
-
-        <!-- ── APPROVED: Receive All button ── -->
         <div class="receive-section" *ngIf="isRequestApproved(req)">
           <div class="receive-prompt">
-            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" class="receive-icon">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/>
-            </svg>
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" class="receive-icon"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/></svg>
             Your items are ready for collection!
           </div>
-          <button
-            class="receive-btn"
-            [disabled]="receivingMap[req.id]"
-            (click)="openReceiveConfirmDialog(req.id)"
-          >
-            <span *ngIf="receivingMap[req.id]">
-              <span class="btn-spinner"></span> Confirming…
-            </span>
-            <span *ngIf="!receivingMap[req.id]">
-              ✓ Confirm Receipt of REQ-{{ req.id }}
-            </span>
+          <button class="receive-btn" [disabled]="receivingMap[req.id]" (click)="openReceiveConfirmDialog(req.id)">
+            <span *ngIf="receivingMap[req.id]"><span class="btn-spinner"></span> Confirming…</span>
+            <span *ngIf="!receivingMap[req.id]">✓ Confirm Receipt of REQ-{{ req.id }}</span>
           </button>
         </div>
-
-        <!-- ── RECEIVED: View Receipt link ── -->
         <div class="receipt-section" *ngIf="isRequestReceived(req)">
-          <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 0 1 0 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 1.414-1.414L8 12.586l7.293-7.293a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"/>
-          </svg>
+          <svg viewBox="0 0 20 20" width="15" height="15" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 0 1 0 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 0 1 1.414-1.414L8 12.586l7.293-7.293a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"/></svg>
           Items received
-          <button class="view-receipt-btn" (click)="openReceiptModal(req.id)">
-            View Order Receipt →
-          </button>
+          <button class="view-receipt-btn" (click)="openReceiptModal(req.id)">View Order Receipt →</button>
         </div>
-
-        <!-- ── APPROVED: View Receipt button (to see details before confirming) ── -->
         <div class="receipt-section" *ngIf="isRequestApproved(req)">
-          <button class="view-receipt-btn-small" (click)="openReceiptModal(req.id)">
-            View Receipt Details
-          </button>
+          <button class="view-receipt-btn-small" (click)="openReceiptModal(req.id)">View Receipt Details</button>
         </div>
-
-        <!-- ── OTHER STATUSES: View Receipt for any request ── -->
         <div class="receipt-section" *ngIf="!isRequestReceived(req) && !isRequestApproved(req)">
-          <button class="view-receipt-btn-small" (click)="openReceiptModal(req.id)">
-            View Receipt Details
-          </button>
+          <button class="view-receipt-btn-small" (click)="openReceiptModal(req.id)">View Receipt Details</button>
         </div>
-
-        <!-- ── REORDER: Rejected Items ── -->
         <div class="reorder-section" *ngIf="hasRejectedItems(req)">
-          <div class="reorder-prompt">
-            <span class="warning-icon">⚠️</span>
-            Some items could not be fully issued due to stock limits.
-          </div>
-          <button class="reorder-btn" (click)="openReorderModal(req.id)">
-            View Reorder Options
-          </button>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-
-  <app-reorder-modal
-    [isOpen]="isReorderModalOpen"
-    [loading]="reorderLoading"
-    [suggestions]="reorderSuggestions"
-    (close)="isReorderModalOpen = false"
-    (reorder)="handleReorder($event)">
-  </app-reorder-modal>
-
-              <label>Generated:</label>
-              <span>{{ formatDateTime(generatedDate) }}</span>
-            </div>
-          </div>
-          <div class="company-footer">
-            <p>Inventory Hub - Enterprise Inventory Management System</p>
-          </div>
+          <div class="reorder-prompt"><span class="warning-icon">⚠️</span> Some items could not be fully issued due to stock limits.</div>
+          <button class="reorder-btn" (click)="openReorderModal(req.id)">View Reorder Options</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- REORDER MODAL -->
+  <app-reorder-modal [isOpen]="isReorderModalOpen" [loading]="reorderLoading" [suggestions]="reorderSuggestions" (close)="isReorderModalOpen = false" (reorder)="handleReorder($event)"></app-reorder-modal>
+
+  <!-- RECEIPT MODAL -->
+  <div class="receipt-modal" *ngIf="isReceiptModalOpen" role="dialog" aria-modal="true" aria-labelledby="receipt-modal-title">
+    <div class="modal-header">
+      <h2 id="receipt-modal-title">Order Receipt</h2>
+      <button class="close-btn" (click)="closeReceiptModal()" aria-label="Close receipt modal">×</button>
+    </div>
+    <div class="modal-body">
+      <label>Generated:</label>
+      <span>{{ formatDateTime(generatedDate) }}</span>
+    </div>
+    <div class="company-footer">
+      <p>Inventory Hub - Enterprise Inventory Management System</p>
+    </div>
+  </div>
 </div>
