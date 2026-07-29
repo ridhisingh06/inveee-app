@@ -137,6 +137,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   loadRequests() {
+    console.log('[UserCheckStatus] loadRequests called - refreshing request list');
     this.loading.set(true);
     this.errorMsg.set('');
 
@@ -144,9 +145,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: res => {
-          if (environment.production) {
-            console.log('[UserCheckStatus] loadRequests API response:', res);
-          }
+          console.log('[UserCheckStatus] loadRequests API response:', res);
           const rawRequests = Array.isArray(res) ? res : (res.data ?? []);
           
           // Normalize request objects to ensure they have 'id' property
@@ -155,6 +154,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
             id: req.id || req.Id || req.requestId || req.RequestId
           }));
           
+          console.log('[UserCheckStatus] Updated requests with count:', normalizedRequests.length);
           this.requests.set(normalizedRequests);
           this.loading.set(false);
           this.cdr.markForCheck();
@@ -373,10 +373,12 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   confirmReceiptFromModal(): void {
+    console.log('[UserCheckStatus] confirmReceiptFromModal called');
     if (!this.currentReceipt || this.receivingFromModal) return;
 
     this.receivingFromModal = true;
     const requestId = this.currentReceipt.id;
+    console.log('[UserCheckStatus] Confirming receipt from modal for requestId:', requestId);
     this.cdr.markForCheck();
 
     // Validate request ID before making API call
@@ -392,14 +394,14 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          if (environment.production) {
-            console.log('[UserCheckStatus] Receive API response:', res);
-          }
+          console.log('[UserCheckStatus] Receive API response from modal:', res);
           if (res.orderSummaryId) {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
+            console.log('[UserCheckStatus] Order summary ID stored:', res.orderSummaryId);
           }
           this.receivingFromModal = false;
           this.successMsg.set(`Request #${requestId} received! Order receipt generated.`);
+          console.log('[UserCheckStatus] Success message set, refreshing requests');
 
           // Refresh the request list
           this.loadRequests();
@@ -415,7 +417,8 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
           }, 2000);
         },
         error: (err: any) => {
-          console.error('[UserCheckStatus] Receive API error:', err);
+          console.error('[UserCheckStatus] Receive API error from modal:', err);
+          console.error('[UserCheckStatus] Error details:', JSON.stringify(err));
           this.receiptError.set(err?.message || 'Failed to confirm receipt. Please try again.');
           this.receivingFromModal = false;
           this.cdr.markForCheck();

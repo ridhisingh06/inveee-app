@@ -114,9 +114,9 @@ export class WorkflowService {
         payload
       )
       .pipe(
-        catchError(this.handleError),
         // Add logging for response
-        tap(response => console.log('[WorkflowService] receiveItems API response:', response))
+        tap(response => console.log('[WorkflowService] receiveItems API response:', response)),
+        catchError(this.handleError)
       );
   }
 
