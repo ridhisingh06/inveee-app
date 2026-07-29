@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import {
   IssuerPendingList,
@@ -103,12 +103,21 @@ export class WorkflowService {
     * Creates an immutable OrderSummary record.
     */
   receiveItems(requestId: number, notes?: string): Observable<ReceiveItemsResponse> {
+    console.log('[WorkflowService] Calling receiveItems API for requestId:', requestId);
+    console.log('[WorkflowService] API URL:', `${this.requestBase}/${requestId}/receive`);
+    const payload = notes ? { notes } : {};
+    console.log('[WorkflowService] Request payload:', payload);
+    
     return this.http
       .patch<ReceiveItemsResponse>(
         `${this.requestBase}/${requestId}/receive`,
-        notes ? { notes } : {}
+        payload
       )
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        // Add logging for response
+        tap(response => console.log('[WorkflowService] receiveItems API response:', response))
+      );
   }
 
   // ──────────────────────────────────────────────────────────

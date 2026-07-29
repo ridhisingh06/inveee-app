@@ -160,7 +160,14 @@
           </button>
         </div>
 
-        <!-- ── ALWAYS AVAILABLE: View Receipt for any request ── -->
+        <!-- ── APPROVED: View Receipt button (to see details before confirming) ── -->
+        <div class="receipt-section" *ngIf="isRequestApproved(req)">
+          <button class="view-receipt-btn-small" (click)="openReceiptModal(req.id)">
+            View Receipt Details
+          </button>
+        </div>
+
+        <!-- ── OTHER STATUSES: View Receipt for any request ── -->
         <div class="receipt-section" *ngIf="!isRequestReceived(req) && !isRequestApproved(req)">
           <button class="view-receipt-btn-small" (click)="openReceiptModal(req.id)">
             View Receipt Details

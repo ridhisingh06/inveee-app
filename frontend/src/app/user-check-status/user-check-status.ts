@@ -171,11 +171,10 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Receive entire approved request ──────────────────────────────────────
 
   openReceiveConfirmDialog(requestId: number): void {
-    if (environment.production) {
-      console.log('[UserCheckStatus] openReceiveConfirmDialog called with requestId:', requestId);
-    }
+    console.log('[UserCheckStatus] openReceiveConfirmDialog called with requestId:', requestId);
     this.receiveConfirmRequestId = requestId;
     this.isReceiveConfirmDialogOpen = true;
+    console.log('[UserCheckStatus] Receive confirm dialog opened for requestId:', requestId);
     this.cdr.markForCheck();
   }
 
@@ -189,9 +188,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   confirmReceive(): void {
-    if (environment.production) {
-      console.log('[UserCheckStatus] confirmReceive called');
-    }
+    console.log('[UserCheckStatus] Confirm Receipt button clicked');
     
     if (!this.receiveConfirmRequestId) {
       console.error('[UserCheckStatus] receiveConfirmRequestId is null/undefined in confirmReceive');
@@ -199,14 +196,13 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
     }
     
     const requestIdToReceive = this.receiveConfirmRequestId;
+    console.log('[UserCheckStatus] Confirming receipt for requestId:', requestIdToReceive);
     this.closeReceiveConfirmDialog();
     this.receiveAll(requestIdToReceive);
   }
 
   receiveAll(requestId: number): void {
-    if (environment.production) {
-      console.log('[UserCheckStatus] receiveAll called with requestId:', requestId);
-    }
+    console.log('[UserCheckStatus] receiveAll called with requestId:', requestId);
     
     if (!requestId || requestId <= 0) {
       console.error('[UserCheckStatus] Invalid request ID:', requestId);
@@ -215,24 +211,30 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.receivingMap[requestId]) return;
+    if (this.receivingMap[requestId]) {
+      console.log('[UserCheckStatus] Already receiving requestId:', requestId);
+      return;
+    }
+    
+    console.log('[UserCheckStatus] Starting receive process for requestId:', requestId);
     this.receivingMap[requestId] = true;
     this.successMsg.set('');
     this.errorMsg.set('');
     this.cdr.markForCheck();
     
+    console.log('[UserCheckStatus] Calling workflow.receiveItems API for requestId:', requestId);
     this.workflow.receiveItems(requestId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          if (environment.production) {
-            console.log('[UserCheckStatus] Receive API response:', res);
-          }
+          console.log('[UserCheckStatus] Receive API response received:', res);
           if (res.orderSummaryId) {
             this.orderSummaryMap[requestId] = res.orderSummaryId;
+            console.log('[UserCheckStatus] Order summary ID stored:', res.orderSummaryId);
           }
           delete this.receivingMap[requestId];
           this.successMsg.set(`Request #${requestId} received! Order receipt generated.`);
+          console.log('[UserCheckStatus] Success message set, refreshing requests');
 
           // Refresh the request list immediately with latest data from API
           this.loadRequests();
@@ -247,6 +249,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
         },
         error: (err: any) => {
           console.error('[UserCheckStatus] Receive API error:', err);
+          console.error('[UserCheckStatus] Error details:', JSON.stringify(err));
           this.errorMsg.set(err?.message || 'Failed to confirm receipt.');
           delete this.receivingMap[requestId];
           this.cdr.markForCheck();
@@ -255,30 +258,41 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   viewReceipt(requestId: number): void {
+    console.log('[UserCheckStatus] viewReceipt called with requestId:', requestId);
+    
     // Validate request ID before making API call
     if (!requestId || requestId <= 0) {
+      console.error('[UserCheckStatus] Invalid request ID:', requestId);
       this.errorMsg.set('Invalid request ID. Cannot view receipt.');
       this.cdr.markForCheck();
       return;
     }
 
     const summaryId = this.orderSummaryMap[requestId];
+    console.log('[UserCheckStatus] orderSummaryMap for requestId:', requestId, 'summaryId:', summaryId);
+    
     if (summaryId) {
+      console.log('[UserCheckStatus] Navigating to order summary with summaryId:', summaryId);
       this.router.navigate(['/user-dashboard/order-summary', summaryId]);
     } else {
+      console.log('[UserCheckStatus] No summaryId in map, calling API to get order summary by requestId');
       this.workflow.getOrderSummaryByRequestId(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (os) => {
+            console.log('[UserCheckStatus] Order summary API response:', os);
             if (os && os.id) {
               this.orderSummaryMap[requestId] = os.id;
+              console.log('[UserCheckStatus] Navigating to order summary with summaryId:', os.id);
               this.router.navigate(['/user-dashboard/order-summary', os.id]);
             } else {
+              console.error('[UserCheckStatus] Order summary response missing id');
               this.errorMsg.set('Order receipt not found for this request.');
               this.cdr.markForCheck();
             }
           },
-          error: ()  => {
+          error: (err)  => {
+            console.error('[UserCheckStatus] Error fetching order summary:', err);
             this.errorMsg.set('Order receipt not found for this request.');
             this.cdr.markForCheck();
           }
@@ -289,9 +303,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   // ── Receipt Modal ─────────────────────────────────────────────────────────────
 
   openReceiptModal(requestId: number): void {
-    if (environment.production) {
-      console.log('[UserCheckStatus] openReceiptModal called with requestId:', requestId);
-    }
+    console.log('[UserCheckStatus] View Order Receipt clicked - requestId:', requestId);
     
     // Validate request ID before opening modal
     if (!requestId || requestId <= 0) {
@@ -301,6 +313,7 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       return;
     }
 
+    console.log('[UserCheckStatus] Opening receipt modal for requestId:', requestId);
     this.isReceiptModalOpen = true;
     this.receiptLoading = true;
     this.receiptError.set('');
@@ -349,7 +362,14 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
   }
 
   canShowReceivedButton(): boolean {
-    return this.currentReceipt && this.isRequestApproved(this.currentReceipt);
+    console.log('[UserCheckStatus] canShowReceivedButton check - currentReceipt:', this.currentReceipt);
+    if (!this.currentReceipt) {
+      console.log('[UserCheckStatus] No current receipt, hiding button');
+      return false;
+    }
+    const isApproved = this.isRequestApproved(this.currentReceipt);
+    console.log('[UserCheckStatus] Request approved status:', isApproved);
+    return isApproved;
   }
 
   confirmReceiptFromModal(): void {
