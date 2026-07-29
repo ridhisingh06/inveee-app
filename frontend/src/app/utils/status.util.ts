@@ -9,6 +9,8 @@ export function normalizeStatus(status: string | null | undefined): string {
   // Legacy aliases returned by older backend records
   if (s === 'requested') return 'pendingwithissuer';
   if (s === 'issued')    return 'pendingadminapproval';
+  // New alias for ready to receive items
+  if (s === 'readytoreceive' || s === 'ready to receive') return 'approved';
   return s;
 }
 
