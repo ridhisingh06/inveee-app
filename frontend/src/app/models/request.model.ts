@@ -10,6 +10,14 @@ export interface RequestItemDetail {
   quantityRequested: number;
   quantityApproved: number;
   quantityIssued: number;
+  
+  // New partial workflow fields
+  issuerIssuedQuantity: number;
+  issuerRejectedQuantity: number;
+  adminApprovedQuantity: number;
+  adminRejectedQuantity: number;
+  receivedQuantity: number;
+  
   status?: string;
 }
 

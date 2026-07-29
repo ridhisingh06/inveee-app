@@ -106,8 +106,13 @@ namespace invmgmt.web.Services
                     ItemCode = ri.Item?.ItemCode ?? string.Empty,
                     ItemName = ri.Item?.Name ?? string.Empty,
                     QuantityRequested = ri.QuantityRequested,
-                    QuantityApproved = ri.QuantityApproved,
-                    QuantityIssued = ri.QuantityIssued,
+                    QuantityApproved = ri.AdminApprovedQuantity != 0 ? ri.AdminApprovedQuantity : ri.QuantityApproved,
+                    QuantityIssued = ri.IssuerIssuedQuantity != 0 ? ri.IssuerIssuedQuantity : ri.QuantityIssued,
+                    IssuerIssuedQuantity = ri.IssuerIssuedQuantity,
+                    IssuerRejectedQuantity = ri.IssuerRejectedQuantity,
+                    AdminApprovedQuantity = ri.AdminApprovedQuantity,
+                    AdminRejectedQuantity = ri.AdminRejectedQuantity,
+                    ReceivedQuantity = ri.ReceivedQuantity,
                     Status = ri.Status
                 }).ToList()
             };

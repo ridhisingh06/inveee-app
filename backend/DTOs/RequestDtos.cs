@@ -31,6 +31,14 @@ public sealed class RequestItemDetailDto
     public int QuantityRequested { get; set; }
     public int QuantityApproved { get; set; }
     public int QuantityIssued { get; set; }
+    
+    // New partial workflow fields
+    public int IssuerIssuedQuantity { get; set; }
+    public int IssuerRejectedQuantity { get; set; }
+    public int AdminApprovedQuantity { get; set; }
+    public int AdminRejectedQuantity { get; set; }
+    public int ReceivedQuantity { get; set; }
+    
     public RequestItemStatus Status { get; set; }
 }
 

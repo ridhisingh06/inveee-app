@@ -137,10 +137,10 @@ public sealed class RequestsController : ControllerBase
                                 itemId = ri.ItemId,
                                 itemName = ri.Item != null ? (ri.Item.Name ?? string.Empty) : string.Empty,
                                 quantityRequested = ri.QuantityRequested,
-                                quantityIssued = ri.QuantityIssued,
-                                issuerIssuedQuantity = ri.IssuerIssuedQuantity != 0 ? ri.IssuerIssuedQuantity : ri.QuantityIssued,
+                                quantityIssued = ri.IssuerIssuedQuantity != 0 ? ri.IssuerIssuedQuantity : ri.QuantityIssued,
+                                issuerIssuedQuantity = ri.IssuerIssuedQuantity,
                                 issuerRejectedQuantity = ri.IssuerRejectedQuantity,
-                                adminApprovedQuantity = ri.AdminApprovedQuantity != 0 ? ri.AdminApprovedQuantity : ri.QuantityApproved,
+                                adminApprovedQuantity = ri.AdminApprovedQuantity,
                                 adminRejectedQuantity = ri.AdminRejectedQuantity,
                                 receivedQuantity = ri.ReceivedQuantity,
                                 status = ri.Status.ToString()
@@ -223,7 +223,12 @@ public sealed class RequestsController : ControllerBase
                             itemId = ri.ItemId,
                             itemName = ri.Item != null ? (ri.Item.Name ?? string.Empty) : string.Empty,
                             quantityRequested = ri.QuantityRequested,
-                            quantityIssued = ri.QuantityIssued,
+                            quantityIssued = ri.IssuerIssuedQuantity != 0 ? ri.IssuerIssuedQuantity : ri.QuantityIssued,
+                            issuerIssuedQuantity = ri.IssuerIssuedQuantity,
+                            issuerRejectedQuantity = ri.IssuerRejectedQuantity,
+                            adminApprovedQuantity = ri.AdminApprovedQuantity,
+                            adminRejectedQuantity = ri.AdminRejectedQuantity,
+                            receivedQuantity = ri.ReceivedQuantity,
                             status = ri.Status.ToString()
                         })
                         .ToList()
