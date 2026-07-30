@@ -107,16 +107,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['USER'] },
     children: [
-      { path: '', redirectTo: 'item-list', pathMatch: 'full' },
       { path: 'item-list', component: UserItemListComponent },
       { path: 'my-requests', component: UserCheckStatusComponent },
       { path: 'cart', component: UserCartComponent },
       { path: 'order-history', component: OrderHistoryComponent },
-      { path: 'order-summary/:id', component: OrderSummaryComponent },
+      { path: 'order-summary/:id', component: OrderSummaryComponent, data: { debug: 'order-summary-route' } },
       { path: 'edit-request/:id', component: EditRequestComponent },
       // Legacy redirects for old links
       { path: 'request-items', redirectTo: 'item-list', pathMatch: 'full' },
-      { path: 'check-status', redirectTo: 'my-requests', pathMatch: 'full' }
+      { path: 'check-status', redirectTo: 'my-requests', pathMatch: 'full' },
+      { path: '', redirectTo: 'item-list', pathMatch: 'full' }
     ]
   },
   {
