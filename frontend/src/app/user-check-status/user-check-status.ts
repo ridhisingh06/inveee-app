@@ -329,33 +329,6 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
         });
     }
   }
-    if (!this.isValidRequestId(requestId)) {
-      this.errorMsg.set('Invalid request ID. Cannot view receipt.');
-      return;
-    }
-
-    const summaryId = this.orderSummaryMap[requestId];
-    
-    if (summaryId) {
-      this.router.navigate(['/user-dashboard/order-summary', summaryId]);
-    } else {
-      this.workflow.getOrderSummaryByRequestId(requestId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (os) => {
-            if (os && os.id) {
-              this.orderSummaryMap[requestId] = os.id;
-              this.router.navigate(['/user-dashboard/order-summary', os.id]);
-            } else {
-              this.errorMsg.set('Order receipt not found for this request.');
-            }
-          },
-          error: (err)  => {
-            this.errorMsg.set('Order receipt not found for this request.');
-          }
-        });
-    }
-  }
 
   // ── Receipt Modal ─────────────────────────────────────────────────────────────
 
