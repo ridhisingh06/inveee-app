@@ -119,6 +119,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'item-list', pathMatch: 'full' }
     ]
   },
+
   {
     path: 'issuer-dashboard',
     component: IssuerDashboardComponent,
