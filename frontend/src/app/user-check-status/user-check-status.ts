@@ -303,6 +303,37 @@ export class UserCheckStatusComponent implements OnInit, OnDestroy {
       return;
     }
 
+    console.log('[Receipt] Request ID:', requestId);
+    const summaryId = this.orderSummaryMap[requestId];
+    if (summaryId) {
+      console.log('[Receipt] OrderSummary ID from cache:', summaryId);
+      this.router.navigate(['/user-dashboard/order-summary', summaryId]);
+    } else {
+      this.workflow.getOrderSummaryByRequestId(requestId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (os) => {
+            console.log('[Receipt] OrderSummary response:', os);
+            if (os && os.id) {
+              this.orderSummaryMap[requestId] = os.id;
+              console.log('[Receipt] Navigating to OrderSummary:', os.id);
+              this.router.navigate(['/user-dashboard/order-summary', os.id]);
+            } else {
+              this.errorMsg.set('Order receipt not found for this request.');
+            }
+          },
+          error: (err) => {
+            console.error('[Receipt] Error fetching OrderSummary:', err);
+            this.errorMsg.set('Order receipt not found for this request.');
+          }
+        });
+    }
+  }
+    if (!this.isValidRequestId(requestId)) {
+      this.errorMsg.set('Invalid request ID. Cannot view receipt.');
+      return;
+    }
+
     const summaryId = this.orderSummaryMap[requestId];
     
     if (summaryId) {
