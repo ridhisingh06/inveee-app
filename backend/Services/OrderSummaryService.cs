@@ -53,138 +53,140 @@ namespace invmgmt.web.Services
 
             try
             {
-                // STEP 1: Get the request with all items
-                var request = await _context.Requests
-                    .Include(r => r.RequestItems)
-                        .ThenInclude(ri => ri.Item)
-                            .ThenInclude(i => i.Category)
-                    .Include(r => r.User)
-                    .FirstOrDefaultAsync(r => r.Id == requestId);
-
-                if (request == null)
+                var strategy = _context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
                 {
-                    _logger.LogWarning("Request not found for order summary: RequestId={RequestId}", requestId);
-                    response.Success = false;
-                    response.Message = $"Request {requestId} not found.";
-                    return response;
-                }
+                    await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                // STEP 2: Validate request is ready to receive.
-                // ✅ Accept both Approved (all items processed) and the edge case where
-                // the request is still technically Approved while some items are NotIssued
-                // — both represent a completed workflow that the user can now receive.
-                if (request.Status != RequestStatus.Approved)
-                {
-                    _logger.LogWarning("Request is not approved: RequestId={RequestId}, Status={Status}", requestId, request.Status);
-                    response.Success = false;
-                    response.Message = $"Only approved requests can be received. Current status: {request.Status}";
-                    return response;
-                }
+                    // STEP 1: Get the request with all items
+                    var request = await _context.Requests
+                        .Include(r => r.RequestItems)
+                            .ThenInclude(ri => ri.Item)
+                                .ThenInclude(i => i.Category)
+                        .Include(r => r.User)
+                        .FirstOrDefaultAsync(r => r.Id == requestId);
 
-                // STEP 3: Check if order summary already exists
-                if (await _orderSummaryRepo.ExistsByRequestIdAsync(requestId))
-                {
-                    _logger.LogWarning("Order summary already exists for RequestId={RequestId}", requestId);
-                    response.Success = false;
-                    response.Message = "Order summary already exists for this request.";
-                    return response;
-                }
-
-                // STEP 4: Calculate summary quantities from request items.
-                // FinalRejectedQuantity = IssuerRejectedQuantity + AdminRejectedQuantity (per item).
-                var orderItems = new List<OrderSummaryItem>();
-                int totalRequested = 0;
-                int totalIssued    = 0;
-                int totalApproved  = 0;
-                int totalRejected  = 0;
-                int totalReceived  = 0;
-
-                foreach (var requestItem in request.RequestItems)
-                {
-                    // Items the issuer fully rejected (NotIssued) have 0 issued / 0 approved.
-                    var issuedQty    = requestItem.IssuerIssuedQuantity;
-                    var approvedQty  = requestItem.AdminApprovedQuantity;
-                    var receivedQty  = approvedQty; // user receives what admin approved
-
-                    // ✅ Final rejected = issuer rejected + admin rejected
-                    var issuerRejected = requestItem.IssuerRejectedQuantity;
-                    var adminRejected  = requestItem.AdminRejectedQuantity;
-
-                    totalRequested += requestItem.QuantityRequested;
-                    totalIssued    += issuedQty;
-                    totalApproved  += approvedQty;
-                    totalRejected  += issuerRejected + adminRejected;
-                    totalReceived  += receivedQty;
-
-                    orderItems.Add(new OrderSummaryItem
+                    if (request == null)
                     {
-                        ItemId                 = requestItem.ItemId,
-                        RequestedQuantity      = requestItem.QuantityRequested,
-                        IssuedQuantity         = issuedQty,
-                        IssuerRejectedQuantity = issuerRejected,
-                        ApprovedQuantity       = approvedQty,
-                        AdminRejectedQuantity  = adminRejected,
-                        ReceivedQuantity       = receivedQty,
-                        RequestItemId          = requestItem.Id,
-                        CreatedAt              = DateTime.UtcNow
-                    });
-                }
-
-                // Mark all Approved items as Received; NotIssued/Rejected items stay as-is.
-                foreach (var ri in request.RequestItems)
-                {
-                    if (ri.Status == RequestItemStatus.Approved)
-                    {
-                        ri.Status           = RequestItemStatus.Received;
-                        ri.ReceivedQuantity = ri.AdminApprovedQuantity;
-                        ri.ReceivedDate     = DateTime.UtcNow;
+                        _logger.LogWarning("Request not found for order summary: RequestId={RequestId}", requestId);
+                        response.Success = false;
+                        response.Message = $"Request {requestId} not found.";
+                        return;
                     }
-                }
 
-                // STEP 5: Create order summary
-                var now = DateTime.UtcNow;
-                var orderSummary = new OrderSummary
-                {
-                    RequestId = requestId,
-                    UserId = userId,
-                    IssuedByUserId = request.IssuedBy,
-                    ApprovedByUserId = request.ApprovedBy,
-                    RequestedDate = request.CreatedAt,
-                    IssuedDate = request.IssuedDate ?? now,
-                    ApprovedDate = request.ApprovedDate ?? now,
-                    ReceivedDate = now,
-                    TotalRequestedQuantity = totalRequested,
-                    TotalIssuedQuantity = totalIssued,
-                    TotalApprovedQuantity = totalApproved,
-                    TotalRejectedQuantity = totalRejected,
-                    TotalReceivedQuantity = totalReceived,
-                    Status = RequestStatus.Received,
-                    Items = orderItems,
-                    Notes = notes,
-                    CreatedAt = now
-                };
+                    // STEP 2: Validate request is ready to receive.
+                    if (request.Status != RequestStatus.Approved)
+                    {
+                        _logger.LogWarning("Request is not approved: RequestId={RequestId}, Status={Status}", requestId, request.Status);
+                        response.Success = false;
+                        response.Message = $"Only approved requests can be received. Current status: {request.Status}";
+                        return;
+                    }
 
-                // STEP 6: Save order summary
-                await _orderSummaryRepo.CreateAsync(orderSummary);
-                await _orderSummaryRepo.SaveChangesAsync();
+                    // STEP 3: Check if order summary already exists
+                    if (await _orderSummaryRepo.ExistsByRequestIdAsync(requestId))
+                    {
+                        _logger.LogWarning("Order summary already exists for RequestId={RequestId}", requestId);
+                        response.Success = false;
+                        response.Message = "Order summary already exists for this request.";
+                        return;
+                    }
 
-                // STEP 7: Update request status to Received
-                request.Status = RequestStatus.Received;
-                request.ReceivedDate = now;
-                request.UpdatedAt = now;
-                _context.Requests.Update(request);
-                await _context.SaveChangesAsync();
+                    // STEP 4: Calculate summary quantities from request items.
+                    var orderItems = new List<OrderSummaryItem>();
+                    int totalRequested = 0;
+                    int totalIssued    = 0;
+                    int totalApproved  = 0;
+                    int totalRejected  = 0;
+                    int totalReceived  = 0;
 
-                _logger.LogInformation(
-                    "Order summary created successfully: Id={OrderSummaryId}, RequestId={RequestId}, TotalReceived={TotalReceived}",
-                    orderSummary.Id, requestId, totalReceived);
+                    foreach (var requestItem in request.RequestItems)
+                    {
+                        var issuedQty    = requestItem.IssuerIssuedQuantity;
+                        var approvedQty  = requestItem.AdminApprovedQuantity;
+                        var receivedQty  = approvedQty; // user receives what admin approved
 
-                // STEP 8: Build success response
-                response.Success = true;
-                response.Message = "Items received successfully and order summary created.";
-                response.RequestId = requestId;
-                response.OrderSummaryId = orderSummary.Id;
-                response.ReceivedDate = now;
+                        var issuerRejected = requestItem.IssuerRejectedQuantity;
+                        var adminRejected  = requestItem.AdminRejectedQuantity;
+
+                        totalRequested += requestItem.QuantityRequested;
+                        totalIssued    += issuedQty;
+                        totalApproved  += approvedQty;
+                        totalRejected  += issuerRejected + adminRejected;
+                        totalReceived  += receivedQty;
+
+                        orderItems.Add(new OrderSummaryItem
+                        {
+                            ItemId                 = requestItem.ItemId,
+                            RequestedQuantity      = requestItem.QuantityRequested,
+                            IssuedQuantity         = issuedQty,
+                            IssuerRejectedQuantity = issuerRejected,
+                            ApprovedQuantity       = approvedQty,
+                            AdminRejectedQuantity  = adminRejected,
+                            ReceivedQuantity       = receivedQty,
+                            RequestItemId          = requestItem.Id,
+                            CreatedAt              = DateTime.UtcNow
+                        });
+                    }
+
+                    // Mark all Approved items as Received; NotIssued/Rejected items stay as-is.
+                    foreach (var ri in request.RequestItems)
+                    {
+                        if (ri.Status == RequestItemStatus.Approved)
+                        {
+                            ri.Status           = RequestItemStatus.Received;
+                            ri.ReceivedQuantity = ri.AdminApprovedQuantity;
+                            ri.ReceivedDate     = DateTime.UtcNow;
+                        }
+                    }
+
+                    // STEP 5: Create order summary
+                    var now = DateTime.UtcNow;
+                    var orderSummary = new OrderSummary
+                    {
+                        RequestId = requestId,
+                        UserId = userId,
+                        IssuedByUserId = request.IssuedBy,
+                        ApprovedByUserId = request.ApprovedBy,
+                        RequestedDate = request.CreatedAt,
+                        IssuedDate = request.IssuedDate ?? now,
+                        ApprovedDate = request.ApprovedDate ?? now,
+                        ReceivedDate = now,
+                        TotalRequestedQuantity = totalRequested,
+                        TotalIssuedQuantity = totalIssued,
+                        TotalApprovedQuantity = totalApproved,
+                        TotalRejectedQuantity = totalRejected,
+                        TotalReceivedQuantity = totalReceived,
+                        Status = RequestStatus.Received,
+                        Items = orderItems,
+                        Notes = notes,
+                        CreatedAt = now
+                    };
+
+                    // STEP 6: Save order summary
+                    await _orderSummaryRepo.CreateAsync(orderSummary);
+                    await _orderSummaryRepo.SaveChangesAsync();
+
+                    // STEP 7: Update request status to Received
+                    request.Status = RequestStatus.Received;
+                    request.ReceivedDate = now;
+                    request.UpdatedAt = now;
+                    _context.Requests.Update(request);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation(
+                        "Order summary created successfully: Id={OrderSummaryId}, RequestId={RequestId}, TotalReceived={TotalReceived}",
+                        orderSummary.Id, requestId, totalReceived);
+
+                    // STEP 8: Build success response
+                    response.Success = true;
+                    response.Message = "Items received successfully and order summary created.";
+                    response.RequestId = requestId;
+                    response.OrderSummaryId = orderSummary.Id;
+                    response.ReceivedDate = now;
+                });
 
                 return response;
             }
