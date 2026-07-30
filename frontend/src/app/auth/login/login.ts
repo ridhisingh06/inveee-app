@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthApiService } from '../services/auth-api.service';
 import { AuthService } from '../services/service';
+import { LoggerService } from '../../services/logger.service';
 
 @Component({
   selector: 'app-login',
@@ -18,6 +19,7 @@ export class LoginComponent implements OnInit {
   password = '';
   errorMsg = '';
   successMsg = '';
+  errorMessage = '';
   isLoading = false;
   isRetrying = false;
   retryCount = 0;
@@ -27,7 +29,8 @@ export class LoginComponent implements OnInit {
     private authApi: AuthApiService,
     private auth: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private logger: LoggerService
   ) {}
 
   ngOnInit() {
@@ -38,23 +41,25 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  login() {
-    // Validate input
-    if (!this.email || !this.password) {
-      this.errorMsg = 'Email and password are required';
-      this.successMsg = '';
-      console.warn('[WARN] Login attempt with missing credentials');
-      return;
-    }
-
-    // Prevent multiple simultaneous requests
-    if (this.isLoading) {
-      console.warn('[WARN] Login already in progress');
-      return;
-    }
-
-    this.retryCount = 0;
-    this.performLogin();
+  async login() {
+    // Call backend login API
+    this.authApi.login({ email: this.email, password: this.password }).subscribe({
+      next: (res: any) => {
+        if (res?.token) {
+          // Store token and update role via AuthService state
+          this.auth.setToken(res.token);
+          this.logger.log('Login', 'Token stored and role extracted');
+          // Navigate to user dashboard (role-specific navigation can be added later)
+          this.router.navigate(['/user-dashboard']);
+        } else {
+          this.errorMessage = res?.message || 'Login failed: No token returned';
+        }
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.message || 'Login error';
+        this.logger.error('Login', err);
+      }
+    });
   }
 
   private performLogin() {
@@ -105,29 +110,8 @@ export class LoginComponent implements OnInit {
 
     // Persist auth state before routing
     this.auth.setToken(res.token);
-
-    console.log('[✓] Token stored and auth state set');
-
-    const role = this.auth.getRole();
-    console.log('[INFO] User role extracted from token:', {
-      role,
-      timestamp: new Date().toISOString()
-    });
-
-    // Route based on role
-    if (role === 'ADMIN' || role === 'Admin') {
-      console.log('[✓] Routing to admin dashboard');
-      this.router.navigate(['/admin-dashboard']);
-    } else if (role === 'USER' || role === 'User') {
-      console.log('[✓] Routing to user dashboard');
-      this.router.navigate(['/user-dashboard']);
-    } else if (role === 'ISSUER' || role === 'Issuer') {
-      console.log('[✓] Routing to issuer dashboard');
-      this.router.navigate(['/issuer-dashboard']);
-    } else {
-      console.warn('[WARN] Unknown role, redirecting to login:', { role });
-      this.router.navigate(['/login']);
-    }
+    // Navigate to user dashboard after successful login
+    this.router.navigate(['/user-dashboard']);
 
     this.isLoading = false;
   }

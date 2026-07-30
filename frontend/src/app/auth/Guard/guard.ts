@@ -24,6 +24,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   const role = auth.getRole();
 
+
   // 🎭 Role check
   const allowedRoles = route.data?.['roles'];
 
