@@ -142,5 +142,13 @@ export const routes: Routes = [
     component: IssuerIssueComponent,
     canActivate: [authGuard],
     data: { roles: ['ISSUER'] }
+  },
+
+  // TEMPORARY TEST ROUTE - Remove after debugging
+  {
+    path: 'test-order-summary/:id',
+    component: OrderSummaryComponent,
+    canActivate: [authGuard],
+    data: { roles: ['USER'] }
   }
 ];

@@ -95,21 +95,13 @@ export class AuthService {
     const payload = this.decodeJwtPayload(token);
     if (!payload) return null;
 
-    console.log('[AUTH DEBUG] JWT payload:', JSON.stringify(payload, null, 2));
-    console.log('[AUTH DEBUG] payload.role:', payload.role);
-    console.log('[AUTH DEBUG] payload[Microsoft Role URI]:', payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']);
-    console.log('[AUTH DEBUG] All payload keys:', Object.keys(payload));
-
     const role = (
       payload.role ||
       payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
       null
     );
 
-    const extractedRole = role ? role.toUpperCase() : null;
-    console.log('[AUTH DEBUG] Extracted role:', extractedRole);
-
-    return extractedRole;
+    return role ? role.toUpperCase() : null;
   }
 
   private extractUsername(token: string | null): string | null {

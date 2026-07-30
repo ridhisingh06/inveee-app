@@ -43,7 +43,9 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    console.log('[OrderSummary] ngOnInit called');
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    console.log('[OrderSummary] route id =', id);
     if (!id) {
       this.errorMsg = 'Invalid order ID.';
       this.loading  = false;
@@ -60,14 +62,17 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   // ── Load ──────────────────────────────────────────────────────────────────
 
   private loadOrder(id: number): void {
+    console.log('[OrderSummary] GET order summary =', id);
     this.workflow.getOrderSummaryById(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
+          console.log('[OrderSummary] API success, data:', data);
           this.order   = data;
           this.loading = false;
         },
         error: (err) => {
+          console.log('[OrderSummary] API error:', err);
           this.errorMsg = err.message || 'Failed to load order summary.';
           this.loading  = false;
         }
