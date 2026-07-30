@@ -111,7 +111,7 @@ export const routes: Routes = [
       { path: 'my-requests', component: UserCheckStatusComponent },
       { path: 'cart', component: UserCartComponent },
       { path: 'order-history', component: OrderHistoryComponent },
-      { path: 'order-summary/:id', component: OrderSummaryComponent, data: { debug: 'order-summary-route' } },
+      { path: 'order-summary/:id', component: OrderSummaryComponent, canActivate: [authGuard], data: { debug: 'order-summary-route', roles: ['USER'] } },
       { path: 'edit-request/:id', component: EditRequestComponent },
       // Legacy redirects for old links
       { path: 'request-items', redirectTo: 'item-list', pathMatch: 'full' },

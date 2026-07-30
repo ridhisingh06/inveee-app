@@ -50,7 +50,14 @@ export class LoginComponent implements OnInit {
           this.auth.setToken(res.token);
           this.logger.log('Login', 'Token stored and role extracted');
           // Navigate to user dashboard (role-specific navigation can be added later)
-          this.router.navigate(['/user-dashboard']);
+          const role = this.auth.getCurrentUser()?.roles?.[0];
+    let target = '/user-dashboard';
+    if (role === 'ADMIN') {
+      target = '/admin-dashboard';
+    } else if (role === 'ISSUER') {
+      target = '/issuer-dashboard';
+    }
+    this.router.navigate([target]);
         } else {
           this.errorMessage = res?.message || 'Login failed: No token returned';
         }
