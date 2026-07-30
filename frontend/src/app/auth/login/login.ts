@@ -50,14 +50,11 @@ export class LoginComponent implements OnInit {
           this.auth.setToken(res.token);
           this.logger.log('Login', 'Token stored and role extracted');
           // Navigate to user dashboard (role-specific navigation can be added later)
-          const role = this.auth.getCurrentUser()?.roles?.[0];
-    let target = '/user-dashboard';
-    if (role === 'ADMIN') {
-      target = '/admin-dashboard';
-    } else if (role === 'ISSUER') {
-      target = '/issuer-dashboard';
-    }
-    this.router.navigate([target]);
+          const role = this.auth.getRole();
+          let target = '/user-dashboard';
+          if (role === 'ADMIN') { target = '/admin-dashboard'; }
+          else if (role === 'ISSUER') { target = '/issuer-dashboard'; }
+          this.router.navigate([target]);
         } else {
           this.errorMessage = res?.message || 'Login failed: No token returned';
         }
@@ -117,8 +114,12 @@ export class LoginComponent implements OnInit {
 
     // Persist auth state before routing
     this.auth.setToken(res.token);
-    // Navigate to user dashboard after successful login
-    this.router.navigate(['/user-dashboard']);
+    // Navigate to appropriate dashboard based on role
+    const role = this.auth.getRole();
+    let target = '/user-dashboard';
+    if (role === 'ADMIN') { target = '/admin-dashboard'; }
+    else if (role === 'ISSUER') { target = '/issuer-dashboard'; }
+    this.router.navigate([target]);
 
     this.isLoading = false;
   }
