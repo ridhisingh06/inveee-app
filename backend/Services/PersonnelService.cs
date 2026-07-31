@@ -25,9 +25,13 @@ namespace invmgmt.web.Services
         // ── CREATE ────────────────────────────────────────────────────────────
         public async Task<PersonnelResponseDto> CreateAsync(PersonnelCreateDto dto, IFormFile? photo, string baseUrl)
         {
-            // Duplicate email check
+            // Duplicate checks
             if (await _repo.EmailExistsAsync(dto.Email))
                 throw new InvalidOperationException($"A personnel record with email '{dto.Email}' already exists.");
+            if (!string.IsNullOrWhiteSpace(dto.ICNumber) && await _repo.ICNumberExistsAsync(dto.ICNumber))
+                throw new InvalidOperationException($"A personnel record with IC Number '{dto.ICNumber}' already exists.");
+            if (!string.IsNullOrWhiteSpace(dto.IdCardNumber) && await _repo.IdCardNumberExistsAsync(dto.IdCardNumber))
+                throw new InvalidOperationException($"A personnel record with ID Card Number '{dto.IdCardNumber}' already exists.");
 
             var personnel = MapToEntity(dto);
             personnel.CreatedAt = DateTime.UtcNow;
@@ -71,9 +75,13 @@ namespace invmgmt.web.Services
             var personnel = await _repo.GetByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Personnel with id {id} not found.");
 
+            // Duplicate checks
             if (await _repo.EmailExistsAsync(dto.Email, excludeId: id))
                 throw new InvalidOperationException($"Email '{dto.Email}' is already in use by another record.");
-
+            if (!string.IsNullOrWhiteSpace(dto.ICNumber) && await _repo.ICNumberExistsAsync(dto.ICNumber, excludeId: id))
+                throw new InvalidOperationException($"IC Number '{dto.ICNumber}' is already in use by another record.");
+            if (!string.IsNullOrWhiteSpace(dto.IdCardNumber) && await _repo.IdCardNumberExistsAsync(dto.IdCardNumber, excludeId: id))
+                throw new InvalidOperationException($"ID Card Number '{dto.IdCardNumber}' is already in use by another record.");
             // Update fields
             personnel.Name = dto.Name;
             personnel.ICNumber = dto.ICNumber;

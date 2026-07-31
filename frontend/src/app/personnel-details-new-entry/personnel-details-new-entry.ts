@@ -61,7 +61,8 @@ export class PersonnelDetailsNewEntryComponent implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private personnelService: PersonnelService
   ) {}
 
   ngOnInit(): void {
@@ -195,14 +196,8 @@ export class PersonnelDetailsNewEntryComponent implements OnInit {
 
     const formData = this.buildFormData();
     const request$ = this.isEditMode() && this.personnelId
-      ? this.http.put<{ message: string; data?: unknown }>(
-          `${environment.apiUrl}/personnel/${this.personnelId}`,
-          formData
-        )
-      : this.http.post<{ message: string; data?: unknown }>(
-          `${environment.apiUrl}/personnel`,
-          formData
-        );
+      ? this.personnelService.updatePersonnel(this.personnelId, formData)
+      : this.personnelService.createPersonnel(formData);
 
     request$.subscribe({
       next: (response) => {

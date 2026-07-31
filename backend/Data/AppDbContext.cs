@@ -102,6 +102,12 @@ namespace invmgmt.web.Data
             modelBuilder.Entity<Personnel>()
                 .HasIndex(p => p.Email)
                 .IsUnique();
+            modelBuilder.Entity<Personnel>()
+                .HasIndex(p => p.ICNumber)
+                .IsUnique();
+            modelBuilder.Entity<Personnel>()
+                .HasIndex(p => p.IdCardNumber)
+                .IsUnique();
 
             // Bill relationships
             modelBuilder.Entity<Bill>()

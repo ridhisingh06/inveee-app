@@ -11,6 +11,7 @@ import { IssuerApprovedComponent } from './issuer-approved/issuer-approved';
 import { IssuerIssueComponent } from './issuer-issue/issuer-issue';
 import { PersonnelManagementComponent } from './personnel-management/personnel-management';
 import { PersonnelDetailsNewEntryComponent } from './personnel-details-new-entry/personnel-details-new-entry';
+import { PersonnelDetailsModifyDeleteComponent } from './personnel-details-modify-delete/personnel-details-modify-delete';
 import { StoresSectionAllocationComponent } from './stores-section-allocation/stores-section-allocation';
 import { UserItemListComponent } from './user-item-list/user-item-list';
 import { UserCartComponent } from './user-cart/user-cart';

@@ -50,3 +50,38 @@ export class PersonnelService {
       );
   }
 }
+  /**
+   * Create a new personnel record
+   * @param data FormData containing personnel fields and optional photo
+   */
+  createPersonnel(data: FormData): Observable<any> {
+    return this.http.post<any>(this.base, data)
+      .pipe(
+        catchError(err => {
+          if (err.status === 409) {
+            // Conflict - duplicate field
+            return throwError(() => new Error(err.error?.message || 'Duplicate record detected.'));
+          }
+          console.error('[PersonnelService] Error creating personnel:', err);
+          return throwError(() => new Error(err.error?.message || 'Failed to create personnel.'));
+        })
+      );
+  }
+
+  /**
+   * Update an existing personnel record
+   * @param id Personnel ID
+   * @param data FormData containing updated fields and optional photo
+   */
+  updatePersonnel(id: number, data: FormData): Observable<any> {
+    return this.http.put<any>(`${this.base}/${id}`, data)
+      .pipe(
+        catchError(err => {
+          if (err.status === 409) {
+            return throwError(() => new Error(err.error?.message || 'Duplicate record detected.'));
+          }
+          console.error('[PersonnelService] Error updating personnel:', err);
+          return throwError(() => new Error(err.error?.message || 'Failed to update personnel.'));
+        })
+      );
+  }

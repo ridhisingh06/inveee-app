@@ -32,6 +32,16 @@ namespace invmgmt.web.Repositories
                 .AnyAsync(p => p.Email.ToLower() == email.ToLower()
                             && (excludeId == null || p.Id != excludeId));
 
+        public async Task<bool> ICNumberExistsAsync(string? icNumber, int? excludeId = null)
+            => await _context.Personnel
+                .AnyAsync(p => icNumber != null && p.ICNumber != null && p.ICNumber.ToLower() == icNumber.ToLower()
+                            && (excludeId == null || p.Id != excludeId));
+
+        public async Task<bool> IdCardNumberExistsAsync(string? idCardNumber, int? excludeId = null)
+            => await _context.Personnel
+                .AnyAsync(p => idCardNumber != null && p.IdCardNumber != null && p.IdCardNumber.ToLower() == idCardNumber.ToLower()
+                            && (excludeId == null || p.Id != excludeId));
+
         public async Task AddAsync(Personnel personnel)
             => await _context.Personnel.AddAsync(personnel);
 
