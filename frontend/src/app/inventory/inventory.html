@@ -83,9 +83,9 @@
     </h2>
     <div class="inventory-form">
       <div class="form-group">
-        <label>Item ID</label>
-        <input type="text" placeholder="Enter Item ID..." [(ngModel)]="itemCode" [disabled]="isEditing()">
-        <!-- ✅ Show duplicate warning if ItemId already exists -->
+        <label>Item Code</label>
+        <input type="text" placeholder="Enter Item Code..." [(ngModel)]="itemCode" [disabled]="isEditing()">
+        <!-- ✅ Show duplicate warning if ItemCode already exists -->
         <div class="duplicate-warning" *ngIf="getDuplicateItemIdWarning()">
           {{ getDuplicateItemIdWarning() }}
         </div>
