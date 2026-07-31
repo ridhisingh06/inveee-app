@@ -76,7 +76,7 @@ namespace invmgmt.web.DTOs
     }
 
     // ── Paginated list wrapper ─────────────────────────────────────────────────
-    public class PersonnelPagedResultDto
+    public class PersonnelPaginatedDto
     {
         public IEnumerable<PersonnelResponseDto> Data { get; set; } = [];
         public int TotalCount { get; set; }
