@@ -4,12 +4,7 @@
   <p>Loading order summary…</p>
 </div>
 
-<pre>
-LOADING = {{ loading }}
-HAS ORDER = {{ !!order }}
-ERROR = {{ errorMsg }}
-{{ order | json }}
-</pre>
+
 <div class="error-state" *ngIf="!loading && errorMsg">
   <div class="alert error-alert">
     <span class="alert-icon">!</span> {{ errorMsg }}
