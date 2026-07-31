@@ -58,7 +58,8 @@ namespace invmgmt.web.Services
                 Data = items.Select(p => MapToDto(p, baseUrl)),
                 TotalCount = total,
                 Page = page,
-                PageSize = pageSize
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)total / pageSize)
             };
         }
 

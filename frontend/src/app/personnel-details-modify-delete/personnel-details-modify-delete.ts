@@ -53,13 +53,9 @@ export class PersonnelDetailsModifyDeleteComponent {
     this.personnelLoading.set(true);
     this.personnelService.deletePersonnel(id).subscribe({
       next: () => {
-        // Remove from list
-        this.personnelRecords.update(current => current.filter(p => p.id !== id));
+        // Refresh the list to update totalCount and totalPages
+        this.fetchPersonnel(this.personnelPage());
         this.personnelLoading.set(false);
-        // If list empty and not first page, go back a page
-        if (this.personnelRecords().length === 0 && this.personnelPage() > 1) {
-          this.changePage(this.personnelPage() - 1);
-        }
       },
       error: err => {
         console.error('Delete failed', err);
