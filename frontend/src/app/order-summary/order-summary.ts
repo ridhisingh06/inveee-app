@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { finalize } from 'rxjs/operators';
 import { WorkflowService } from '../services/workflow.service';
 import { OrderSummary, OrderSummaryItem } from '../models/request.model';
 
@@ -61,23 +61,25 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
 
   // ── Load ──────────────────────────────────────────────────────────────────
 
-  private loadOrder(id: number): void {
-    console.log('[OrderSummary] GET order summary =', id);
-    this.workflow.getOrderSummaryById(id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          console.log('[OrderSummary] API success, data:', data);
-          this.order   = data;
-          this.loading = false;
-        },
-        error: (err) => {
-          console.log('[OrderSummary] API error:', err);
-          this.errorMsg = err.message || 'Failed to load order summary.';
-          this.loading  = false;
-        }
-      });
-  }
+    private loadOrder(id: number): void {
+      console.log('[OrderSummary] GET order summary =', id);
+      this.workflow.getOrderSummaryById(id)
+        .pipe(
+          finalize(() => {
+            this.loading = false;
+          })
+        )
+        .subscribe({
+          next: (data) => {
+            console.log('[OrderSummary] API success, data:', data);
+            this.order = data;
+          },
+          error: (err) => {
+            console.log('[OrderSummary] API error:', err);
+            this.errorMsg = err.message || 'Failed to load order summary.';
+          }
+        });
+    }
 
   // ── Computed helpers ──────────────────────────────────────────────────────
 
