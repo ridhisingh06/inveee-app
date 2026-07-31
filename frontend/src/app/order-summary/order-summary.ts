@@ -1,5 +1,5 @@
 // OrderSummaryComponent — Professional Receipt Page with extensive debug logs
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -33,7 +33,8 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly workflow: WorkflowService
+    private readonly workflow: WorkflowService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     console.log('[OrderSummary]', this.instanceId, 'constructor');
   }
@@ -72,6 +73,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
         finalize(() => {
           console.log('[OrderSummary]', this.instanceId, 'FINALIZE - clearing loading state');
           this.loading = false;
+          this.cdr.markForCheck();
         })
       )
       .subscribe({
@@ -90,6 +92,7 @@ export class OrderSummaryComponent implements OnInit, OnDestroy {
             console.error('[OrderSummary]', this.instanceId, 'ERROR WHILE PROCESSING SUCCESS RESPONSE:', e);
             this.loading = false;
             this.errorMsg = 'Failed to process order summary.';
+            this.cdr.markForCheck();
           }
         },
         error: (err) => {
