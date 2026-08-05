@@ -11,15 +11,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors(
-        (function() {
-          const interceptors = [authInterceptor];
-          if (environment.enableRuntimeLogging) {
-            interceptors.push(httpLoggerInterceptor);
-          }
-          return interceptors;
-        })()
-      )
+      withInterceptors([
+        authInterceptor
+      ])
     )
   ]
 };

@@ -48,6 +48,7 @@ export class LoginComponent implements OnInit {
         if (res?.token) {
           // Store token and update role via AuthService state
           this.auth.setToken(res.token);
+          console.log('LoginComponent DEBUG: token stored ->', localStorage.getItem('token'));
           this.logger.log('Login', 'Token stored and role extracted');
           // Navigate to user dashboard (role-specific navigation can be added later)
           const role = this.auth.getRole();

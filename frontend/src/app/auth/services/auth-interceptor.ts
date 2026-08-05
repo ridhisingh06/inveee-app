@@ -3,9 +3,12 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { AuthService } from './service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
+  const auth = inject(AuthService);
+  const token = auth.getToken();
+  console.log('AuthInterceptor DEBUG: token from AuthService ->', token);
   const router = inject(Router);
 
   console.log('AuthInterceptor: request URL', req.url);
@@ -23,6 +26,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     console.log('AuthInterceptor: no token, not adding header');
   }
   console.log('AuthInterceptor: final headers', newReq.headers.keys());
+  console.log('AuthInterceptor DEBUG: Authorization header ->', newReq.headers.get('Authorization'));
 
   return next(newReq).pipe(
     catchError((error) => {
