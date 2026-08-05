@@ -117,7 +117,6 @@ export class PersonnelManagementComponent {
   readonly personnelError = signal('');
 
   private readonly personnelListSlugs = new Set([
-    'report-list-all',
     'personnel-details-modify-delete'
   ]);
 

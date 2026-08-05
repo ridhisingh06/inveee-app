@@ -119,14 +119,10 @@ export class InventoryService {
     
     return this.http.post<InventoryItem>(this.apiUrl, payload)
       .pipe(
-        tap(newItem => {
-          const current = this.inventorySubject.value;
-          this.inventorySubject.next([...current, newItem]);
-          this.itemsCache.set(newItem.id, newItem);
+        tap(() => {
           this.errorSubject.next('');
           this.loadingSubject.next(false);
-          // ✅ Notify any subscribers (e.g. UserItemListComponent) that
-          //    inventory has changed so they can refresh without a page reload.
+          // Notify subscribers that inventory changed; they can reload.
           this.refresh.notifyInventory();
         }),
         catchError(err => {

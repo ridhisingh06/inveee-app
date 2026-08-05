@@ -1,0 +1,71 @@
+<section class="personnel-table-panel">
+  <div class="panel-header">
+    <div>
+      <h2>{{ selectedLabel() || 'Personnel Records' }}</h2>
+      <p *ngIf="selectedLabel()">View, filter and manage personnel records.</p>
+    </div>
+    <div class="panel-actions">
+      <a class="action-link" [routerLink]="['/personnel-management', 'personnel-details-new-entry']">
+        + Add New Personnel
+      </a>
+    </div>
+  </div>
+
+  <div class="panel-status">
+    <div *ngIf="personnelLoading()" class="status-message">Loading personnel records…</div>
+    <div *ngIf="personnelError()" class="status-error">{{ personnelError() }}</div>
+    <div *ngIf="!personnelLoading() && !personnelError()" class="status-summary">
+      Showing {{ personnelRecords().length }} of {{ personnelTotalCount() }} records
+    </div>
+  </div>
+
+  <div class="table-wrapper" *ngIf="personnelRecords().length > 0; else noPersonnel">
+    <table class="personnel-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Designation</th>
+          <th>Department</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let person of personnelRecords(); trackBy: trackByPersonnelId">
+          <td>{{ person.id }}</td>
+          <td>{{ person.name }}</td>
+          <td>{{ person.email }}</td>
+          <td>{{ person.designation || '-' }}</td>
+          <td>{{ person.department || '-' }}</td>
+          <td>{{ formatDate(person.createdAt) }}</td>
+          <td>
+            <a class="btn btn-small btn-secondary" [routerLink]="['/personnel-management', 'personnel-details-new-entry', person.id]">
+              Edit
+            </a>
+            <button type="button" class="btn btn-small btn-danger" (click)="deletePersonnel(person.id)">
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-controls">
+      <button type="button" class="btn btn-small" [disabled]="personnelPage() === 1" (click)="changePage(personnelPage() - 1)">
+        Previous
+      </button>
+      <span>Page {{ personnelPage() }} of {{ personnelTotalPages() }}</span>
+      <button type="button" class="btn btn-small" [disabled]="personnelPage() === personnelTotalPages()" (click)="changePage(personnelPage() + 1)">
+        Next
+      </button>
+    </div>
+  </div>
+
+  <ng-template #noPersonnel>
+    <div class="empty-state">
+      <p>No personnel records were found. Use Add New Personnel to create the first entry.</p>
+    </div>
+  </ng-template>
+</section>

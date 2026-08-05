@@ -227,6 +227,7 @@ export class InventoryComponent implements OnInit, DoCheck {
       .subscribe({
         next: () => {
           this.successMsg = 'Item added successfully!';
+          this.loadInventory();
           this.resetForm();
           setTimeout(() => this.successMsg = '', 3000);
         },

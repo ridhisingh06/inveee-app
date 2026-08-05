@@ -12,6 +12,7 @@ import { IssuerIssueComponent } from './issuer-issue/issuer-issue';
 import { PersonnelManagementComponent } from './personnel-management/personnel-management';
 import { PersonnelDetailsNewEntryComponent } from './personnel-details-new-entry/personnel-details-new-entry';
 import { PersonnelDetailsModifyDeleteComponent } from './personnel-details-modify-delete/personnel-details-modify-delete';
+import { PersonnelListComponent } from './personnel-management/personnel-list/personnel-list';
 import { StoresSectionAllocationComponent } from './stores-section-allocation/stores-section-allocation';
 import { UserItemListComponent } from './user-item-list/user-item-list';
 import { UserCartComponent } from './user-cart/user-cart';
@@ -65,6 +66,10 @@ export const routes: Routes = [
       {
         path: 'personnel-management/personnel-details-new-entry/:id',
         component: PersonnelDetailsNewEntryComponent
+      },
+      {
+        path: 'personnel-management/report-list-all',
+        component: PersonnelListComponent
       },
       {
         path: 'personnel-management/:slug',
