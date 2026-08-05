@@ -47,8 +47,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     // Only trust CloudFront and ALB
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
-    // Allow all proxies in ECS environment (CloudFront → ALB → ECS)
-    options.RequireHeaderSymmetricity = false;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
