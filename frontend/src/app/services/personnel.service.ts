@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { PersonnelPagedResult } from '../models/personnel.model';
+import { PersonnelPagedResult, PersonnelResponse } from '../models/personnel.model';
 
 /**
  * Service responsible for Personnel CRUD operations.
@@ -38,6 +38,18 @@ export class PersonnelService {
         catchError(err => {
           console.error('[PersonnelService] Error deleting personnel:', err);
           return throwError(() => new Error(err?.error?.message || 'Failed to delete personnel. Please try again.'));
+        })
+      );
+  }
+
+  /** Get a single personnel record by ID. */
+  getPersonnelById(id: number): Observable<PersonnelResponse> {
+    return this.http
+      .get<PersonnelResponse>(`${this.base}/${id}`)
+      .pipe(
+        catchError(err => {
+          console.error('[PersonnelService] Error fetching personnel by ID:', err);
+          return throwError(() => new Error(err?.error?.message || 'Failed to load personnel record.'));
         })
       );
   }

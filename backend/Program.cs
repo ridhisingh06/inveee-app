@@ -10,6 +10,7 @@ using invmgmt.web.Repositories;
 using invmgmt.web.Services;
 using invmgmt.web.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,17 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     //    (e.g. "Editable" instead of "editable") which causes undefined
     //    reads on the frontend.
     options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+});
+
+// Configure ForwardedHeaders for CloudFront/ALB
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    // Only trust CloudFront and ALB
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+    // Allow all proxies in ECS environment (CloudFront → ALB → ECS)
+    options.RequireHeaderSymmetricity = false;
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -447,7 +459,11 @@ app.UseExceptionHandler(errApp =>
 //    handles TLS termination and forwards plain HTTP to ECS on port 5000.
 //app.UseHttpsRedirection();
 
-// 3. Diagnostics / logging
+// 3. Forwarded headers — MUST come before routing to correctly set Scheme/Host
+//    from CloudFront X-Forwarded-* headers for correct URL generation.
+app.UseForwardedHeaders();
+
+// 4. Diagnostics / logging
 app.UseMiddleware<TraceIdEnricherMiddleware>();
 app.UseSerilogRequestLogging();
 

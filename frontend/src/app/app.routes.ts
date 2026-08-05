@@ -72,6 +72,10 @@ export const routes: Routes = [
         component: PersonnelListComponent
       },
       {
+        path: 'personnel-management/personnel-details-modify-delete',
+        component: PersonnelDetailsModifyDeleteComponent
+      },
+      {
         path: 'personnel-management/:slug',
         component: PersonnelManagementComponent
       },

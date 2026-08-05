@@ -248,7 +248,7 @@ export class PersonnelDetailsNewEntryComponent implements OnInit {
 
   private loadPersonnelRecord(id: number): void {
     this.isSubmitting.set(true);
-    this.http.get<any>(`${environment.apiUrl}/personnel/${id}`)
+    this.personnelService.getPersonnelById(id)
       .subscribe({
         next: (person) => {
           this.form.patchValue({
