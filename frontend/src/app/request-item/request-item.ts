@@ -307,4 +307,11 @@ export class RequestItemComponent implements OnInit, OnDestroy {
   trackByItemCode(index: number, item: InventoryItem | DraftItem): string {
     return item.itemCode;
   }
+
+  /**
+   * Track by function for skeleton cards (numbers)
+   */
+  trackByIdx(index: number, item: any): number {
+    return index;
+  }
 }

@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, Router, RouterModule } from '@angular/router';
-
+import { Router, RouterOutlet, RouterModule } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar';
+import { ClickLoggerDirective } from './click-logger.directive';
 
 @Component({
   selector: 'app-root',
   standalone: true,
+  imports: [RouterOutlet, NavbarComponent, RouterModule, ClickLoggerDirective],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  imports: [RouterOutlet, NavbarComponent, RouterModule, ClickLoggerDirective]
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   constructor(private router: Router) {

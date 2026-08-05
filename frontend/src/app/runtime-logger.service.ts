@@ -143,7 +143,7 @@ export class RuntimeLoggerService {
       summary.avgClickHandlerTimeMs = clickDurations.reduce((a, b) => a + b, 0) / clickDurations.length;
     }
     if (summary._navDurations && summary._navDurations.length) {
-      summary.avgNavigationDurationMs = summary._navDurations.reduce((a, b) => a + b, 0) / summary._navDurations.length;
+      summary.avgNavigationDurationMs = summary._navDurations.reduce((a: number, b: number) => a + b, 0) / summary._navDurations.length;
     }
     delete summary._navDurations;
     return summary;
