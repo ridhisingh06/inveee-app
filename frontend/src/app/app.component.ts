@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, Router, RouterModule } from '@angular/router';
+
 import { NavbarComponent } from './navbar/navbar';
 
 @Component({
@@ -7,7 +8,7 @@ import { NavbarComponent } from './navbar/navbar';
   standalone: true,
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  imports: [RouterOutlet, NavbarComponent, RouterModule]
+  imports: [RouterOutlet, NavbarComponent, RouterModule, ClickLoggerDirective]
 })
 export class AppComponent {
   constructor(private router: Router) {

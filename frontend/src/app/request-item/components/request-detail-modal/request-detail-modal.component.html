@@ -1,7 +1,7 @@
 <!-- Request Detail Modal -->
 <div class="modal-overlay" *ngIf="isOpen" (click)="closeModal()">
   <div class="modal-container" (click)="$event.stopPropagation()">
-    
+
     <!-- Modal Header -->
     <div class="modal-header">
       <h2>Request Details</h2>
@@ -15,7 +15,7 @@
 
     <!-- Modal Body -->
     <div class="modal-body">
-      
+
       <!-- Loading State -->
       <div *ngIf="loading" class="loading-state">
         <div class="spinner"></div>
@@ -35,52 +35,31 @@
 
       <!-- Request Data -->
       <div *ngIf="request && !loading" class="request-details">
-        
+
         <!-- Request Header Info -->
         <div class="request-header-info">
-          <div class="info-row">
-            <span class="label">Request ID:</span>
-            <span class="value">#{{ request.id }}</span>
-          </div>
+          <div class="info-row"><span class="label">Request ID:</span><span class="value">#{{ request.id }}</span></div>
           <div class="info-row">
             <span class="label">Status:</span>
-            <span [class]="'status-badge ' + getStatusClass(request.status)">
-              {{ getStatusLabel(request.status) }}
-            </span>
+            <span [class]="'status-badge ' + getStatusClass(request.status)">{{ getStatusLabel(request.status) }}</span>
           </div>
-          <div class="info-row">
-            <span class="label">Created:</span>
-            <span class="value">{{ formatDate(request.createdAt) }}</span>
-          </div>
-          <div class="info-row" *ngIf="request.updatedAt">
-            <span class="label">Updated:</span>
-            <span class="value">{{ formatDate(request.updatedAt) }}</span>
-          </div>
+          <div class="info-row"><span class="label">Created:</span><span class="value">{{ formatDate(request.createdAt) }}</span></div>
+          <div class="info-row" *ngIf="request.updatedAt"><span class="label">Updated:</span><span class="value">{{ formatDate(request.updatedAt) }}</span></div>
         </div>
 
-        <!-- Progress Bars -->
+        <!-- Progress Sections -->
         <div class="progress-section">
           <div class="progress-item">
-            <div class="progress-label">
-              <span>Approval Progress</span>
-              <span class="percentage">{{ getApprovalPercentage() }}%</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill approved" [style.width.%]="getApprovalPercentage()"></div>
-            </div>
+            <div class="progress-label"><span>Approval Progress</span><span class="percentage">{{ getApprovalPercentage() }}%</span></div>
+            <div class="progress-bar"><div class="progress-fill approved" [style.width.%]="getApprovalPercentage()"></div></div>
           </div>
           <div class="progress-item">
-            <div class="progress-label">
-              <span>Issuance Progress</span>
-              <span class="percentage">{{ getIssuancePercentage() }}%</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill issued" [style.width.%]="getIssuancePercentage()"></div>
-            </div>
+            <div class="progress-label"><span>Issuance Progress</span><span class="percentage">{{ getIssuancePercentage() }}%</span></div>
+            <div class="progress-bar"><div class="progress-fill issued" [style.width.%]="getIssuancePercentage()"></div></div>
           </div>
         </div>
 
-        <!-- Request Items Table -->
+        <!-- Requested Items Table -->
         <div class="items-section">
           <h3>Requested Items</h3>
           <div class="items-table">
@@ -100,18 +79,17 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
 
     <!-- Modal Footer -->
     <div class="modal-footer" *ngIf="request && !loading">
-      <button 
-        class="cancel-btn" 
+      <button type="button" class="cancel-btn"
         (click)="cancelRequest()"
         [disabled]="request.status !== RequestStatus.Pending && request.status !== RequestStatus.PendingWithIssuer">
         Cancel Request
       </button>
-      <button class="close-btn-footer" (click)="closeModal()">Close</button>
     </div>
   </div>
 </div>

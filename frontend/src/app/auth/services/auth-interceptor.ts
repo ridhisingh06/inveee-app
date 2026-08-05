@@ -8,6 +8,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('token');
   const router = inject(Router);
 
+  console.log('AuthInterceptor: request URL', req.url);
+  console.log('AuthInterceptor: token present?', !!token);
+
   let newReq = req;
   if (token) {
     newReq = req.clone({
@@ -15,7 +18,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         Authorization: `Bearer ${token}`
       }
     });
+    console.log('AuthInterceptor: added Authorization header');
+  } else {
+    console.log('AuthInterceptor: no token, not adding header');
   }
+  console.log('AuthInterceptor: final headers', newReq.headers.keys());
 
   return next(newReq).pipe(
     catchError((error) => {

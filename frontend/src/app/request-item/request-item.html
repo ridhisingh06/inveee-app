@@ -44,7 +44,7 @@
   <div class="loading-skeleton" *ngIf="loading$ | async">
     <div class="skeleton-header"></div>
     <div class="skeleton-grid">
-      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]; index as idx; trackBy: trackByIdx"></div>
     </div>
   </div>
 
@@ -75,7 +75,7 @@
             </option>
           </select>
 
-          <button class="filter-toggle" 
+          <button type="button" class="filter-toggle" 
                   (click)="toggleStockFilter()"
                   [class.active]="showStockOnly"
                   title="Show only in-stock items">
@@ -110,7 +110,7 @@
             </span>
           </div>
 
-          <button class="add-btn"
+          <button type="button" class="add-btn"
                   (click)="addToDraft(item)"
                   [disabled]="item.availableQuantity === 0"
                   title="Add to draft request">
@@ -159,7 +159,7 @@
           </div>
           
           <div class="draft-item-controls">
-            <button class="qty-btn minus" 
+            <button type="button" class="qty-btn minus" 
                     (click)="updateDraftQuantity(item.itemCode, item.quantity - 1)"
                     title="Decrease quantity">−</button>
             <input type="number"
@@ -168,13 +168,13 @@
                    (change)="updateDraftQuantity(item.itemCode, $event.target.valueAsNumber)"
                    min="1"
                    [max]="item.availableQuantity">
-            <button class="qty-btn plus"
+            <button type="button" class="qty-btn plus"
                     (click)="updateDraftQuantity(item.itemCode, item.quantity + 1)"
                     [disabled]="item.quantity >= item.availableQuantity"
                     title="Increase quantity">+</button>
           </div>
 
-          <button class="remove-btn" 
+          <button type="button" class="remove-btn" 
                   (click)="removeFromDraft(item.itemCode)"
                   title="Remove from draft">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
@@ -206,13 +206,13 @@
 
       <!-- Draft Actions Footer -->
       <div class="draft-footer">
-        <button class="submit-btn"
+        <button type="submit" class="submit-btn"
                 (click)="submitRequest()"
                 [disabled]="draftItems.length === 0 || (requestLoading$ | async)">
           <span *ngIf="!(requestLoading$ | async)">Submit Request</span>
           <span *ngIf="requestLoading$ | async">Submitting...</span>
         </button>
-        <button class="clear-btn"
+        <button type="button" class="clear-btn"
                 (click)="clearDraft()"
                 [disabled]="draftItems.length === 0">
           Clear Draft

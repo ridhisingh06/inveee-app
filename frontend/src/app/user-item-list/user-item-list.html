@@ -34,12 +34,13 @@
       [(ngModel)]="searchText"
       id="search-items-input"
     >
-    <button *ngIf="searchText" class="clear-btn" (click)="searchText = ''" title="Clear search">✕</button>
+    <button type="button" *ngIf="searchText" class="clear-btn" (click)="searchText = ''" title="Clear search">✕</button>
   </div>
 
   <!-- CATEGORY PILLS -->
   <div class="cat-tabs">
     <button
+      type="button"
       class="cat-tab"
       *ngFor="let c of categories"
       [class.active]="selectedCategory === c"
